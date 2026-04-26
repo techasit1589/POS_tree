@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ร้านพีท-ภีมพันธุ์ไม้</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: #FDFAF5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #E8E0D4;
+      border-radius: 16px;
+      padding: 36px 32px 28px;
+      width: 300px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      text-align: center;
+    }
+    .logo {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #3E7A3A 0%, #2D5E2A 100%);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 3px 8px rgba(62,122,58,0.3);
+    }
+    h1 { font-size: 15px; font-weight: 600; color: #1C1C1E; margin-bottom: 4px; }
+    p  { font-size: 12px; color: #8E8E93; margin-bottom: 24px; }
+    .dots {
+      display: flex; gap: 12px; justify-content: center;
+      margin-bottom: 28px;
+    }
+    .dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid #D1C9BE;
+      background: transparent;
+      transition: all 0.15s;
+    }
+    .dot.filled { background: #3E7A3A; border-color: #3E7A3A; }
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .key {
+      aspect-ratio: 1;
+      border: 1px solid #E8E0D4;
+      background: #FDFAF5;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 500;
+      color: #1C1C1E;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .key:active { background: #EDE8DF; transform: scale(0.95); }
+    .key.del { font-size: 14px; color: #8E8E93; }
+    .err { font-size: 12px; color: #FF3B30; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M12 20 C12 11, 5 6, 2 6 C2 12, 5 19, 12 20Z" fill="#D4E68A" opacity="0.9"/>
+        <path d="M12 20 C12 11, 19 6, 22 6 C22 12, 19 19, 12 20Z" fill="#B8D46A" opacity="0.75"/>
+        <path d="M12 20 V4" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <h1>ร้านพีท-ภีมพันธุ์ไม้</h1>
+    <p>กรอก PIN 6 หลัก</p>
+    <div class="dots" id="dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="keypad">
+      <button class="key" onclick="press('1')">1</button>
+      <button class="key" onclick="press('2')">2</button>
+      <button class="key" onclick="press('3')">3</button>
+      <button class="key" onclick="press('4')">4</button>
+      <button class="key" onclick="press('5')">5</button>
+      <button class="key" onclick="press('6')">6</button>
+      <button class="key" onclick="press('7')">7</button>
+      <button class="key" onclick="press('8')">8</button>
+      <button class="key" onclick="press('9')">9</button>
+      <button class="key" onclick="press('')"></button>
+      <button class="key" onclick="press('0')">0</button>
+      <button class="key del" onclick="del()">⌫</button>
+    </div>
+    <div class="err" id="err"></div>
+  </div>
+
+  <script>
+    let input = ''
+    const dots = document.querySelectorAll('.dot')
+    const errEl = document.getElementById('err')
+
+    function render() {
+      dots.forEach((d, i) => d.classList.toggle('filled', i < input.length))
+    }
+
+    function press(n) {
+      if (!n || input.length >= 6) return
+      input += n
+      render()
+      errEl.textContent = ''
+      if (input.length === 6) submit()
+    }
+
+    function del() {
+      input = input.slice(0, -1)
+      render()
+    }
+
+    async function submit() {
+      try {
+        const res = await fetch('/api/verify-pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin: input }),
+        })
+        const data = await res.json()
+        if (data.ok) {
+          window.location.href = '/'
+        } else {
+          errEl.textContent = 'PIN ไม่ถูกต้อง'
+          input = ''
+          render()
+        }
+      } catch {
+        errEl.textContent = 'เกิดข้อผิดพลาด ลองใหม่'
+        input = ''
+        render()
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key >= '0' && e.key <= '9') press(e.key)
+      else if (e.key === 'Backspace') del()
+    })
+  </script>
+</body>
+</html>

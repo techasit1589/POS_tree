@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Environment (มี secrets — อย่า commit!)
+.env
+.env.*
+!.env.example
+
+# Migration data (มีข้อมูลลูกค้า)
+supabase/data.sql
+
+# Vercel
+.vercel/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

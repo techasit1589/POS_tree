@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream-0: #FFFAF3;
+  --cream-1: #F5EEDC;
+  --cream-2: #ECE3CC;
+  --ink:     #1C2E1A;
+  --ink-2:   #3A4A35;
+  --ink-3:   #5E6E55;
+  --ink-4:   #94A28A;
+  --rule:    #BFCFA6;
+  --rule-soft: #D2DDBC;
+  --clay:    #3E7A3A;
+  --clay-d:  #245020;
+  --clay-l:  #6FA068;
+  --sage:    #8A9A5B;
+  --sage-d:  #5F7038;
+  --mustard: #B38A2E;
+  --paper:   #F6F9EB;
+  --font-ui: 'IBM Plex Sans Thai', 'Sarabun', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-receipt: 'Sarabun', 'IBM Plex Sans Thai', sans-serif;
+}
+
+* {
+  font-family: 'Sarabun', sans-serif;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-print-area,
+  #receipt-print-area * {
+    visibility: visible;
+  }
+  #receipt-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
