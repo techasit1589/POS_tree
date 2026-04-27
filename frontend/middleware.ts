@@ -24,10 +24,8 @@ async function verifyToken(token: string, secret: string): Promise<boolean> {
 
 export default async function middleware(request: Request) {
   const cookie = request.headers.get('cookie') ?? ''
-  const token  = cookie.split(';')
-    .find(c => c.trim().startsWith('pin_ok='))
-    ?.split('=')[1]
-    ?.trim()
+  const raw    = cookie.split(';').find(c => c.trim().startsWith('pin_ok='))
+  const token  = raw ? raw.trim().slice('pin_ok='.length) : undefined
 
   const secret = process.env.COOKIE_SECRET
   if (secret && token && await verifyToken(token, secret)) {
