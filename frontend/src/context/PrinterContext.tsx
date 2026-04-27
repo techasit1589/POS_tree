@@ -78,7 +78,7 @@ export function PrinterProvider({ children }: { children: ReactNode }) {
   // ── Connect ──
   const connect = useCallback(async () => {
     if (!isWebBluetoothSupported) {
-      setStatus({ status: 'error', errorMessage: 'บราวเซอร์นี้ไม่รองรับ Web Bluetooth (ใช้ Chrome)' });
+      setStatus({ status: 'error', errorMessage: 'บราวเซอร์นี้ไม่รองรับ Web Bluetooth — ใช้ Chrome/Edge หรือ Bluefy (iOS)' });
       return;
     }
 
@@ -159,17 +159,22 @@ export function PrinterProvider({ children }: { children: ReactNode }) {
     const char = characteristicRef.current;
     if (!char) throw new Error('ยังไม่ได้เชื่อมต่อเครื่องพิมพ์');
 
-    const CHUNK = 512;
+    // 128 bytes ต่อ chunk — ปลอดภัยสำหรับ BLE MTU บน iOS (Bluefy) และ Android
+    // (default BLE MTU = 23 bytes, negotiate ได้สูงสุด ~512 แต่ iOS มักไม่ negotiate อัตโนมัติ)
+    const CHUNK = 128;
     const useWithoutResponse = char.properties.writeWithoutResponse;
 
     for (let i = 0; i < data.length; i += CHUNK) {
       const chunk = data.slice(i, i + CHUNK);
       if (useWithoutResponse) {
         await char.writeValueWithoutResponse(chunk);
+        // writeWithoutResponse ไม่รอ ACK → ต้องให้ delay เพียงพอ
+        // writeValue รอ ACK เองอยู่แล้ว ไม่ต้อง delay มาก
+        if (i + CHUNK < data.length) await sleep(50);
       } else {
         await char.writeValue(chunk);
+        if (i + CHUNK < data.length) await sleep(10);
       }
-      if (i + CHUNK < data.length) await sleep(50);
     }
   }, []);
 

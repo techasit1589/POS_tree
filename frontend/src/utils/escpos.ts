@@ -1,11 +1,14 @@
 /**
  * ESC/POS command builder สำหรับ Thermal Printer 58mm / 80mm
  * ใช้ส่งผ่าน Web Bluetooth API
+ *
+ * การ encode ข้อความ: ใช้ TIS-620 สำหรับภาษาไทย
+ * (TextEncoder ส่ง UTF-8 ซึ่งเครื่องพิมพ์ความร้อนส่วนใหญ่ไม่รองรับ)
  */
 
 const ESC = 0x1b;
-const GS = 0x1d;
-const LF = 0x0a;
+const GS  = 0x1d;
+const LF  = 0x0a;
 
 // จำนวนตัวอักษรต่อบรรทัดตามขนาดกระดาษ
 export const PAPER_CHARS: Record<string, number> = {
@@ -20,7 +23,8 @@ export class EscPos {
 
   // ── Initialization ──
   init(): this {
-    this.push(ESC, 0x40);
+    this.push(ESC, 0x40);        // Reset printer
+    this.push(ESC, 0x74, 0x14);  // Codepage 20 = TIS-620 (Thai)
     return this;
   }
 
@@ -28,6 +32,15 @@ export class EscPos {
   center(): this { this.push(ESC, 0x61, 0x01); return this; }
   left(): this   { this.push(ESC, 0x61, 0x00); return this; }
   right(): this  { this.push(ESC, 0x61, 0x02); return this; }
+
+  /**
+   * ตั้ง codepage ของเครื่องพิมพ์ (ESC t n)
+   * ค่าที่ใช้บ่อยสำหรับภาษาไทย:
+   *   20 (0x14) = TIS-620  ← ค่าเริ่มต้นที่แนะนำสำหรับ XPrinter / iposprinter
+   *   255 (0xFF) = บางรุ่นใช้ค่านี้แทน
+   * ปรับตามรุ่นเครื่องพิมพ์ของคุณถ้าภาษาไทยยังไม่ออก
+   */
+  setCodepage(n: number): this { this.push(ESC, 0x74, n); return this; }
 
   // ── Text Style ──
   boldOn(): this  { this.push(ESC, 0x45, 0x01); return this; }
@@ -51,8 +64,7 @@ export class EscPos {
 
   // ── Text ──
   text(str: string): this {
-    const bytes = new TextEncoder().encode(str);
-    bytes.forEach((b) => this.buf.push(b));
+    tis620Encode(str).forEach((b) => this.buf.push(b));
     return this;
   }
 
@@ -165,6 +177,29 @@ export function buildReceipt(opts: {
 }
 
 // ── Helpers ──
+
+/**
+ * แปลง string เป็น TIS-620 bytes สำหรับเครื่องพิมพ์ความร้อน
+ *
+ * - ASCII (U+0000–U+007F) → byte เดิม (1:1)
+ * - ภาษาไทย (U+0E01–U+0E5B) → TIS-620 byte (0xA1–0xFB)
+ * - ตัวอักษรอื่น → 0x3F ('?')
+ */
+function tis620Encode(str: string): number[] {
+  const out: number[] = [];
+  for (const ch of str) {
+    const cp = ch.codePointAt(0)!;
+    if (cp <= 0x7F) {
+      out.push(cp);
+    } else if (cp >= 0x0E01 && cp <= 0x0E5B) {
+      // Thai block: Unicode U+0E00 base → TIS-620 0xA0 base
+      out.push(cp - 0x0E00 + 0xA0);
+    } else {
+      out.push(0x3F); // '?' สำหรับ character ที่ไม่รองรับ
+    }
+  }
+  return out;
+}
 
 function formatPrice(n: number): string {
   return `${n.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}B`;

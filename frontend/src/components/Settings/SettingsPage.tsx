@@ -34,11 +34,26 @@ export default function SettingsPage() {
       {!isWebBluetoothSupported && (
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
           <AlertTriangle size={18} className="text-amber-500 mt-0.5 shrink-0" />
-          <div>
-            <p className="font-semibold text-amber-800 text-sm">บราวเซอร์ไม่รองรับ</p>
-            <p className="text-xs text-amber-700 mt-0.5">
-              Web Bluetooth API รองรับเฉพาะ <strong>Google Chrome</strong> หรือ <strong>Microsoft Edge</strong> เท่านั้น
-              กรุณาเปลี่ยนบราวเซอร์แล้วลองใหม่
+          <div className="space-y-2">
+            <p className="font-semibold text-amber-800 text-sm">บราวเซอร์ไม่รองรับ Bluetooth</p>
+            <p className="text-xs text-amber-700">
+              <strong>Android / Windows / Mac</strong> — ใช้{' '}
+              <strong>Google Chrome</strong> หรือ <strong>Microsoft Edge</strong>
+            </p>
+            <p className="text-xs text-amber-700">
+              <strong>iPhone / iPad (iOS)</strong> — Safari ไม่รองรับ Web Bluetooth
+              กรุณาเปิดแอป{' '}
+              <strong>
+                <a
+                  href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Bluefy
+                </a>
+              </strong>{' '}
+              แล้วเปิดเว็บนี้ในแอปนั้น
             </p>
           </div>
         </div>
