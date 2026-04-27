@@ -149,6 +149,11 @@
           errEl.textContent = `ลองผิดหลายครั้ง — ลองใหม่ใน ${mins} นาที`
           input = ''
           render()
+        } else if (res.status >= 500) {
+          // server config ผิด (env หาย) — แยกข้อความเพื่อไม่ให้สับสนว่า PIN ผิด
+          errEl.textContent = 'ระบบขัดข้อง ติดต่อแอดมิน'
+          input = ''
+          render()
         } else {
           errEl.textContent = 'PIN ไม่ถูกต้อง'
           input = ''

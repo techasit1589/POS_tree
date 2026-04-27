@@ -87,7 +87,16 @@ export default async function handler(req: Request) {
   // 3. Verify PIN
   const correct = process.env.APP_PIN
   const secret  = process.env.COOKIE_SECRET
-  if (!correct || !secret || pin !== correct) {
+  if (!correct || !secret) {
+    // env ไม่ถูกตั้งบน Vercel — log ออกมาให้แอดมินเห็น แล้วคืน 500
+    // ห้ามรวมเข้ากับ "PIN ผิด" เพราะแอดมินจะหาไม่เจอว่าทำไมล็อกอินไม่ได้
+    console.error('[verify-pin] missing env vars: APP_PIN or COOKIE_SECRET')
+    return new Response(JSON.stringify({ ok: false, error: 'config' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+  if (pin !== correct) {
     return new Response(JSON.stringify({ ok: false }), {
       headers: { 'Content-Type': 'application/json' },
     })

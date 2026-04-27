@@ -92,12 +92,23 @@ export class EscPos {
   }
 
   /**
-   * นับความกว้างของ string เป็น bytes
-   * ASCII = 1, Thai/non-ASCII = 2-3 bytes แต่พิมพ์กว้าง 1 char
+   * นับจำนวน "คอลัมน์" ที่ตัวอักษรกินบนเครื่องพิมพ์ (ใช้สำหรับจัดคอลัมน์)
+   * - ASCII / consonant ไทย / สระลอย = 1 คอลัมน์
+   * - Combining marks ของไทย (สระบน-ล่าง, วรรณยุกต์) = 0 คอลัมน์ (ทับตัวก่อนหน้า)
+   *
+   * ถ้าใช้ [...str].length ตรงๆ จะนับเกินคอลัมน์จริงทำให้ตัวเลขขวาเลื่อนเข้ามา
    */
   private measureBytes(str: string): number {
-    // ใช้ length เพื่อความง่าย (นับ character ไม่ใช่ byte)
-    return [...str].length;
+    let n = 0;
+    for (const ch of str) {
+      const cp = ch.codePointAt(0)!;
+      const isCombiningThai =
+        cp === 0x0E31 ||
+        (cp >= 0x0E34 && cp <= 0x0E3A) ||
+        (cp >= 0x0E47 && cp <= 0x0E4E);
+      if (!isCombiningThai) n++;
+    }
+    return n;
   }
 }
 
