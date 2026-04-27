@@ -227,7 +227,21 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     // ไม่งั้น html2canvas จะใช้ system font แทนและตัวอักษรไทยบางตัวหาย
     await document.fonts.ready;
     const { default: html2canvas } = await import('html2canvas');
-    const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: '#F6F9EB' });
+    const canvas = await html2canvas(element, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#F6F9EB',
+      onclone: (_doc, el) => {
+        // html2canvas ตัด overflow:hidden เข้มกว่า browser จริง
+        // ทำให้สระบน/ล่างภาษาไทย (้ ่ ุ ู ฯลฯ) โดนตัดครึ่ง
+        // แก้โดย override overflow ทุก element ใน clone ก่อน capture
+        el.querySelectorAll<HTMLElement>('*').forEach((node) => {
+          const s = node.style;
+          if (s.overflow === 'hidden') s.overflow = 'visible';
+          if (s.textOverflow === 'ellipsis') s.textOverflow = 'clip';
+        });
+      },
+    });
     const filename = `receipt-${savedOrder?.receiptNumber || receiptNo}.png`;
     const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
     if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
