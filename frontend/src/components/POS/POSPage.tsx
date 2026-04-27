@@ -259,13 +259,23 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const handleExportPDF = async () => {
     const element = receiptRef.current;
     if (!element) return;
+    await document.fonts.ready;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const html2pdf = ((await import('html2pdf.js')) as any).default;
     html2pdf().set({
       margin: 10,
       filename: `receipt-${savedOrder?.receiptNumber || receiptNo}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        onclone: (_doc: Document, el: HTMLElement) => {
+          el.querySelectorAll<HTMLElement>('*').forEach((node) => {
+            if (node.style.overflow === 'hidden') node.style.overflow = 'visible';
+            if (node.style.textOverflow === 'ellipsis') node.style.textOverflow = 'clip';
+          });
+        },
+      },
       jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' },
     }).from(element).save();
   };
