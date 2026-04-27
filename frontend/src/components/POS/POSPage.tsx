@@ -223,6 +223,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const handleSaveImage = async () => {
     const element = receiptRef.current;
     if (!element) return;
+    // รอให้ web fonts (Sarabun, IBM Plex Sans Thai) โหลดเสร็จก่อน capture
+    // ไม่งั้น html2canvas จะใช้ system font แทนและตัวอักษรไทยบางตัวหาย
+    await document.fonts.ready;
     const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: '#F6F9EB' });
     const filename = `receipt-${savedOrder?.receiptNumber || receiptNo}.png`;
