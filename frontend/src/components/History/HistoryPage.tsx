@@ -272,16 +272,25 @@ export default function HistoryPage() {
   const closePrint = () => { setPrintTarget(null); setBtError(null); };
 
 
+  // ── shared onclone: แก้ overflow:hidden ที่ทำให้ตัวอักษรไทยขาดครึ่งใน html2canvas ──
+  const fixOverflowClone = (_doc: Document, el: HTMLElement) => {
+    el.querySelectorAll<HTMLElement>('*').forEach((node) => {
+      if (node.style.overflow === 'hidden')       node.style.overflow = 'visible';
+      if (node.style.textOverflow === 'ellipsis') node.style.textOverflow = 'clip';
+    });
+  };
+
   const handleExportPDF = useCallback(async () => {
     const element = receiptRef.current;
     if (!element || !printTarget) return;
+    await document.fonts.ready;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const html2pdf = ((await import('html2pdf.js')) as any).default;
     html2pdf().set({
       margin: 10,
       filename: `receipt-${printTarget.receiptNumber}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 2, useCORS: true, onclone: fixOverflowClone },
       jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' },
     }).from(element).save();
   }, [printTarget]);
@@ -289,8 +298,14 @@ export default function HistoryPage() {
   const handleSaveImage = useCallback(async () => {
     const element = receiptRef.current;
     if (!element || !printTarget) return;
+    await document.fonts.ready;
     const { default: html2canvas } = await import('html2canvas');
-    const canvas = await html2canvas(element, { scale: 3, useCORS: true, backgroundColor: '#F6F9EB' });
+    const canvas = await html2canvas(element, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#F6F9EB',
+      onclone: fixOverflowClone,
+    });
     const filename = `receipt-${printTarget.receiptNumber}.png`;
     const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
     if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
