@@ -28,6 +28,10 @@
   font-family: 'Sarabun', sans-serif;
 }
 
+body {
+  touch-action: pan-x pan-y;
+}
+
 @media print {
   body * {
     visibility: hidden;
