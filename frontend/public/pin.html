@@ -121,7 +121,19 @@
       render()
     }
 
+    let lockedUntil = 0
+
     async function submit() {
+      // ถ้ายังอยู่ในช่วง lockout ไม่ต้องยิง API
+      const now = Date.now()
+      if (now < lockedUntil) {
+        const secs = Math.ceil((lockedUntil - now) / 1000)
+        errEl.textContent = `ลองใหม่ใน ${secs} วินาที`
+        input = ''
+        render()
+        return
+      }
+
       try {
         const res = await fetch('/api/verify-pin', {
           method: 'POST',
@@ -131,6 +143,12 @@
         const data = await res.json()
         if (data.ok) {
           window.location.href = '/'
+        } else if (res.status === 429) {
+          lockedUntil = Date.now() + (data.retryAfter ?? 900) * 1000
+          const mins = Math.ceil((data.retryAfter ?? 900) / 60)
+          errEl.textContent = `ลองผิดหลายครั้ง — ลองใหม่ใน ${mins} นาที`
+          input = ''
+          render()
         } else {
           errEl.textContent = 'PIN ไม่ถูกต้อง'
           input = ''
