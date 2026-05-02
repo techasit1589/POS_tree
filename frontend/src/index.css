@@ -29,7 +29,17 @@
 }
 
 body {
-  touch-action: pan-x pan-y;
+  /* manipulation = pan + pinch-zoom + suppress double-tap-zoom delay
+     เปลี่ยนจาก pan-x pan-y เพื่อให้ผู้ใช้ pinch zoom ได้ (a11y) */
+  touch-action: manipulation;
+}
+
+/* iOS Safari จะ auto-zoom เมื่อแตะ input ที่ font-size < 16px
+   บังคับ 16px เฉพาะบนจอเล็กเพื่อกัน auto-zoom โดยไม่กระทบ desktop */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
 }
 
 @media print {

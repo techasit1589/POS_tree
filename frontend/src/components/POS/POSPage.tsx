@@ -75,6 +75,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const [showConfirm, setShowConfirm] = useState(false);
   const [btPrinting, setBtPrinting] = useState(false);
   const [btError, setBtError] = useState<string | null>(null);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [imageGenerating, setImageGenerating] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
   const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
@@ -141,6 +144,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     setSavedOrder(null);
     setError(null);
     setBtError(null);
+    setExportError(null);
     setReceiptNo(genReceiptNo());
     setMobileTab('form');
   };
@@ -223,61 +227,79 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const handleSaveImage = async () => {
     const element = receiptRef.current;
     if (!element) return;
-    // รอให้ web fonts (Sarabun, IBM Plex Sans Thai) โหลดเสร็จก่อน capture
-    // ไม่งั้น html2canvas จะใช้ system font แทนและตัวอักษรไทยบางตัวหาย
-    await document.fonts.ready;
-    const { default: html2canvas } = await import('html2canvas');
-    const canvas = await html2canvas(element, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: '#F6F9EB',
-      onclone: (_doc, el) => {
-        // html2canvas ตัด overflow:hidden เข้มกว่า browser จริง
-        // ทำให้สระบน/ล่างภาษาไทย (้ ่ ุ ู ฯลฯ) โดนตัดครึ่ง
-        // แก้โดย override overflow ทุก element ใน clone ก่อน capture
-        el.querySelectorAll<HTMLElement>('*').forEach((node) => {
-          const s = node.style;
-          if (s.overflow === 'hidden') s.overflow = 'visible';
-          if (s.textOverflow === 'ellipsis') s.textOverflow = 'clip';
-        });
-      },
-    });
-    const filename = `receipt-${savedOrder?.receiptNumber || receiptNo}.png`;
-    const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
-    if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
-      const file = new File([blob], filename, { type: 'image/png' });
-      await navigator.share({ files: [file], title: 'ใบเสร็จ' });
-    } else {
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = URL.createObjectURL(blob);
-      link.click();
-      URL.revokeObjectURL(link.href);
+    setExportError(null);
+    setImageGenerating(true);
+    try {
+      // รอให้ web fonts (Sarabun, IBM Plex Sans Thai) โหลดเสร็จก่อน capture
+      // ไม่งั้น html2canvas จะใช้ system font แทนและตัวอักษรไทยบางตัวหาย
+      await document.fonts.ready;
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#F6F9EB',
+        onclone: (_doc, el) => {
+          // html2canvas ตัด overflow:hidden เข้มกว่า browser จริง
+          // ทำให้สระบน/ล่างภาษาไทย (้ ่ ุ ู ฯลฯ) โดนตัดครึ่ง
+          // แก้โดย override overflow ทุก element ใน clone ก่อน capture
+          el.querySelectorAll<HTMLElement>('*').forEach((node) => {
+            const s = node.style;
+            if (s.overflow === 'hidden') s.overflow = 'visible';
+            if (s.textOverflow === 'ellipsis') s.textOverflow = 'clip';
+          });
+        },
+      });
+      const filename = `receipt-${savedOrder?.receiptNumber || receiptNo}.png`;
+      const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
+      if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+        const file = new File([blob], filename, { type: 'image/png' });
+        await navigator.share({ files: [file], title: 'ใบเสร็จ' });
+      } else {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+    } catch (e) {
+      // ผู้ใช้กดยกเลิกใน share sheet → ไม่ใช่ error
+      if (e instanceof Error && e.name === 'AbortError') return;
+      setExportError(e instanceof Error ? e.message : 'บันทึกรูปไม่สำเร็จ');
+    } finally {
+      setImageGenerating(false);
     }
   };
 
   const handleExportPDF = async () => {
     const element = receiptRef.current;
     if (!element) return;
-    await document.fonts.ready;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const html2pdf = ((await import('html2pdf.js')) as any).default;
-    html2pdf().set({
-      margin: 10,
-      filename: `receipt-${savedOrder?.receiptNumber || receiptNo}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        onclone: (_doc: Document, el: HTMLElement) => {
-          el.querySelectorAll<HTMLElement>('*').forEach((node) => {
-            if (node.style.overflow === 'hidden') node.style.overflow = 'visible';
-            if (node.style.textOverflow === 'ellipsis') node.style.textOverflow = 'clip';
-          });
+    setExportError(null);
+    setPdfGenerating(true);
+    try {
+      await document.fonts.ready;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const html2pdf = ((await import('html2pdf.js')) as any).default;
+      await html2pdf().set({
+        margin: 10,
+        filename: `receipt-${savedOrder?.receiptNumber || receiptNo}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          onclone: (_doc: Document, el: HTMLElement) => {
+            el.querySelectorAll<HTMLElement>('*').forEach((node) => {
+              if (node.style.overflow === 'hidden') node.style.overflow = 'visible';
+              if (node.style.textOverflow === 'ellipsis') node.style.textOverflow = 'clip';
+            });
+          },
         },
-      },
-      jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' },
-    }).from(element).save();
+        jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' },
+      }).from(element).save();
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : 'สร้าง PDF ไม่สำเร็จ');
+    } finally {
+      setPdfGenerating(false);
+    }
   };
 
   const openSettings = () => {
@@ -371,31 +393,39 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
         padding: '8px 12px', gap: '6px',
         position: 'sticky', top: '56px', zIndex: 15,
       }}>
-        {([['form', 'กรอกข้อมูล'], ['preview', 'ดูใบเสร็จ']] as const).map(([tab, label]) => (
-          <button
-            key={tab}
-            onClick={() => setMobileTab(tab)}
-            style={{
-              flex: 1, padding: '10px 12px', borderRadius: '8px',
-              border: mobileTab === tab ? 'none' : '1px solid transparent',
-              background: mobileTab === tab ? 'var(--clay)' : 'transparent',
-              color: mobileTab === tab ? 'var(--cream-0)' : 'var(--ink-3)',
-              fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 500,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              boxShadow: mobileTab === tab ? '0 2px 6px rgba(62,122,58,0.28)' : 'none',
-            }}
-          >
-            {label}
-            {tab === 'preview' && (
-              <span style={{
-                background: mobileTab === tab ? 'rgba(255,255,255,0.25)' : 'var(--cream-2)',
-                color: mobileTab === tab ? 'inherit' : 'var(--ink-3)',
-                padding: '1px 6px', borderRadius: '8px', fontSize: '11px',
-                fontFamily: 'var(--font-mono)', marginLeft: '4px',
-              }}>{validItemCount}</span>
-            )}
-          </button>
-        ))}
+        {([['form', 'กรอกข้อมูล'], ['preview', 'ดูใบเสร็จ']] as const).map(([tab, label]) => {
+          // ล็อคแท็บ "กรอกข้อมูล" หลัง save จนกว่าจะกด "ออเดอร์ใหม่"
+          // ป้องกัน bug PDF/บันทึกรูปได้ไฟล์เปล่าเมื่อ preview pane ถูก display:none
+          const locked = !!savedOrder && tab === 'form';
+          return (
+            <button
+              key={tab}
+              onClick={() => setMobileTab(tab)}
+              disabled={locked}
+              style={{
+                flex: 1, padding: '10px 12px', borderRadius: '8px',
+                border: mobileTab === tab ? 'none' : '1px solid transparent',
+                background: mobileTab === tab ? 'var(--clay)' : 'transparent',
+                color: mobileTab === tab ? 'var(--cream-0)' : 'var(--ink-3)',
+                fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 500,
+                cursor: locked ? 'not-allowed' : 'pointer',
+                opacity: locked ? 0.4 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                boxShadow: mobileTab === tab ? '0 2px 6px rgba(62,122,58,0.28)' : 'none',
+              }}
+            >
+              {label}
+              {tab === 'preview' && (
+                <span style={{
+                  background: mobileTab === tab ? 'rgba(255,255,255,0.25)' : 'var(--cream-2)',
+                  color: mobileTab === tab ? 'inherit' : 'var(--ink-3)',
+                  padding: '1px 6px', borderRadius: '8px', fontSize: '11px',
+                  fontFamily: 'var(--font-mono)', marginLeft: '4px',
+                }}>{validItemCount}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Main layout */}
@@ -655,14 +685,22 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 title={printerStatus !== 'connected' ? "ไปที่แท็บ 'เครื่องพิมพ์' เพื่อเชื่อมต่อ Bluetooth" : undefined}
                 icon={<BtIcon active={printerStatus === 'connected'} />}
               >{btPrinting ? '...' : 'BT'}</ActionBtn>
-              <ActionBtn onClick={handleExportPDF} icon={<PdfIcon />}>PDF</ActionBtn>
-              <ActionBtn onClick={handleSaveImage} icon={<ImgIcon />}>บันทึกรูป</ActionBtn>
+              <ActionBtn
+                onClick={handleExportPDF}
+                disabled={pdfGenerating || imageGenerating}
+                icon={<PdfIcon />}
+              >{pdfGenerating ? '...' : 'PDF'}</ActionBtn>
+              <ActionBtn
+                onClick={handleSaveImage}
+                disabled={pdfGenerating || imageGenerating}
+                icon={<ImgIcon />}
+              >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
               <ActionBtn onClick={clear} ghost icon={<span style={{ fontSize: '11px', opacity: 0.7 }}>✦</span>}>ออเดอร์ใหม่</ActionBtn>
             </div>
           )}
 
-          {btError && (
-            <div style={{ color: 'var(--cream-0)', fontSize: '12px', textAlign: 'center', marginTop: '8px', opacity: 0.8 }}>{btError}</div>
+          {(btError || exportError) && (
+            <div style={{ color: 'var(--cream-0)', fontSize: '12px', textAlign: 'center', marginTop: '8px', opacity: 0.8 }}>{btError || exportError}</div>
           )}
         </div>
       </div>
@@ -714,15 +752,23 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           ) : (
             /* หลัง save: ปุ่ม print */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {btError && <div style={{ fontSize: '11px', color: '#B6452F' }}>{btError}</div>}
+              {(btError || exportError) && <div style={{ fontSize: '11px', color: '#B6452F' }}>{btError || exportError}</div>}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <ActionBtn
                   onClick={handleBtPrint}
                   disabled={printerStatus !== 'connected' || btPrinting}
                   icon={<BtIcon active={printerStatus === 'connected'} />}
                 >{btPrinting ? '...' : 'BT'}</ActionBtn>
-                <ActionBtn onClick={handleExportPDF} icon={<PdfIcon />}>PDF</ActionBtn>
-                <ActionBtn onClick={handleSaveImage} icon={<ImgIcon />}>บันทึกรูป</ActionBtn>
+                <ActionBtn
+                  onClick={handleExportPDF}
+                  disabled={pdfGenerating || imageGenerating}
+                  icon={<PdfIcon />}
+                >{pdfGenerating ? '...' : 'PDF'}</ActionBtn>
+                <ActionBtn
+                  onClick={handleSaveImage}
+                  disabled={pdfGenerating || imageGenerating}
+                  icon={<ImgIcon />}
+                >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
               </div>
               <button
                 onClick={clear}

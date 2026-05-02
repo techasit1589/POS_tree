@@ -143,6 +143,9 @@ export default function HistoryPage() {
   const [printTarget, setPrintTarget]     = useState<Order | null>(null);
   const [btPrinting, setBtPrinting]       = useState(false);
   const [btError, setBtError]             = useState<string | null>(null);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [imageGenerating, setImageGenerating] = useState(false);
+  const [exportError, setExportError]     = useState<string | null>(null);
   const receiptRef                        = useRef<HTMLDivElement>(null);
   const posSettings                        = loadPOSSettings();
   const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
@@ -269,7 +272,7 @@ export default function HistoryPage() {
     setPrintTarget(order);
     setBtError(null);
   };
-  const closePrint = () => { setPrintTarget(null); setBtError(null); };
+  const closePrint = () => { setPrintTarget(null); setBtError(null); setExportError(null); };
 
 
   // ── shared onclone: แก้ overflow:hidden ที่ทำให้ตัวอักษรไทยขาดครึ่งใน html2canvas ──
@@ -283,40 +286,58 @@ export default function HistoryPage() {
   const handleExportPDF = useCallback(async () => {
     const element = receiptRef.current;
     if (!element || !printTarget) return;
-    await document.fonts.ready;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const html2pdf = ((await import('html2pdf.js')) as any).default;
-    html2pdf().set({
-      margin: 10,
-      filename: `receipt-${printTarget.receiptNumber}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, onclone: fixOverflowClone },
-      jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' },
-    }).from(element).save();
+    setExportError(null);
+    setPdfGenerating(true);
+    try {
+      await document.fonts.ready;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const html2pdf = ((await import('html2pdf.js')) as any).default;
+      await html2pdf().set({
+        margin: 10,
+        filename: `receipt-${printTarget.receiptNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, onclone: fixOverflowClone },
+        jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' },
+      }).from(element).save();
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : 'สร้าง PDF ไม่สำเร็จ');
+    } finally {
+      setPdfGenerating(false);
+    }
   }, [printTarget]);
 
   const handleSaveImage = useCallback(async () => {
     const element = receiptRef.current;
     if (!element || !printTarget) return;
-    await document.fonts.ready;
-    const { default: html2canvas } = await import('html2canvas');
-    const canvas = await html2canvas(element, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: '#F6F9EB',
-      onclone: fixOverflowClone,
-    });
-    const filename = `receipt-${printTarget.receiptNumber}.png`;
-    const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
-    if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
-      const file = new File([blob], filename, { type: 'image/png' });
-      await navigator.share({ files: [file], title: 'ใบเสร็จ' });
-    } else {
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = URL.createObjectURL(blob);
-      link.click();
-      URL.revokeObjectURL(link.href);
+    setExportError(null);
+    setImageGenerating(true);
+    try {
+      await document.fonts.ready;
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#F6F9EB',
+        onclone: fixOverflowClone,
+      });
+      const filename = `receipt-${printTarget.receiptNumber}.png`;
+      const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
+      if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+        const file = new File([blob], filename, { type: 'image/png' });
+        await navigator.share({ files: [file], title: 'ใบเสร็จ' });
+      } else {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+    } catch (e) {
+      // ผู้ใช้กดยกเลิกใน share sheet → ไม่ใช่ error
+      if (e instanceof Error && e.name === 'AbortError') return;
+      setExportError(e instanceof Error ? e.message : 'บันทึกรูปไม่สำเร็จ');
+    } finally {
+      setImageGenerating(false);
     }
   }, [printTarget]);
 
@@ -634,6 +655,11 @@ export default function HistoryPage() {
                   <Bluetooth size={12} /> {btError}
                 </div>
               )}
+              {exportError && (
+                <div style={{ fontSize: '12px', color: '#B6452F', marginBottom: '10px' }}>
+                  {exportError}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <HistBtn
                   onClick={handleBtPrint}
@@ -643,8 +669,16 @@ export default function HistoryPage() {
                 >
                   {btPrinting ? 'กำลังพิมพ์...' : 'BT'}
                 </HistBtn>
-                <HistBtn onClick={handleExportPDF} icon={<FileDown size={14} />}>PDF</HistBtn>
-                <HistBtn onClick={handleSaveImage} icon={<ImageDown size={14} />}>บันทึกรูป</HistBtn>
+                <HistBtn
+                  onClick={handleExportPDF}
+                  disabled={pdfGenerating || imageGenerating}
+                  icon={<FileDown size={14} />}
+                >{pdfGenerating ? '...' : 'PDF'}</HistBtn>
+                <HistBtn
+                  onClick={handleSaveImage}
+                  disabled={pdfGenerating || imageGenerating}
+                  icon={<ImageDown size={14} />}
+                >{imageGenerating ? '...' : 'บันทึกรูป'}</HistBtn>
               </div>
             </div>
           </div>

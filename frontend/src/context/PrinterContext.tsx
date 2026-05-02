@@ -13,6 +13,14 @@ const KNOWN_CHARS = [
   '49535343-8841-43f4-a8d4-ecbe34729bb3',
 ];
 
+// Parse codepage จาก localStorage แบบกัน edge case:
+// null/"" → ใช้ default, "abc" → NaN → default, ค่านอกช่วง byte → default
+function parseStoredCodepage(raw: string | null): number {
+  if (!raw) return 0x14;
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 0 && n <= 0xFF ? n : 0x14;
+}
+
 export type PrinterStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
 interface PrinterState {
@@ -50,7 +58,7 @@ export function PrinterProvider({ children }: { children: ReactNode }) {
     status: 'disconnected',
     deviceName: null,
     paperSize: (localStorage.getItem('bt_paper_size') as PaperSize) || '58mm',
-    codepage: Number(localStorage.getItem('bt_codepage') ?? 0x14),
+    codepage: parseStoredCodepage(localStorage.getItem('bt_codepage')),
     errorMessage: null,
   });
 
