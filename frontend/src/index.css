@@ -28,6 +28,7 @@
   font-family: 'Sarabun', sans-serif;
 }
 
+
 body {
   /* manipulation = pan + pinch-zoom + suppress double-tap-zoom delay
      เปลี่ยนจาก pan-x pan-y เพื่อให้ผู้ใช้ pinch zoom ได้ (a11y) */

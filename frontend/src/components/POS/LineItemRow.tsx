@@ -22,9 +22,10 @@ interface Props {
   onUpdate: (idx: number, item: LineItem) => void;
   onRemove: (idx: number) => void;
   showErrors?: boolean;
+  autoFillPrice?: boolean;
 }
 
-export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRemove, showErrors }: Props) {
+export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRemove, showErrors, autoFillPrice = true }: Props) {
   const [query, setQuery] = useState(item.name);
   const [showSuggest, setShowSuggest] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -54,7 +55,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
     onUpdate(idx, {
       ...item,
       name: tree.name,
-      price: tree.price,
+      price: autoFillPrice ? tree.price : item.price,
       unit: tree.unit || 'ต้น',
       category: tree.category || '',
       treeId: tree.id,
@@ -92,7 +93,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
       }}
     >
       {/* # */}
-      <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '12px' }}>{idx + 1}</div>
+      <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '14px' }}>{idx + 1}</div>
 
       {/* Name + autocomplete */}
       <div style={{ position: 'relative' }} ref={wrapRef}>
@@ -115,7 +116,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
             padding: '8px 10px',
             borderRadius: '7px',
             fontFamily: 'var(--font-ui)',
-            fontSize: '14px',
+            fontSize: '19px',
             color: 'var(--ink)',
             outline: 'none',
             transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -126,7 +127,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
         {item.category && !showSuggest && (
           <div style={{
             position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-            fontSize: '10px', color: 'var(--sage-d)',
+            fontSize: '12px', color: 'var(--sage-d)',
             background: 'rgba(138,154,91,0.18)', padding: '2px 7px', borderRadius: '3px',
             fontWeight: 500, pointerEvents: 'none',
           }}>
@@ -152,8 +153,8 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
                   background: i === activeIdx ? 'rgba(62,122,58,0.08)' : 'transparent',
                 }}
               >
-                <div style={{ fontSize: '13.5px', color: 'var(--ink)' }}>{m.name}</div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '11.5px' }}>
+                <div style={{ fontSize: '18px', color: 'var(--ink)' }}>{m.name}</div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '13.5px' }}>
                   {m.category && (
                     <span style={{ color: 'var(--sage-d)', background: 'rgba(138,154,91,0.18)', padding: '2px 6px', borderRadius: '3px', fontWeight: 500 }}>
                       {m.category}
@@ -179,17 +180,17 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
           style={{
             width: '100%', border: '1px solid var(--rule)', background: 'var(--cream-0)',
             padding: '8px 8px', borderRadius: '7px',
-            fontFamily: 'var(--font-mono)', fontSize: '13px', textAlign: 'right',
+            fontFamily: 'var(--font-mono)', fontSize: '15px', textAlign: 'right',
             color: 'var(--ink)', outline: 'none',
           }}
         />
-        <span style={{ fontSize: '11px', color: 'var(--ink-4)', minWidth: '22px' }}>{item.unit || '—'}</span>
+        <span style={{ fontSize: '13px', color: 'var(--ink-4)', minWidth: '22px' }}>{item.unit || '—'}</span>
       </div>
 
       {/* Price */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '13px' }}>฿</span>
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '15px' }}>฿</span>
           <input
             type="number"
             min="0"
@@ -202,13 +203,13 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
               boxShadow: priceErr ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none',
               background: priceErr ? '#FEF2F2' : 'var(--cream-0)',
               padding: '8px 8px', borderRadius: '7px',
-              fontFamily: 'var(--font-mono)', fontSize: '13px', textAlign: 'right',
+              fontFamily: 'var(--font-mono)', fontSize: '15px', textAlign: 'right',
               color: 'var(--ink)', outline: 'none',
             }}
           />
         </div>
         {priceErr && isCustom && (
-          <div style={{ fontSize: '10px', color: '#EF4444', textAlign: 'right', paddingRight: '2px' }}>
+          <div style={{ fontSize: '12px', color: '#EF4444', textAlign: 'right', paddingRight: '2px' }}>
             ต้องใส่ราคา
           </div>
         )}
@@ -216,7 +217,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
 
       {/* Subtotal */}
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: '13.5px', fontWeight: 600,
+        fontFamily: 'var(--font-mono)', fontSize: '15.5px', fontWeight: 600,
         textAlign: 'right', color: 'var(--clay-d)',
       }}>
         ฿{fmt(subtotal)}
@@ -243,7 +244,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
 }
 
 /* Mobile card layout (injected via className hook) */
-export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, showErrors }: Omit<Props, 'isLast'>) {
+export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, showErrors, autoFillPrice = true }: Omit<Props, 'isLast'>) {
   const [query, setQuery] = useState(item.name);
   const [showSuggest, setShowSuggest] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -266,7 +267,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
   }, [query, catalog]);
 
   const pick = (tree: Tree) => {
-    onUpdate(idx, { ...item, name: tree.name, price: tree.price, unit: tree.unit || 'ต้น', category: tree.category || '', treeId: tree.id });
+    onUpdate(idx, { ...item, name: tree.name, price: autoFillPrice ? tree.price : item.price, unit: tree.unit || 'ต้น', category: tree.category || '', treeId: tree.id });
     setQuery(tree.name);
     setShowSuggest(false);
   };
@@ -297,7 +298,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
               boxShadow: nameErrM ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none',
               background: '#fff',
               padding: '9px 12px', borderRadius: '7px', fontFamily: 'var(--font-ui)',
-              fontSize: '14px', color: 'var(--ink)', outline: 'none',
+              fontSize: '19px', color: 'var(--ink)', outline: 'none',
             }}
           />
           {showSuggest && matches.length > 0 && (
@@ -315,8 +316,8 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
                     display: 'flex', justifyContent: 'space-between',
                     background: i === activeIdx ? 'rgba(62,122,58,0.08)' : 'transparent',
                   }}>
-                  <span style={{ fontSize: '13.5px' }}>{m.name}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontSize: '12px', fontWeight: 600 }}>฿{Number(m.price).toLocaleString('th-TH')}</span>
+                  <span style={{ fontSize: '18px' }}>{m.name}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontSize: '14px', fontWeight: 600 }}>฿{Number(m.price).toLocaleString('th-TH')}</span>
                 </div>
               ))}
             </div>
@@ -329,29 +330,29 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
       </div>
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ fontSize: '10px', color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>จำนวน</span>
+          <span style={{ fontSize: '12px', color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>จำนวน</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <input type="number" min="0" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
-              style={{ width: '72px', border: '1px solid var(--rule)', background: '#fff', padding: '8px', borderRadius: '7px', fontFamily: 'var(--font-mono)', fontSize: '14px', outline: 'none', textAlign: 'center' }} />
-            <span style={{ fontSize: '11px', color: 'var(--ink-4)' }}>{item.unit || '—'}</span>
+              style={{ width: '72px', border: '1px solid var(--rule)', background: '#fff', padding: '8px', borderRadius: '7px', fontFamily: 'var(--font-mono)', fontSize: '16px', outline: 'none', textAlign: 'center' }} />
+            <span style={{ fontSize: '13px', color: 'var(--ink-4)' }}>{item.unit || '—'}</span>
           </div>
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ fontSize: '10px', color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ราคา/หน่วย</span>
+          <span style={{ fontSize: '12px', color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ราคา/หน่วย</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '13px' }}>฿</span>
+            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '15px' }}>฿</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <input type="number" min="0" value={item.price} onChange={(e) => onUpdate(idx, { ...item, price: e.target.value })}
                 placeholder={isCustomM ? 'ใส่ราคา' : ''}
-                style={{ width: '96px', border: priceErrM ? '1px solid #EF4444' : '1px solid var(--rule)', boxShadow: priceErrM ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none', background: priceErrM ? '#FEF2F2' : '#fff', padding: '8px', borderRadius: '7px', fontFamily: 'var(--font-mono)', fontSize: '14px', outline: 'none', textAlign: 'right' }} />
+                style={{ width: '96px', border: priceErrM ? '1px solid #EF4444' : '1px solid var(--rule)', boxShadow: priceErrM ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none', background: priceErrM ? '#FEF2F2' : '#fff', padding: '8px', borderRadius: '7px', fontFamily: 'var(--font-mono)', fontSize: '16px', outline: 'none', textAlign: 'right' }} />
               {priceErrM && isCustomM && (
-                <div style={{ fontSize: '10px', color: '#EF4444', textAlign: 'right' }}>ต้องใส่ราคา</div>
+                <div style={{ fontSize: '12px', color: '#EF4444', textAlign: 'right' }}>ต้องใส่ราคา</div>
               )}
             </div>
           </div>
         </label>
       </div>
-      <div style={{ textAlign: 'right', paddingTop: '8px', marginTop: '8px', borderTop: '1px dashed var(--rule-soft)', fontFamily: 'var(--font-mono)', fontSize: '15px', fontWeight: 600, color: 'var(--clay-d)' }}>
+      <div style={{ textAlign: 'right', paddingTop: '8px', marginTop: '8px', borderTop: '1px dashed var(--rule-soft)', fontFamily: 'var(--font-mono)', fontSize: '17px', fontWeight: 600, color: 'var(--clay-d)' }}>
         ฿{fmt(subtotal)}
       </div>
     </div>

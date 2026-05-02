@@ -7,6 +7,8 @@ import HistoryPage from './components/History/HistoryPage';
 import SettingsPage from './components/Settings/SettingsPage';
 import { PrinterProvider, usePrinter } from './context/PrinterContext';
 
+export const BOTTOM_NAV_H = 56;
+
 type Tab = 'pos' | 'trees' | 'history' | 'settings';
 
 function AppContent() {
@@ -22,9 +24,10 @@ function AppContent() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--cream-1)', fontFamily: 'var(--font-ui)' }}>
-      {/* ── Top bar ── */}
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+
+      {/* ── Top bar: desktop action buttons only (hidden on mobile) ── */}
+      <header className="hidden sm:flex" style={{
+        alignItems: 'center', justifyContent: 'flex-end',
         padding: '0 12px', height: '56px',
         borderBottom: '1px solid var(--rule-soft)',
         background: 'rgba(255, 250, 243, 0.9)',
@@ -32,68 +35,8 @@ function AppContent() {
         position: 'sticky', top: 0, zIndex: 20,
         gap: '16px',
       }}>
-        {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flexShrink: 0 }}>
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
-            background: 'linear-gradient(135deg, var(--clay) 0%, var(--clay-d) 100%)',
-            display: 'grid', placeItems: 'center',
-            boxShadow: '0 2px 6px rgba(62,122,58,0.28)',
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 20 C12 11, 5 6, 2 6 C2 12, 5 19, 12 20Z" fill="#D4E68A" opacity="0.9"/>
-              <path d="M12 20 C12 11, 19 6, 22 6 C22 12, 19 19, 12 20Z" fill="#B8D46A" opacity="0.75"/>
-              <path d="M12 20 V4" stroke="#fff" strokeWidth="1" strokeLinecap="round" opacity="0.6"/>
-            </svg>
-          </div>
-          <div className="hidden sm:block">
-            <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--ink)', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-              ร้านพีท-ภีมพันธุ์ไม้
-            </div>
-            <div style={{ fontSize: '10px', color: 'var(--ink-3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Point of Sale
-            </div>
-          </div>
-        </div>
-
-        {/* Nav tabs */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '2px', flex: 1, justifyContent: 'center', overflow: 'hidden' }}>
-          <NavTab active={activeTab === 'pos'} onClick={() => setActiveTab('pos')}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <rect x="3" y="2" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M5 5h4M5 7h4M5 9h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-            </svg>
-            <span className="hidden sm:inline">สร้างใบเสร็จ</span>
-            <span className="sm:hidden">ใบเสร็จ</span>
-          </NavTab>
-          <NavTab active={activeTab === 'trees'} onClick={() => setActiveTab('trees')}>
-            <TreePine size={14} />
-            <span className="hidden sm:inline">จัดการต้นไม้</span>
-            <span className="sm:hidden">ต้นไม้</span>
-          </NavTab>
-          <NavTab active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
-            <History size={14} />
-            <span className="hidden sm:inline">ประวัติการขาย</span>
-            <span className="sm:hidden">ประวัติ</span>
-          </NavTab>
-          <NavTab active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
-            <span style={{ position: 'relative', display: 'inline-flex' }}>
-              <Settings size={14} />
-              {dotColor && (
-                <span style={{
-                  position: 'absolute', top: '-4px', right: '-4px',
-                  width: '7px', height: '7px', borderRadius: '50%',
-                  background: dotColor, border: '1.5px solid white',
-                }} />
-              )}
-            </span>
-            <span className="hidden sm:inline">เครื่องพิมพ์</span>
-            <span className="sm:hidden">พิมพ์</span>
-          </NavTab>
-        </nav>
-
-        {/* POS action buttons (right) — always rendered to keep nav centered; hidden on mobile (handled by POSPage bottom bar) */}
-        <div className="hidden sm:flex" style={{ gap: '8px', alignItems: 'center', flexShrink: 0, visibility: activeTab === 'pos' ? 'visible' : 'hidden' }}>
+        {/* Desktop POS action buttons */}
+        <div style={{ gap: '8px', alignItems: 'center', flexShrink: 0, display: 'flex', visibility: activeTab === 'pos' ? 'visible' : 'hidden' }}>
           <button
             onClick={() => { posRef.current?.clear(); setPosOrderSaved(false); }}
             style={tbBtnStyle}
@@ -116,14 +59,13 @@ function AppContent() {
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
               <path d="M2 7l3 3 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="hidden sm:inline">ออกใบเสร็จ</span>
-            <span className="sm:hidden">ออก</span>
+            ออกใบเสร็จ
           </button>
         </div>
       </header>
 
-      {/* Page content — keep all tabs mounted, hide inactive ones to avoid layout jump */}
-      <main>
+      {/* ── Page content ── */}
+      <main style={{ paddingBottom: `${BOTTOM_NAV_H}px` }}>
         <div style={{ display: activeTab === 'pos' ? undefined : 'none' }}>
           <POSPage ref={posRef} onSavedOrderChange={setPosOrderSaved} />
         </div>
@@ -137,22 +79,66 @@ function AppContent() {
           <SettingsPage />
         </div>
       </main>
+
+      {/* ── Bottom nav ── */}
+      <nav style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        height: `${BOTTOM_NAV_H}px`, zIndex: 20,
+        display: 'flex', alignItems: 'stretch',
+        background: 'rgba(255, 250, 243, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid var(--rule-soft)',
+        boxShadow: '0 -2px 12px rgba(28,46,26,0.07)',
+      }}>
+        <NavTab active={activeTab === 'pos'} onClick={() => setActiveTab('pos')}>
+          <svg width="20" height="20" viewBox="0 0 14 14" fill="none">
+            <rect x="3" y="2" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+            <path d="M5 5h4M5 7h4M5 9h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+          ใบเสร็จ
+        </NavTab>
+        <NavTab active={activeTab === 'trees'} onClick={() => setActiveTab('trees')}>
+          <TreePine size={20} />
+          ต้นไม้
+        </NavTab>
+        <NavTab active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
+          <History size={20} />
+          ประวัติ
+        </NavTab>
+        <NavTab active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hidden>
+          <span style={{ position: 'relative', display: 'inline-flex' }}>
+            <Settings size={20} />
+            {dotColor && (
+              <span style={{
+                position: 'absolute', top: '-3px', right: '-3px',
+                width: '7px', height: '7px', borderRadius: '50%',
+                background: dotColor, border: '1.5px solid white',
+              }} />
+            )}
+          </span>
+          พิมพ์
+        </NavTab>
+      </nav>
     </div>
   );
 }
 
-function NavTab({ children, active, onClick }: { children: React.ReactNode; active: boolean; onClick: () => void }) {
+function NavTab({ children, active, onClick, hidden }: { children: React.ReactNode; active: boolean; onClick: () => void; hidden?: boolean }) {
+  if (hidden) return null;
   return (
     <button
       onClick={onClick}
       style={{
+        flex: 1,
         appearance: 'none', border: 'none',
-        background: active ? 'rgba(62,122,58,0.12)' : 'transparent',
-        color: active ? 'var(--clay-d)' : 'var(--ink-3)',
-        padding: '7px 12px', borderRadius: '7px',
-        fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: active ? 500 : 400,
-        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
-        transition: 'all 0.15s', whiteSpace: 'nowrap',
+        background: 'transparent',
+        color: active ? 'var(--clay-d)' : 'var(--ink-4)',
+        fontFamily: 'var(--font-ui)', fontSize: '11px', fontWeight: active ? 600 : 400,
+        cursor: 'pointer',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px',
+        transition: 'color 0.15s',
+        borderTop: active ? '2px solid var(--clay)' : '2px solid transparent',
+        paddingTop: '2px',
       }}
     >
       {children}

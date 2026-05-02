@@ -8,7 +8,7 @@ function useIsMobile() {
   };
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
-import { getAllTrees, createOrder, createTree } from '../../api';
+import { getAllTrees, createOrder } from '../../api';
 import type { Tree, Order } from '../../types';
 import LineItemRow, { LineItemRowMobile, emptyItem } from './LineItemRow';
 import type { LineItem } from './LineItemRow';
@@ -66,11 +66,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const [saving, setSaving] = useState(false);
   const [savedOrder, setSavedOrder] = useState<Order | null>(null);
 
-  // เพิ่มต้นไม้ใหม่
-  const [showAddTree, setShowAddTree] = useState(false);
-  const [addTreeForm, setAddTreeForm] = useState({ name: '', category: 'ไม้ผล', price: '', unit: 'ต้น' });
-  const [addTreeSaving, setAddTreeSaving] = useState(false);
-  const [addTreeError, setAddTreeError] = useState<string | null>(null);
+  const [manualPrice, setManualPrice] = useState(
+    () => localStorage.getItem('pos_manual_price') === 'true'
+  );
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [btPrinting, setBtPrinting] = useState(false);
@@ -109,30 +107,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   }, []);
 
   const addItem = () => setItems((prev) => [...prev, emptyItem()]);
-
-  const handleAddTree = async () => {
-    const price = parseFloat(addTreeForm.price);
-    if (!addTreeForm.name.trim()) return setAddTreeError('กรุณาใส่ชื่อต้นไม้');
-    if (isNaN(price) || price <= 0) return setAddTreeError('กรุณาใส่ราคาที่ถูกต้อง');
-    setAddTreeSaving(true);
-    setAddTreeError(null);
-    try {
-      const created = await createTree({
-        name: addTreeForm.name.trim(),
-        category: addTreeForm.category,
-        price,
-        unit: addTreeForm.unit,
-      } as never);
-      setAllTrees((prev) => [...prev, created]);
-      setShowAddTree(false);
-      setAddTreeForm({ name: '', category: 'ไม้ผล', price: '', unit: 'ต้น' });
-    } catch (e: unknown) {
-      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setAddTreeError(typeof msg === 'string' ? msg : 'เกิดข้อผิดพลาด');
-    } finally {
-      setAddTreeSaving(false);
-    }
-  };
 
   const clear = () => {
     setShowErrors(false);
@@ -351,13 +325,13 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     section: { marginBottom: '32px' } as React.CSSProperties,
     sectionHead: { display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' } as React.CSSProperties,
     sectionNum: {
-      fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--clay-d)',
+      fontFamily: 'var(--font-mono)', fontSize: '14px', color: 'var(--clay-d)',
       background: 'rgba(62,122,58,0.12)', border: '1px solid rgba(62,122,58,0.22)',
       padding: '4px 8px', borderRadius: '4px', marginTop: '2px',
       letterSpacing: '0.08em', fontWeight: 600,
     } as React.CSSProperties,
-    sectionTitle: { fontSize: '17px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em' } as React.CSSProperties,
-    sectionSub: { fontSize: '12.5px', color: 'var(--ink-3)', marginTop: '2px' } as React.CSSProperties,
+    sectionTitle: { fontSize: '20px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em' } as React.CSSProperties,
+    sectionSub: { fontSize: '15.5px', color: 'var(--ink-3)', marginTop: '2px' } as React.CSSProperties,
     fld: {
       appearance: 'none' as const,
       border: '1px solid var(--rule)',
@@ -365,14 +339,14 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
       padding: '10px 12px',
       borderRadius: '7px',
       fontFamily: 'var(--font-ui)',
-      fontSize: '14px',
+      fontSize: '17px',
       color: 'var(--ink)',
       width: '100%',
       outline: 'none',
       transition: 'all 0.15s',
     } as React.CSSProperties,
     lbl: {
-      fontSize: '11.5px', color: 'var(--ink-3)',
+      fontSize: '14.5px', color: 'var(--ink-3)',
       textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 500,
       display: 'block', marginBottom: '6px',
     } as React.CSSProperties,
@@ -391,7 +365,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
         display: isMobile ? 'flex' : 'none',
         background: 'var(--cream-0)', borderBottom: '1px solid var(--rule-soft)',
         padding: '8px 12px', gap: '6px',
-        position: 'sticky', top: '56px', zIndex: 15,
+        position: 'sticky', top: 0, zIndex: 15,
       }}>
         {([['form', 'กรอกข้อมูล'], ['preview', 'ดูใบเสร็จ']] as const).map(([tab, label]) => {
           // ล็อคแท็บ "กรอกข้อมูล" หลัง save จนกว่าจะกด "ออเดอร์ใหม่"
@@ -407,7 +381,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 border: mobileTab === tab ? 'none' : '1px solid transparent',
                 background: mobileTab === tab ? 'var(--clay)' : 'transparent',
                 color: mobileTab === tab ? 'var(--cream-0)' : 'var(--ink-3)',
-                fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 500,
+                fontFamily: 'var(--font-ui)', fontSize: '16px', fontWeight: 500,
                 cursor: locked ? 'not-allowed' : 'pointer',
                 opacity: locked ? 0.4 : 1,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
@@ -419,7 +393,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 <span style={{
                   background: mobileTab === tab ? 'rgba(255,255,255,0.25)' : 'var(--cream-2)',
                   color: mobileTab === tab ? 'inherit' : 'var(--ink-3)',
-                  padding: '1px 6px', borderRadius: '8px', fontSize: '11px',
+                  padding: '1px 6px', borderRadius: '8px', fontSize: '14px',
                   fontFamily: 'var(--font-mono)', marginLeft: '4px',
                 }}>{validItemCount}</span>
               )}
@@ -440,7 +414,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               marginBottom: '20px', padding: '12px 14px',
               background: 'rgba(62,122,58,0.10)', border: '1px solid rgba(62,122,58,0.25)',
               borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px',
-              fontSize: '13px', color: 'var(--clay-d)',
+              fontSize: '16px', color: 'var(--clay-d)',
             }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <rect x="4" y="7" width="8" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
@@ -456,7 +430,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               <div style={s.sectionNum}>01</div>
               <div>
                 <div style={s.sectionTitle}>ข้อมูลลูกค้า</div>
-                <div style={s.sectionSub}>กรอกเพื่อพิมพ์บนใบเสร็จ</div>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '14px' }}>
@@ -493,24 +466,30 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 <div style={s.sectionNum}>02</div>
                 <div>
                   <div style={s.sectionTitle}>รายการสินค้า</div>
-                  <div style={s.sectionSub}>พิมพ์ชื่อเพื่อค้นหาจากสต็อก • Enter เพื่อเลือก</div>
                 </div>
               </div>
               <button
-                onClick={() => { setShowAddTree(true); setAddTreeError(null); setAddTreeForm({ name: '', category: 'ไม้ผล', price: '', unit: 'ต้น' }); }}
+                onClick={() => setManualPrice((p) => { localStorage.setItem('pos_manual_price', String(!p)); return !p; })}
+                title={manualPrice ? 'ราคาอิสระ: เปิดอยู่ — ราคาจะไม่ถูกดึงจากสต็อก' : 'ราคาอิสระ: ปิดอยู่ — เลือกต้นไม้จะดึงราคามาให้'}
                 style={{
-                  appearance: 'none', border: '1px solid rgba(62,122,58,0.35)',
-                  background: 'rgba(62,122,58,0.08)', color: 'var(--clay-d)',
+                  appearance: 'none',
+                  border: manualPrice ? '1px solid rgba(180,80,30,0.4)' : '1px solid rgba(62,122,58,0.35)',
+                  background: manualPrice ? 'rgba(180,80,30,0.08)' : 'rgba(62,122,58,0.08)',
+                  color: manualPrice ? '#B6452F' : 'var(--clay-d)',
                   padding: '6px 12px', borderRadius: '7px', cursor: 'pointer',
-                  fontFamily: 'var(--font-ui)', fontSize: '12.5px', fontWeight: 500,
+                  fontFamily: 'var(--font-ui)', fontSize: '15.5px', fontWeight: 500,
                   display: 'inline-flex', alignItems: 'center', gap: '5px',
-                  whiteSpace: 'nowrap', flexShrink: 0,
+                  whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.15s',
                 }}
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                  <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                  <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
+                  {manualPrice
+                    ? <path d="M5 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    : <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  }
                 </svg>
-                เพิ่มต้นไม้ใหม่
+                {manualPrice ? 'ราคาอิสระ' : 'ดึงราคา'}
               </button>
             </div>
 
@@ -522,7 +501,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   display: 'grid', gridTemplateColumns: '28px 1fr 100px 110px 94px 28px',
                   alignItems: 'center', gap: '8px', padding: '10px 14px',
                   background: 'var(--cream-2)', borderBottom: '1px solid var(--rule-soft)',
-                  fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em',
+                  fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.08em',
                   color: 'var(--ink-3)', fontWeight: 600, borderRadius: '10px 10px 0 0',
                 }}>
                   <div>#</div><div>รายการ</div><div>จำนวน</div><div>ราคา/หน่วย</div><div style={{ textAlign: 'right' }}>รวม</div><div />
@@ -537,6 +516,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     onUpdate={updateItem}
                     onRemove={removeItem}
                     showErrors={showErrors}
+                    autoFillPrice={!manualPrice}
                   />
                 ))}
               </div>
@@ -554,6 +534,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     onUpdate={updateItem}
                     onRemove={removeItem}
                     showErrors={showErrors}
+                    autoFillPrice={!manualPrice}
                   />
                 ))}
               </div>
@@ -564,7 +545,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               style={{
                 appearance: 'none', border: '1.5px dashed var(--rule)', background: 'transparent',
                 color: 'var(--ink-3)', padding: '12px 14px', borderRadius: '8px',
-                cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: '13px',
+                cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: '16px',
                 display: 'inline-flex', alignItems: 'center', gap: '7px',
                 width: '100%', justifyContent: 'center', transition: 'all 0.15s', fontWeight: 500,
               }}
@@ -582,7 +563,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               <div style={s.sectionNum}>03</div>
               <div>
                 <div style={s.sectionTitle}>วิธีชำระเงิน</div>
-                <div style={s.sectionSub}>เลือกหนึ่งวิธี</div>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -607,7 +587,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   }}
                 >
                   <PayIcon kind={p.icon} />
-                  <span style={{ fontSize: '14px', fontWeight: 500 }}>{p.label}</span>
+                  <span style={{ fontSize: '17px', fontWeight: 500 }}>{p.label}</span>
                 </button>
               ))}
             </div>
@@ -635,7 +615,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
           {/* Error */}
           {error && (
-            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', marginBottom: '16px' }}>
+            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '12px 14px', fontSize: '16px', marginBottom: '16px' }}>
               {error}
             </div>
           )}
@@ -646,7 +626,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
         <div style={{ ...s.previewPane, display: isMobile && mobileTab !== 'preview' ? 'none' : undefined }}>
           {/* Preview bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px 20px', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--cream-0)', letterSpacing: '0.02em' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', color: 'var(--cream-0)', letterSpacing: '0.02em' }}>
               <span>ตัวอย่างใบเสร็จ</span>
             </div>
             <button
@@ -655,7 +635,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 appearance: 'none', border: '1px solid rgba(251,245,232,0.4)',
                 background: 'rgba(251,245,232,0.15)', backdropFilter: 'blur(8px)',
                 color: 'var(--cream-0)', padding: '7px 12px', borderRadius: '7px',
-                fontFamily: 'var(--font-ui)', fontSize: '12.5px', cursor: 'pointer',
+                fontFamily: 'var(--font-ui)', fontSize: '15.5px', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', gap: '7px', transition: 'all 0.15s',
               }}
             >
@@ -695,12 +675,12 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 disabled={pdfGenerating || imageGenerating}
                 icon={<ImgIcon />}
               >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
-              <ActionBtn onClick={clear} ghost icon={<span style={{ fontSize: '11px', opacity: 0.7 }}>✦</span>}>ออเดอร์ใหม่</ActionBtn>
+              <ActionBtn onClick={clear} ghost icon={<span style={{ fontSize: '14px', opacity: 0.7 }}>✦</span>}>ออเดอร์ใหม่</ActionBtn>
             </div>
           )}
 
           {(btError || exportError) && (
-            <div style={{ color: 'var(--cream-0)', fontSize: '12px', textAlign: 'center', marginTop: '8px', opacity: 0.8 }}>{btError || exportError}</div>
+            <div style={{ color: 'var(--cream-0)', fontSize: '15px', textAlign: 'center', marginTop: '8px', opacity: 0.8 }}>{btError || exportError}</div>
           )}
         </div>
       </div>
@@ -708,7 +688,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
       {/* ── Mobile bottom action bar ── */}
       {isMobile && (
         <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 30,
+          position: 'fixed', bottom: 56, left: 0, right: 0, zIndex: 30,
           background: 'var(--cream-0)', borderTop: '1px solid var(--rule-soft)',
           boxShadow: '0 -4px 20px rgba(28,46,26,0.10)',
           padding: '10px 16px 10px',
@@ -719,13 +699,13 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               <div style={{ flex: 1, minWidth: 0 }}>
                 {validItemCount > 0 ? (
                   <>
-                    <div style={{ fontSize: '11px', color: 'var(--ink-4)', lineHeight: 1.2 }}>ยอดรวม {validItemCount} รายการ</div>
-                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--clay-d)', fontFamily: 'var(--font-mono)', lineHeight: 1.2 }}>
+                    <div style={{ fontSize: '14px', color: 'var(--ink-4)', lineHeight: 1.2 }}>ยอดรวม {validItemCount} รายการ</div>
+                    <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--clay-d)', fontFamily: 'var(--font-mono)', lineHeight: 1.2 }}>
                       ฿{subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontSize: '13px', color: 'var(--ink-4)' }}>ยังไม่มีรายการ</div>
+                  <div style={{ fontSize: '16px', color: 'var(--ink-4)' }}>ยังไม่มีรายการ</div>
                 )}
               </div>
               <button
@@ -735,7 +715,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   background: 'linear-gradient(180deg, var(--clay) 0%, var(--clay-d) 100%)',
                   color: 'var(--cream-0)', border: '1px solid var(--clay-d)',
                   padding: '13px 22px', borderRadius: '10px',
-                  fontFamily: 'var(--font-ui)', fontSize: '14px', fontWeight: 600,
+                  fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 600,
                   cursor: saving ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', gap: '8px',
                   boxShadow: '0 2px 8px rgba(62,122,58,0.35)',
@@ -752,7 +732,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           ) : (
             /* หลัง save: ปุ่ม print */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {(btError || exportError) && <div style={{ fontSize: '11px', color: '#B6452F' }}>{btError || exportError}</div>}
+              {(btError || exportError) && <div style={{ fontSize: '14px', color: '#B6452F' }}>{btError || exportError}</div>}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <ActionBtn
                   onClick={handleBtPrint}
@@ -775,11 +755,11 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 style={{
                   width: '100%', padding: '10px', borderRadius: '8px',
                   border: '1px solid var(--rule)', background: 'transparent',
-                  color: 'var(--ink-3)', fontFamily: 'var(--font-ui)', fontSize: '13px',
+                  color: 'var(--ink-3)', fontFamily: 'var(--font-ui)', fontSize: '16px',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                 }}
               >
-                <span style={{ fontSize: '11px' }}>✦</span> ออเดอร์ใหม่
+                <span style={{ fontSize: '14px' }}>✦</span> ออเดอร์ใหม่
               </button>
             </div>
           )}
@@ -800,8 +780,8 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: '28px 24px 20px', textAlign: 'center' }}>
               <div style={{ fontSize: '32px', marginBottom: '8px' }}>🧾</div>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--ink)', marginBottom: '4px' }}>ยืนยันออกใบเสร็จ?</div>
-              <div style={{ fontSize: '13px', color: 'var(--ink-3)', marginBottom: '16px' }}>กรุณาตรวจสอบรายการก่อนยืนยัน</div>
+              <div style={{ fontSize: '21px', fontWeight: 700, color: 'var(--ink)', marginBottom: '4px' }}>ยืนยันออกใบเสร็จ?</div>
+              <div style={{ fontSize: '16px', color: 'var(--ink-3)', marginBottom: '16px' }}>กรุณาตรวจสอบรายการก่อนยืนยัน</div>
               <div style={{ background: 'var(--cream-1)', borderRadius: '8px', padding: '12px 14px', textAlign: 'left' }}>
                 {customerName && <SummaryRow label="ลูกค้า" value={customerName} />}
                 <SummaryRow label="รายการสินค้า" value={`${validItemCount} รายการ`} />
@@ -832,7 +812,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           }} onClick={(e) => e.stopPropagation()}>
             {/* Modal header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 14px', borderBottom: '1px solid var(--rule-soft)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '15px', color: 'var(--clay-d)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '18px', color: 'var(--clay-d)' }}>
                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.8 2.8l1.4 1.4M9.8 9.8l1.4 1.4M2.8 11.2l1.4-1.4M9.8 4.2l1.4-1.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
                 ตั้งค่าใบเสร็จ
               </div>
@@ -858,7 +838,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               <div style={{ height: '1px', background: 'var(--rule-soft)', margin: '2px 0' }} />
               {/* Logo toggle */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--ink)' }}>แสดงโลโก้บนใบเสร็จ</span>
+                <span style={{ fontSize: '16px', color: 'var(--ink)' }}>แสดงโลโก้บนใบเสร็จ</span>
                 <button
                   onClick={() => setDraftSettings((d) => ({ ...d, showLogo: !d.showLogo }))}
                   style={{
@@ -891,96 +871,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
         </div>
       )}
 
-      {/* ── Add Tree Modal ── */}
-      {showAddTree && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(28,46,26,0.45)',
-          backdropFilter: 'blur(4px)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
-        }} onClick={() => setShowAddTree(false)}>
-          <div style={{
-            background: '#fff', borderRadius: '14px', width: '100%', maxWidth: '400px',
-            boxShadow: '0 24px 60px rgba(28,46,26,0.35)',
-            animation: 'rsPop 0.18s cubic-bezier(0.2,0.8,0.2,1)',
-          }} onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 14px', borderBottom: '1px solid var(--rule-soft)' }}>
-              <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--clay-d)', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                <svg width="15" height="15" viewBox="0 0 14 14" fill="none">
-                  <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-                </svg>
-                เพิ่มต้นไม้ใหม่
-              </div>
-              <button onClick={() => setShowAddTree(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-3)', padding: '4px', display: 'inline-flex' }}>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-              </button>
-            </div>
-
-            {/* Body */}
-            <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={{ fontSize: '12px', color: 'var(--ink-2)', fontWeight: 500, display: 'block', marginBottom: '5px' }}>ชื่อต้นไม้ *</label>
-                <input
-                  autoFocus
-                  value={addTreeForm.name}
-                  onChange={(e) => setAddTreeForm((f) => ({ ...f, name: e.target.value }))}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddTree(); }}
-                  placeholder="เช่น มะม่วง, กุหลาบ"
-                  style={{ ...modalInputStyle, width: '100%' }}
-                />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: 'var(--ink-2)', fontWeight: 500, display: 'block', marginBottom: '5px' }}>หมวดหมู่</label>
-                  <select
-                    value={addTreeForm.category}
-                    onChange={(e) => setAddTreeForm((f) => ({ ...f, category: e.target.value }))}
-                    style={{ ...modalInputStyle, width: '100%' }}
-                  >
-                    {['ไม้ผล','ไม้ประดับ','ไม้ยืนต้น','ไม้ไผ่','ไม้สมุนไพร','อื่นๆ'].map((c) => <option key={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: 'var(--ink-2)', fontWeight: 500, display: 'block', marginBottom: '5px' }}>หน่วย</label>
-                  <select
-                    value={addTreeForm.unit}
-                    onChange={(e) => setAddTreeForm((f) => ({ ...f, unit: e.target.value }))}
-                    style={{ ...modalInputStyle, width: '100%' }}
-                  >
-                    {['ต้น','กระถาง','กอ','ถุง'].map((u) => <option key={u}>{u}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize: '12px', color: 'var(--ink-2)', fontWeight: 500, display: 'block', marginBottom: '5px' }}>ราคา (บาท) *</label>
-                <input
-                  type="number"
-                  value={addTreeForm.price}
-                  onChange={(e) => setAddTreeForm((f) => ({ ...f, price: e.target.value }))}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddTree(); }}
-                  placeholder="0"
-                  min="0"
-                  style={{ ...modalInputStyle, width: '100%' }}
-                />
-              </div>
-              {addTreeError && (
-                <div style={{ fontSize: '13px', color: '#DC2626', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '7px', padding: '9px 12px' }}>
-                  {addTreeError}
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div style={{ display: 'flex', gap: '8px', padding: '12px 20px 18px', borderTop: '1px solid var(--rule-soft)' }}>
-              <ModalBtn onClick={() => setShowAddTree(false)}>ยกเลิก</ModalBtn>
-              <ModalBtn primary onClick={handleAddTree} disabled={addTreeSaving}>
-                {addTreeSaving ? 'กำลังบันทึก...' : '+ เพิ่มต้นไม้'}
-              </ModalBtn>
-            </div>
-          </div>
-        </div>
-      )}
-
       <style>{`
         @keyframes rsPop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -1007,7 +897,7 @@ function PayIcon({ kind }: { kind: 'cash' | 'transfer' }) {
 
 function SummaryRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '16px' }}>
       <span style={{ color: 'var(--ink-3)' }}>{label}</span>
       <span style={{ color: 'var(--ink)', fontWeight: bold ? 700 : 500 }}>{value}</span>
     </div>
@@ -1024,7 +914,7 @@ function ModalBtn({ onClick, children, primary, disabled }: { onClick?: () => vo
         border: primary ? '1px solid var(--clay-d)' : '1px solid var(--rule)',
         background: primary ? 'linear-gradient(180deg, var(--clay) 0%, var(--clay-d) 100%)' : '#fff',
         color: primary ? '#fff' : 'var(--ink)',
-        fontSize: '13.5px', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer',
+        fontSize: '16.5px', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
         fontWeight: 500, transition: 'all 0.15s',
         boxShadow: primary ? '0 1px 0 rgba(255,255,255,0.2) inset, 0 2px 6px rgba(62,122,58,0.32)' : 'none',
@@ -1076,7 +966,7 @@ function ActionBtn({
         color: ghost ? 'rgba(251,245,232,0.75)' : 'var(--ink-2)',
         padding: '8px 14px', borderRadius: '8px',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 500,
+        fontFamily: 'var(--font-ui)', fontSize: '16px', fontWeight: 500,
         display: 'inline-flex', alignItems: 'center', gap: '6px',
         transition: 'all 0.15s', whiteSpace: 'nowrap',
         backdropFilter: 'blur(6px)',
@@ -1093,7 +983,7 @@ function ActionBtn({
 function SettingsField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-      <label style={{ fontSize: '12px', color: 'var(--ink-2)', fontWeight: 500 }}>{label}</label>
+      <label style={{ fontSize: '15px', color: 'var(--ink-2)', fontWeight: 500 }}>{label}</label>
       {children}
     </div>
   );
@@ -1101,7 +991,7 @@ function SettingsField({ label, children }: { label: string; children: React.Rea
 
 const modalInputStyle: React.CSSProperties = {
   appearance: 'none', border: '1px solid var(--rule)', borderRadius: '7px',
-  padding: '9px 11px', fontFamily: 'var(--font-ui)', fontSize: '13.5px',
+  padding: '9px 11px', fontFamily: 'var(--font-ui)', fontSize: '16.5px',
   color: 'var(--ink)', background: '#fff', outline: 'none', width: '100%',
   transition: 'border-color 0.15s, box-shadow 0.15s',
 };

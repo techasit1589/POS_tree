@@ -162,16 +162,16 @@ export default function TreesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-gray-700 flex items-center gap-2">
-            <TreePine size={20} className="text-forest-600" /> รายการต้นไม้ในระบบ
+          <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+            <TreePine size={22} className="text-forest-600" /> รายการต้นไม้ในระบบ
           </h2>
-          <p className="text-sm text-gray-400 mt-0.5">{trees.length} รายการ</p>
+          <p className="text-base text-gray-400 mt-0.5">{trees.length} รายการ</p>
         </div>
         <button
           onClick={() => { setShowAddModal(true); setAddForm(emptyForm()); setAddError(null); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-sm font-semibold rounded-xl transition"
+          className="flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-base font-semibold rounded-xl transition"
         >
-          <Plus size={16} /> เพิ่มต้นไม้ใหม่
+          <Plus size={18} /> เพิ่มต้นไม้ใหม่
         </button>
       </div>
 
@@ -179,12 +179,12 @@ export default function TreesPage() {
       <div className="bg-white rounded-xl border border-gray-100 p-4 flex flex-wrap gap-4 items-center">
         {/* Search */}
         <div className="relative flex-1 min-w-48">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาชื่อ, หมวดหมู่..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>
         {/* Category filter */}
@@ -193,7 +193,7 @@ export default function TreesPage() {
             <button
               key={c}
               onClick={() => setFilterCat(c)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 filterCat === c ? 'bg-forest-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-forest-100'
               }`}
             >
@@ -204,20 +204,20 @@ export default function TreesPage() {
         {!hasLoaded ? (
           <button
             onClick={load}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-forest-600 text-white rounded-lg text-xs font-medium hover:bg-forest-700 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-forest-600 text-white rounded-lg text-sm font-medium hover:bg-forest-700 transition"
           >
-            <RefreshCw size={13} /> โหลดรายการ
+            <RefreshCw size={14} /> โหลดรายการ
           </button>
         ) : (
           <button onClick={load} className="text-gray-400 hover:text-forest-600 transition" title="รีเฟรช">
-            <RefreshCw size={16} />
+            <RefreshCw size={18} />
           </button>
         )}
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 text-sm">{error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 text-base">{error}</div>
       )}
 
       {/* Table */}
@@ -225,17 +225,17 @@ export default function TreesPage() {
         {loading ? (
           <div className="text-center py-16 text-gray-400">
             <RefreshCw size={32} className="mx-auto mb-2 animate-spin opacity-40" />
-            <p className="text-sm">กำลังโหลด...</p>
+            <p className="text-base">กำลังโหลด...</p>
           </div>
         ) : !hasLoaded ? (
           <div className="text-center py-16 text-gray-400">
             <TreePine size={48} className="mx-auto mb-3 opacity-30" />
-            <p className="text-sm mb-3">กดปุ่ม "โหลดรายการ" เพื่อดูต้นไม้ทั้งหมด</p>
+            <p className="text-base mb-3">กดปุ่ม "โหลดรายการ" เพื่อดูต้นไม้ทั้งหมด</p>
             <button
               onClick={load}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-forest-600 text-white rounded-lg text-sm font-medium hover:bg-forest-700 transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-forest-600 text-white rounded-lg text-base font-medium hover:bg-forest-700 transition"
             >
-              <RefreshCw size={14} /> โหลดรายการต้นไม้
+              <RefreshCw size={16} /> โหลดรายการต้นไม้
             </button>
           </div>
         ) : filtered.length === 0 ? (
@@ -244,8 +244,8 @@ export default function TreesPage() {
             <p>ไม่พบรายการ</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+          <table className="w-full text-base">
+            <thead className="bg-gray-50 text-sm text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3">ชื่อต้นไม้</th>
                 <th className="text-left px-4 py-3 hidden md:table-cell">หมวดหมู่</th>
@@ -257,13 +257,13 @@ export default function TreesPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map((tree) => (
-                <tr key={tree.id} className="hover:bg-gray-50 group">
+                <tr key={tree.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-800">{tree.name}</p>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     {tree.category && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[tree.category] || CATEGORY_COLORS['อื่นๆ']}`}>
+                      <span className={`text-sm px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[tree.category] || CATEGORY_COLORS['อื่นๆ']}`}>
                         {tree.category}
                       </span>
                     )}
@@ -274,24 +274,24 @@ export default function TreesPage() {
                   <td className="px-4 py-3 text-center text-gray-500 hidden md:table-cell">
                     {tree.unit || 'ต้น'}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs hidden lg:table-cell max-w-xs truncate">
+                  <td className="px-4 py-3 text-gray-400 text-sm hidden lg:table-cell max-w-xs truncate">
                     {tree.description || '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEdit(tree)}
                         className="p-1.5 text-blue-500 hover:bg-blue-100 rounded-lg"
                         title="แก้ไข"
                       >
-                        <Pencil size={15} />
+                        <Pencil size={18} />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(tree)}
                         className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg"
                         title="ลบ"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -308,73 +308,73 @@ export default function TreesPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                <Pencil size={16} className="text-blue-500" /> แก้ไขต้นไม้
+                <Pencil size={18} className="text-blue-500" /> แก้ไขต้นไม้
               </h3>
-              <button onClick={closeEdit} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+              <button onClick={closeEdit} className="text-gray-400 hover:text-gray-600"><X size={22} /></button>
             </div>
             <div className="px-6 py-5 space-y-3">
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">ชื่อต้นไม้ *</label>
+                <label className="text-sm font-medium text-gray-600 mb-1 block">ชื่อต้นไม้ *</label>
                 <input
                   autoFocus
                   value={editForm.name}
                   onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">หมวดหมู่</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">หมวดหมู่</label>
                   <select
                     value={editForm.category}
                     onChange={(e) => setEditForm((f) => ({ ...f, category: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
                   >
                     {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">หน่วย</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">หน่วย</label>
                   <select
                     value={editForm.unit}
                     onChange={(e) => setEditForm((f) => ({ ...f, unit: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
                   >
                     {UNITS.map((u) => <option key={u}>{u}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">ราคา (บาท) *</label>
+                <label className="text-sm font-medium text-gray-600 mb-1 block">ราคา (บาท) *</label>
                 <input
                   type="number"
                   value={editForm.price}
                   onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
+                <label className="text-sm font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
                 <input
                   value={editForm.description}
                   onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="รายละเอียดเพิ่มเติม"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
               </div>
-              {editError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{editError}</p>}
+              {editError && <p className="text-base text-red-600 bg-red-50 px-3 py-2 rounded-lg">{editError}</p>}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
-              <button onClick={closeEdit} className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm hover:bg-gray-200 font-medium">
+              <button onClick={closeEdit} className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl text-base hover:bg-gray-200 font-medium">
                 ยกเลิก
               </button>
               <button
                 onClick={saveEdit}
                 disabled={editSaving}
-                className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 flex items-center gap-2"
+                className="px-5 py-2 bg-blue-600 text-white rounded-xl text-base font-semibold hover:bg-blue-700 disabled:opacity-60 flex items-center gap-2"
               >
-                <Check size={15} /> {editSaving ? 'กำลังบันทึก...' : 'บันทึก'}
+                <Check size={16} /> {editSaving ? 'กำลังบันทึก...' : 'บันทึก'}
               </button>
             </div>
           </div>
@@ -399,80 +399,80 @@ export default function TreesPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                <Plus size={18} className="text-forest-600" /> เพิ่มต้นไม้ใหม่
+                <Plus size={20} className="text-forest-600" /> เพิ่มต้นไม้ใหม่
               </h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X size={20} />
+                <X size={22} />
               </button>
             </div>
             <div className="px-6 py-5 space-y-3">
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">ชื่อต้นไม้ *</label>
+                <label className="text-sm font-medium text-gray-600 mb-1 block">ชื่อต้นไม้ *</label>
                 <input
                   value={addForm.name}
                   onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="เช่น ต้นมะม่วง"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                   autoFocus
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">หมวดหมู่</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">หมวดหมู่</label>
                   <select
                     value={addForm.category}
                     onChange={(e) => setAddForm((f) => ({ ...f, category: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
                   >
                     {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">หน่วย</label>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">หน่วย</label>
                   <select
                     value={addForm.unit}
                     onChange={(e) => setAddForm((f) => ({ ...f, unit: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 bg-white"
                   >
                     {UNITS.map((u) => <option key={u}>{u}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">ราคา (บาท) *</label>
+                <label className="text-sm font-medium text-gray-600 mb-1 block">ราคา (บาท) *</label>
                 <input
                   type="number"
                   value={addForm.price}
                   onChange={(e) => setAddForm((f) => ({ ...f, price: e.target.value }))}
                   placeholder="0.00"
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
+                <label className="text-sm font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
                 <input
                   value={addForm.description}
                   onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="รายละเอียดเพิ่มเติม"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
               </div>
-              {addError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{addError}</p>}
+              {addError && <p className="text-base text-red-600 bg-red-50 px-3 py-2 rounded-lg">{addError}</p>}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm hover:bg-gray-200 font-medium"
+                className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl text-base hover:bg-gray-200 font-medium"
               >
                 ยกเลิก
               </button>
               <button
                 onClick={handleAdd}
                 disabled={addSaving}
-                className="px-5 py-2 bg-forest-600 text-white rounded-xl text-sm font-semibold hover:bg-forest-700 disabled:opacity-60 flex items-center gap-2"
+                className="px-5 py-2 bg-forest-600 text-white rounded-xl text-base font-semibold hover:bg-forest-700 disabled:opacity-60 flex items-center gap-2"
               >
-                <Plus size={15} /> {addSaving ? 'กำลังเพิ่ม...' : 'เพิ่มต้นไม้'}
+                <Plus size={16} /> {addSaving ? 'กำลังเพิ่ม...' : 'เพิ่มต้นไม้'}
               </button>
             </div>
           </div>
