@@ -22,9 +22,9 @@ export class EscPos {
   private buf: number[] = [];
 
   // ── Initialization ──
-  init(): this {
-    this.push(ESC, 0x40);        // Reset printer
-    this.push(ESC, 0x74, 0x14);  // Codepage 20 = TIS-620 (Thai)
+  init(codepage = 0x14): this {
+    this.push(ESC, 0x40);             // Reset printer
+    this.push(ESC, 0x74, codepage);   // Codepage for Thai (default: 20 = TIS-620)
     return this;
   }
 
@@ -125,10 +125,11 @@ export function buildReceipt(opts: {
   total: number;
   note?: string;
   paperSize: PaperSize;
+  codepage?: number;
 }): Uint8Array {
   const cols = PAPER_CHARS[opts.paperSize] ?? 32;
   const sep = '-'.repeat(cols);
-  const doc = new EscPos().init();
+  const doc = new EscPos().init(opts.codepage);
 
   // ── Header ──
   doc.center();
