@@ -163,7 +163,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
                     </span>
                   )}
                   <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontWeight: 600 }}>
-                    ฿{Number(m.price).toLocaleString('th-TH')}
+                    ฿{Number(priceMode === 'wholesale' ? (m.priceWholesale ?? m.price) : m.price).toLocaleString('th-TH')}
                   </span>
                 </div>
               </div>
@@ -320,7 +320,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
                     background: i === activeIdx ? 'rgba(62,122,58,0.08)' : 'transparent',
                   }}>
                   <span style={{ fontSize: '18px' }}>{m.name}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontSize: '14px', fontWeight: 600 }}>฿{Number(m.price).toLocaleString('th-TH')}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontSize: '14px', fontWeight: 600 }}>฿{Number(priceMode === 'wholesale' ? (m.priceWholesale ?? m.price) : m.price).toLocaleString('th-TH')}</span>
                 </div>
               ))}
             </div>
