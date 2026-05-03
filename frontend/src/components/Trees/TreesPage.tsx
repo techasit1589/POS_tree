@@ -260,21 +260,21 @@ export default function TreesPage() {
             <p>ไม่พบรายการ</p>
           </div>
         ) : (
-          <table className="w-full text-base">
+          <table className="w-full text-base table-fixed">
             <thead className="bg-gray-50 text-sm text-gray-500 uppercase">
               <tr>
-                <th className="text-left px-4 py-3">ชื่อต้นไม้</th>
-                <th className="text-left px-4 py-3 hidden md:table-cell">หมวดหมู่</th>
-                <th className="text-right px-4 py-3">ปลีก/ส่ง</th>
-                <th className="text-center px-4 py-3 hidden md:table-cell">หน่วย</th>
+                <th className="text-left px-4 py-3 w-2/5">ชื่อต้นไม้</th>
+                <th className="text-left px-4 py-3 hidden md:table-cell w-1/5">หมวดหมู่</th>
+                <th className="text-right px-4 py-3 w-1/5">ปลีก/ส่ง</th>
+                <th className="text-center px-4 py-3 hidden md:table-cell w-16">หน่วย</th>
                 <th className="px-4 py-3 text-center">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map((tree) => (
                 <tr key={tree.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-gray-800">{tree.name}</p>
+                  <td className="px-4 py-3 min-w-0">
+                    <p className="font-medium text-gray-800 truncate" title={tree.name}>{tree.name}</p>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     {tree.category && (
