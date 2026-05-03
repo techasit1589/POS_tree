@@ -187,7 +187,7 @@ export default function TreesPage() {
         </div>
         <button
           onClick={() => { setShowAddModal(true); setAddForm(emptyForm()); setAddError(null); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-base font-semibold rounded-xl transition"
+          className="flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-base font-semibold rounded-xl transition ml-auto"
         >
           <Plus size={18} /> เพิ่มต้นไม้ใหม่
         </button>
