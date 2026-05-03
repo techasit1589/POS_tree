@@ -296,17 +296,19 @@ export default function TreesPage() {
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEdit(tree)}
-                        className="p-1.5 text-blue-500 hover:bg-blue-100 rounded-lg"
+                        className="flex items-center gap-1 px-2.5 py-2 text-blue-500 hover:bg-blue-100 rounded-lg text-sm font-medium"
                         title="แก้ไข"
                       >
-                        <Pencil size={18} />
+                        <Pencil size={16} />
+                        <span>แก้ไข</span>
                       </button>
                       <button
                         onClick={() => setDeleteTarget(tree)}
-                        className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg"
+                        className="flex items-center gap-1 px-2.5 py-2 text-red-500 hover:bg-red-100 rounded-lg text-sm font-medium"
                         title="ลบ"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
+                        <span>ลบ</span>
                       </button>
                     </div>
                   </td>
