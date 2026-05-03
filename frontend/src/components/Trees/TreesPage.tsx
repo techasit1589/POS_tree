@@ -219,18 +219,12 @@ export default function TreesPage() {
             </button>
           ))}
         </div>
-        {!hasLoaded ? (
-          <button
-            onClick={load}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-forest-600 text-white rounded-lg text-sm font-medium hover:bg-forest-700 transition"
-          >
-            <RefreshCw size={14} /> โหลดรายการ
-          </button>
-        ) : (
-          <button onClick={load} className="text-gray-400 hover:text-forest-600 transition" title="รีเฟรช">
-            <RefreshCw size={18} />
-          </button>
-        )}
+        <button
+          onClick={load}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-forest-600 text-white rounded-lg text-sm font-medium hover:bg-forest-700 transition"
+        >
+          <RefreshCw size={14} /> โหลดรายการ
+        </button>
       </div>
 
       {/* Error */}
