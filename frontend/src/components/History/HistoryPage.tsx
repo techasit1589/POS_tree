@@ -98,7 +98,7 @@ function HistBtn({ onClick, icon, children, disabled, title }: {
         background: disabled ? 'rgba(200,210,190,0.4)' : 'rgba(251,245,232,0.92)',
         border: '1px solid rgba(191,207,166,0.7)',
         color: disabled ? 'var(--ink-4)' : 'var(--ink-2)',
-        fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 500,
+        fontFamily: 'var(--font-ui)', fontSize: '16px', fontWeight: 500,
         cursor: disabled ? 'not-allowed' : 'pointer',
         boxShadow: disabled ? 'none' : '0 1px 0 rgba(255,255,255,0.6) inset',
         backdropFilter: 'blur(6px)',
@@ -362,12 +362,12 @@ export default function HistoryPage() {
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-700 flex items-center gap-2">
-          <History size={20} className="text-forest-600" /> ประวัติการขาย
+        <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+          <History size={22} className="text-forest-600" /> ประวัติการขาย
         </h2>
         {hasSearched && (
-          <button onClick={load} className="flex items-center gap-1.5 text-sm text-forest-600 hover:text-forest-800">
-            <RefreshCw size={15} /> รีเฟรช
+          <button onClick={load} className="flex items-center gap-1.5 text-base text-forest-600 hover:text-forest-800">
+            <RefreshCw size={16} /> รีเฟรช
           </button>
         )}
       </div>
@@ -380,31 +380,31 @@ export default function HistoryPage() {
             <input value={search} onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleSearchKey}
               placeholder="ค้นหาชื่อลูกค้า หรือเลขที่ใบเสร็จ... (Enter)"
-              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+              className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
           </div>
           <button onClick={load}
-            className="flex items-center gap-1.5 px-4 py-2 bg-forest-600 hover:bg-forest-700 text-white text-sm font-medium rounded-lg transition shrink-0">
-            <Search size={14} /> ค้นหา
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-base font-medium rounded-lg transition shrink-0">
+            <Search size={16} /> ค้นหา
           </button>
           <div className="flex items-center gap-2 flex-wrap">
-            <Calendar size={15} className="text-gray-400 shrink-0" />
+            <Calendar size={16} className="text-gray-400 shrink-0" />
             <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="px-2 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
-            <span className="text-gray-400 text-sm">ถึง</span>
+              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
+            <span className="text-gray-400 text-base">ถึง</span>
             <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="px-2 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
           </div>
           {hasFilter && (
-            <button onClick={clearFilters} className="flex items-center gap-1 text-sm text-red-400 hover:text-red-600">
-              <X size={14} /> ล้าง
+            <button onClick={clearFilters} className="flex items-center gap-1 text-base text-red-400 hover:text-red-600">
+              <X size={16} /> ล้าง
             </button>
           )}
         </div>
         <div className="flex gap-2 flex-wrap">
-          <span className="text-xs text-gray-400 self-center">ดูด่วน:</span>
+          <span className="text-sm text-gray-400 self-center">ดูด่วน:</span>
           {[['วันนี้', setToday], ['เดือนนี้', setThisMonth], ['ปีนี้', setThisYear]].map(([label, fn]) => (
             <button key={label as string} onClick={fn as () => void}
-              className="px-3 py-1 bg-forest-50 text-forest-700 rounded-full text-xs font-medium hover:bg-forest-100 transition">
+              className="px-4 py-1.5 bg-forest-50 text-forest-700 rounded-full text-sm font-medium hover:bg-forest-100 transition">
               {label as string}
             </button>
           ))}
@@ -414,11 +414,11 @@ export default function HistoryPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-xs text-gray-500">จำนวนใบเสร็จ{hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}</p>
+          <p className="text-sm text-gray-500">จำนวนใบเสร็จ{hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}</p>
           <p className="text-3xl font-bold text-forest-700 mt-1">{filtered.length}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-xs text-gray-500">ยอดขายรวม{hasFilter ? ' (ที่กรอง)' : ''}</p>
+          <p className="text-sm text-gray-500">ยอดขายรวม{hasFilter ? ' (ที่กรอง)' : ''}</p>
           <p className="text-3xl font-bold text-forest-700 mt-1">฿{fmt(grandTotal)}</p>
         </div>
       </div>
@@ -427,29 +427,29 @@ export default function HistoryPage() {
       {filtered.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center gap-1 px-4 pt-3 border-b border-gray-100">
-            <span className="text-xs text-gray-500 mr-2">สรุปตาม:</span>
+            <span className="text-sm text-gray-500 mr-2">สรุปตาม:</span>
             {(['day','month','year'] as SummaryTab[]).map((k) => (
               <button key={k} onClick={() => setSummaryTab(k)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-4 py-2.5 text-base font-medium border-b-2 transition-colors ${
                   summaryTab === k ? 'border-forest-600 text-forest-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                 {k === 'day' ? 'รายวัน' : k === 'month' ? 'รายเดือน' : 'รายปี'}
               </button>
             ))}
           </div>
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+          <table className="w-full text-base">
+            <thead className="bg-gray-50 text-sm text-gray-500 uppercase">
               <tr>
-                <th className="text-left px-4 py-2">ช่วงเวลา</th>
-                <th className="text-center px-4 py-2">จำนวนบิล</th>
-                <th className="text-right px-4 py-2">ยอดรวม</th>
+                <th className="text-left px-4 py-2.5">ช่วงเวลา</th>
+                <th className="text-center px-4 py-2.5">จำนวนบิล</th>
+                <th className="text-right px-4 py-2.5">ยอดรวม</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {summaryGroups.map((g) => (
                 <tr key={g.label} className="hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-medium text-gray-700">{g.label}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-500">{g.count} บิล</td>
-                  <td className="px-4 py-2.5 text-right font-semibold text-forest-700">฿{fmt(g.total)}</td>
+                  <td className="px-4 py-3 font-medium text-gray-700">{g.label}</td>
+                  <td className="px-4 py-3 text-center text-gray-500">{g.count} บิล</td>
+                  <td className="px-4 py-3 text-right font-semibold text-forest-700">฿{fmt(g.total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -459,17 +459,17 @@ export default function HistoryPage() {
 
       {/* Orders list */}
       <div>
-        <p className="text-sm font-semibold text-gray-600 mb-2">รายการทั้งหมด ({filtered.length})</p>
+        <p className="text-base font-semibold text-gray-600 mb-2">รายการทั้งหมด ({filtered.length})</p>
         {!hasSearched ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
             <Search size={40} className="mx-auto mb-3 opacity-30" />
-            <p className="text-sm font-medium">กดปุ่ม "ค้นหา" หรือกด Enter เพื่อดูประวัติ</p>
-            <p className="text-xs mt-1">หรือเลือกช่วงเวลาจากปุ่มดูด่วนด้านบน</p>
+            <p className="text-base font-medium">กดปุ่ม "ค้นหา" หรือกด Enter เพื่อดูประวัติ</p>
+            <p className="text-sm mt-1">หรือเลือกช่วงเวลาจากปุ่มดูด่วนด้านบน</p>
           </div>
         ) : loading ? (
           <div className="text-center py-16 text-gray-400">
             <RefreshCw size={32} className="mx-auto mb-2 animate-spin opacity-40" />
-            <p className="text-sm">กำลังโหลด...</p>
+            <p className="text-base">กำลังโหลด...</p>
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-500 text-sm bg-red-50 rounded-xl border border-red-200 p-6">{error}</div>
@@ -489,16 +489,16 @@ export default function HistoryPage() {
                     className="flex-1 px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition text-left min-w-0"
                   >
                     <div className="flex items-center gap-3 flex-wrap min-w-0">
-                      <span className="font-mono text-sm font-semibold text-forest-700 shrink-0">{order.receiptNumber}</span>
+                      <span className="font-mono text-base font-semibold text-forest-700 shrink-0">{order.receiptNumber}</span>
                       {order.customerName && (
-                        <span className="flex items-center gap-1 text-sm text-gray-700 truncate">
-                          <User size={13} className="text-gray-400 shrink-0" /> {order.customerName}
+                        <span className="flex items-center gap-1 text-base text-gray-700 truncate">
+                          <User size={15} className="text-gray-400 shrink-0" /> {order.customerName}
                         </span>
                       )}
-                      <span className="text-xs text-gray-400 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
+                      <span className="text-sm text-gray-400 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <span className="font-bold text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
+                      <span className="font-bold text-lg text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
                       {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                     </div>
                   </button>
@@ -532,39 +532,39 @@ export default function HistoryPage() {
                 {/* Expanded detail */}
                 {expanded === order.id && (
                   <div className="px-4 pb-4 border-t border-gray-100">
-                    <p className="text-xs text-gray-400 mt-2 mb-1 sm:hidden">{toLocalDateStr(order.createdAt)}</p>
-                    <table className="w-full text-sm mt-2">
+                    <p className="text-sm text-gray-400 mt-2 mb-1 sm:hidden">{toLocalDateStr(order.createdAt)}</p>
+                    <table className="w-full text-base mt-2">
                       <thead>
-                        <tr className="text-xs text-gray-400 border-b">
-                          <th className="text-left py-1">รายการ</th>
-                          <th className="text-center py-1">จำนวน</th>
-                          <th className="text-right py-1">ราคา/หน่วย</th>
-                          <th className="text-right py-1">รวม</th>
+                        <tr className="text-sm text-gray-400 border-b">
+                          <th className="text-left py-1.5">รายการ</th>
+                          <th className="text-center py-1.5">จำนวน</th>
+                          <th className="text-right py-1.5">ราคา/หน่วย</th>
+                          <th className="text-right py-1.5">รวม</th>
                         </tr>
                       </thead>
                       <tbody>
                         {order.items?.map((item) => (
                           <tr key={item.id} className="border-b border-gray-50">
-                            <td className="py-1.5 text-gray-700">{item.treeName}</td>
-                            <td className="py-1.5 text-center text-gray-500">{item.quantity}</td>
-                            <td className="py-1.5 text-right text-gray-500">฿{fmt(Number(item.unitPrice))}</td>
-                            <td className="py-1.5 text-right font-medium text-gray-700">฿{fmt(Number(item.subtotal))}</td>
+                            <td className="py-2 text-gray-700">{item.treeName}</td>
+                            <td className="py-2 text-center text-gray-500">{item.quantity}</td>
+                            <td className="py-2 text-right text-gray-500">฿{fmt(Number(item.unitPrice))}</td>
+                            <td className="py-2 text-right font-medium text-gray-700">฿{fmt(Number(item.subtotal))}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                     {(order.customerPhone) && (
-                      <p className="mt-2 text-xs text-gray-500">
+                      <p className="mt-2 text-sm text-gray-500">
                         📞 {order.customerPhone}
                       </p>
                     )}
-                    {order.note && <p className="mt-2 text-xs text-gray-400 italic">หมายเหตุ: {order.note}</p>}
+                    {order.note && <p className="mt-2 text-sm text-gray-400 italic">หมายเหตุ: {order.note}</p>}
 
                     {/* Quick print buttons in expanded row */}
                     <div className="mt-3 pt-3 border-t border-dashed border-gray-100 flex gap-2 flex-wrap">
                       <button onClick={() => openPrint(order)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 text-forest-700 rounded-lg text-xs font-medium hover:bg-forest-100 transition">
-                        <ReceiptIcon size={13} /> ดู / พิมพ์ใบเสร็จ
+                        className="flex items-center gap-1.5 px-4 py-2 bg-forest-50 text-forest-700 rounded-lg text-sm font-medium hover:bg-forest-100 transition">
+                        <ReceiptIcon size={15} /> ดู / พิมพ์ใบเสร็จ
                       </button>
                     </div>
                   </div>
