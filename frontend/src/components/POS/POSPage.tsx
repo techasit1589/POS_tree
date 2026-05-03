@@ -364,12 +364,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   return (
     <>
       {/* Mobile tab switcher */}
-      <div style={{
-        display: isMobile ? 'flex' : 'none',
-        background: 'var(--cream-0)', borderBottom: '1px solid var(--rule-soft)',
-        padding: '8px 12px', gap: '6px',
-        position: 'sticky', top: 0, zIndex: 15,
-      }}>
+      <div className="flex md:hidden bg-[var(--cream-0)] border-b border-[var(--rule-soft)] px-3 py-2 gap-1.5 sticky top-0 z-[15]">
         {([['form', 'กรอกข้อมูล'], ['preview', 'ดูใบเสร็จ']] as const).map(([tab, label]) => {
           // ล็อคแท็บ "กรอกข้อมูล" หลัง save จนกว่าจะกด "ออเดอร์ใหม่"
           // ป้องกัน bug PDF/บันทึกรูปได้ไฟล์เปล่าเมื่อ preview pane ถูก display:none
@@ -379,26 +374,18 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               key={tab}
               onClick={() => setMobileTab(tab)}
               disabled={locked}
-              style={{
-                flex: 1, padding: '10px 12px', borderRadius: '8px',
-                border: mobileTab === tab ? 'none' : '1px solid transparent',
-                background: mobileTab === tab ? 'var(--clay)' : 'transparent',
-                color: mobileTab === tab ? 'var(--cream-0)' : 'var(--ink-3)',
-                fontFamily: 'var(--font-ui)', fontSize: '16px', fontWeight: 500,
-                cursor: locked ? 'not-allowed' : 'pointer',
-                opacity: locked ? 0.4 : 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                boxShadow: mobileTab === tab ? '0 2px 6px rgba(62,122,58,0.28)' : 'none',
-              }}
+              className={`flex-1 px-3 py-2.5 rounded-lg flex items-center justify-center gap-1.5 font-[var(--font-ui)] text-[16px] font-medium transition-all
+                ${mobileTab === tab
+                  ? 'bg-[var(--clay)] text-[var(--cream-0)] shadow-[0_2px_6px_rgba(62,122,58,0.28)] border-0'
+                  : 'bg-transparent text-[var(--ink-3)] border border-transparent'}
+                ${locked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
             >
               {label}
               {tab === 'preview' && (
-                <span style={{
-                  background: mobileTab === tab ? 'rgba(255,255,255,0.25)' : 'var(--cream-2)',
-                  color: mobileTab === tab ? 'inherit' : 'var(--ink-3)',
-                  padding: '1px 6px', borderRadius: '8px', fontSize: '14px',
-                  fontFamily: 'var(--font-mono)', marginLeft: '4px',
-                }}>{validItemCount}</span>
+                <span className={`px-1.5 py-px rounded-full text-[14px] font-[var(--font-mono)] ml-1
+                  ${mobileTab === tab ? 'bg-[rgba(255,255,255,0.25)]' : 'bg-[var(--cream-2)] text-[var(--ink-3)]'}`}>
+                  {validItemCount}
+                </span>
               )}
             </button>
           );
