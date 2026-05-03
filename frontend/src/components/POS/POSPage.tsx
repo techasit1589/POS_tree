@@ -464,8 +464,8 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
           {/* 02 Line Items */}
           <div style={s.section}>
-            <div style={{ ...s.sectionHead, justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <div style={{ ...s.sectionHead, justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={s.sectionNum}>02</div>
                 <div>
                   <div style={s.sectionTitle}>รายการสินค้า</div>
