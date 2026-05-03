@@ -267,7 +267,7 @@ export default function TreesPage() {
               <tr>
                 <th className="text-left px-4 py-3 w-2/5">ชื่อต้นไม้</th>
                 <th className="text-left px-4 py-3 hidden md:table-cell w-1/5">หมวดหมู่</th>
-                <th className="text-right px-4 py-3 w-1/5">ปลีก/ส่ง</th>
+                <th className="text-right px-4 py-3 w-1/5 whitespace-nowrap">ปลีก/ส่ง</th>
                 <th className="text-center px-4 py-3 hidden md:table-cell w-16">หน่วย</th>
                 <th className="px-4 py-3 text-center">จัดการ</th>
               </tr>
