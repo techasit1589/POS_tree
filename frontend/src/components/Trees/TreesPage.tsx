@@ -16,16 +16,25 @@ const CATEGORY_COLORS: Record<string, string> = {
   'อื่นๆ': 'bg-gray-100 text-gray-600',
 };
 
+function fmtPrice(n: number | undefined | null): string {
+  if (n === undefined || n === null) return '—';
+  const v = Number(n);
+  return v % 1 === 0
+    ? v.toLocaleString('th-TH')
+    : v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 type FormState = {
   name: string;
   category: string;
   price: string;
+  priceWholesale: string;
   unit: string;
   description: string;
 };
 
 const emptyForm = (): FormState => ({
-  name: '', category: 'ไม้ผล', price: '', unit: 'ต้น', description: '',
+  name: '', category: 'ไม้ผล', price: '', priceWholesale: '', unit: 'ต้น', description: '',
 });
 
 export default function TreesPage() {
@@ -80,7 +89,11 @@ export default function TreesPage() {
   const handleAdd = async () => {
     const price = parseFloat(addForm.price);
     if (!addForm.name.trim()) return setAddError('กรุณาใส่ชื่อต้นไม้');
-    if (isNaN(price) || price <= 0) return setAddError('กรุณาใส่ราคาที่ถูกต้อง');
+    if (isNaN(price) || price <= 0) return setAddError('กรุณาใส่ราคาปลีกที่ถูกต้อง');
+    const priceWholesale = addForm.priceWholesale ? parseFloat(addForm.priceWholesale) : undefined;
+    if (priceWholesale !== undefined && (isNaN(priceWholesale) || priceWholesale < 0)) {
+      return setAddError('กรุณาใส่ราคาส่งที่ถูกต้อง');
+    }
     setAddSaving(true);
     setAddError(null);
     try {
@@ -88,6 +101,7 @@ export default function TreesPage() {
         name: addForm.name.trim(),
         category: addForm.category,
         price,
+        priceWholesale,
         unit: addForm.unit,
         description: addForm.description.trim() || undefined,
       } as Omit<Tree, 'id'>);
@@ -111,6 +125,7 @@ export default function TreesPage() {
       name: tree.name,
       category: tree.category || 'อื่นๆ',
       price: String(Number(tree.price)),
+      priceWholesale: tree.priceWholesale !== undefined ? String(Number(tree.priceWholesale)) : '',
       unit: tree.unit || 'ต้น',
       description: tree.description || '',
     });
@@ -122,7 +137,11 @@ export default function TreesPage() {
     if (!editTarget) return;
     const price = parseFloat(editForm.price);
     if (!editForm.name.trim()) return setEditError('กรุณาใส่ชื่อต้นไม้');
-    if (isNaN(price) || price <= 0) return setEditError('กรุณาใส่ราคาที่ถูกต้อง');
+    if (isNaN(price) || price <= 0) return setEditError('กรุณาใส่ราคาปลีกที่ถูกต้อง');
+    const priceWholesale = editForm.priceWholesale ? parseFloat(editForm.priceWholesale) : undefined;
+    if (priceWholesale !== undefined && (isNaN(priceWholesale) || priceWholesale < 0)) {
+      return setEditError('กรุณาใส่ราคาส่งที่ถูกต้อง');
+    }
     setEditSaving(true);
     setEditError(null);
     try {
@@ -130,6 +149,7 @@ export default function TreesPage() {
         name: editForm.name.trim(),
         category: editForm.category,
         price,
+        priceWholesale,
         unit: editForm.unit,
         description: editForm.description.trim() || undefined,
       });
@@ -249,7 +269,8 @@ export default function TreesPage() {
               <tr>
                 <th className="text-left px-4 py-3">ชื่อต้นไม้</th>
                 <th className="text-left px-4 py-3 hidden md:table-cell">หมวดหมู่</th>
-                <th className="text-right px-4 py-3">ราคา</th>
+                <th className="text-right px-4 py-3">ราคาปลีก</th>
+                <th className="text-right px-4 py-3 hidden sm:table-cell">ราคาส่ง</th>
                 <th className="text-center px-4 py-3 hidden md:table-cell">หน่วย</th>
                 <th className="text-left px-4 py-3 hidden lg:table-cell">คำอธิบาย</th>
                 <th className="px-4 py-3 text-right">จัดการ</th>
@@ -269,7 +290,10 @@ export default function TreesPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-forest-700">
-                    ฿{Number(tree.price).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                    {fmtPrice(tree.price)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-semibold text-blue-600 hidden sm:table-cell">
+                    {fmtPrice(tree.priceWholesale)}
                   </td>
                   <td className="px-4 py-3 text-center text-gray-500 hidden md:table-cell">
                     {tree.unit || 'ต้น'}
@@ -344,15 +368,28 @@ export default function TreesPage() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">ราคา (บาท) *</label>
-                <input
-                  type="number"
-                  value={editForm.price}
-                  onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาปลีก (บาท) *</label>
+                  <input
+                    type="number"
+                    value={editForm.price}
+                    onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาส่ง (บาท)</label>
+                  <input
+                    type="number"
+                    value={editForm.priceWholesale}
+                    onChange={(e) => setEditForm((f) => ({ ...f, priceWholesale: e.target.value }))}
+                    placeholder="ไม่บังคับ"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
@@ -438,16 +475,29 @@ export default function TreesPage() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">ราคา (บาท) *</label>
-                <input
-                  type="number"
-                  value={addForm.price}
-                  onChange={(e) => setAddForm((f) => ({ ...f, price: e.target.value }))}
-                  placeholder="0.00"
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาปลีก (บาท) *</label>
+                  <input
+                    type="number"
+                    value={addForm.price}
+                    onChange={(e) => setAddForm((f) => ({ ...f, price: e.target.value }))}
+                    placeholder="0"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาส่ง (บาท)</label>
+                  <input
+                    type="number"
+                    value={addForm.priceWholesale}
+                    onChange={(e) => setAddForm((f) => ({ ...f, priceWholesale: e.target.value }))}
+                    placeholder="ไม่บังคับ"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
+                  />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
