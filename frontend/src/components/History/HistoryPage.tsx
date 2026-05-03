@@ -386,13 +386,13 @@ export default function HistoryPage() {
             className="flex items-center gap-1.5 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-base font-medium rounded-lg transition shrink-0">
             <Search size={16} /> ค้นหา
           </button>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-nowrap">
             <Calendar size={16} className="text-gray-400 shrink-0" />
             <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
-            <span className="text-gray-400 text-base">ถึง</span>
+              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 min-w-0" />
+            <span className="text-gray-400 text-base shrink-0">ถึง</span>
             <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
+              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 min-w-0" />
           </div>
           {hasFilter && (
             <button onClick={clearFilters} className="flex items-center gap-1 text-base text-red-400 hover:text-red-600">
