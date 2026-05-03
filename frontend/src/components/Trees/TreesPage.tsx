@@ -267,7 +267,7 @@ export default function TreesPage() {
                 <th className="text-left px-4 py-3 hidden md:table-cell">หมวดหมู่</th>
                 <th className="text-right px-4 py-3">ปลีก/ส่ง</th>
                 <th className="text-center px-4 py-3 hidden md:table-cell">หน่วย</th>
-                <th className="px-4 py-3 text-right">จัดการ</th>
+                <th className="px-4 py-3 text-center">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -293,7 +293,7 @@ export default function TreesPage() {
                     {tree.unit || 'ต้น'}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       <button
                         onClick={() => openEdit(tree)}
                         className="flex items-center gap-1 px-2.5 py-2 text-blue-500 hover:bg-blue-100 rounded-lg text-sm font-medium"
