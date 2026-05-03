@@ -210,7 +210,8 @@ export async function getOrders(): Promise<Order[]> {
   const { data, error } = await supabase
     .from('orders')
     .select('*, order_items(*)')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(100);
   if (error) unwrapSupabaseError(error);
   return (data as DbOrder[]).map(toOrder);
 }
