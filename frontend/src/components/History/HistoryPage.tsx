@@ -188,6 +188,33 @@ export default function HistoryPage() {
   const grandTotal = filtered.reduce((s, o) => s + Number(o.totalAmount), 0);
   const hasFilter  = search || dateFrom || dateTo;
   const clearFilters = () => { setSearch(''); setDateFrom(''); setDateTo(''); };
+
+  const exportCSV = () => {
+    const rows: string[] = [
+      ['วันที่', 'เลขที่ใบเสร็จ', 'ชื่อลูกค้า', 'เบอร์โทร', 'วิธีชำระ', 'รายการ', 'ยอดรวม'].join(','),
+    ];
+    filtered.forEach((o) => {
+      const items = o.items.map((i) => `${i.treeName} x${i.quantity}`).join(' / ');
+      const method = o.paymentMethod === 'transfer' ? 'โอน' : 'เงินสด';
+      rows.push([
+        toLocalDateStr(o.createdAt),
+        o.receiptNumber,
+        o.customerName || '',
+        o.customerPhone || '',
+        method,
+        `"${items}"`,
+        Number(o.totalAmount).toFixed(2),
+      ].join(','));
+    });
+    const bom = '﻿'; // UTF-8 BOM for Excel Thai support
+    const blob = new Blob([bom + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders_${isoDate(new Date())}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
   const setToday = () => {
     const t = isoDate(new Date());
     setDateFrom(t); setDateTo(t);
@@ -365,11 +392,18 @@ export default function HistoryPage() {
         <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
           <History size={22} className="text-forest-600" /> ประวัติการขาย
         </h2>
-        {hasSearched && (
-          <button onClick={load} className="flex items-center gap-1.5 text-base text-forest-600 hover:text-forest-800">
-            <RefreshCw size={16} /> รีเฟรช
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {hasSearched && (
+            <button onClick={load} className="flex items-center gap-1.5 text-base text-forest-600 hover:text-forest-800">
+              <RefreshCw size={16} /> รีเฟรช
+            </button>
+          )}
+          {filtered.length > 0 && (
+            <button onClick={exportCSV} className="flex items-center gap-1.5 text-base text-blue-600 hover:text-blue-800">
+              <FileDown size={16} /> Export CSV
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
