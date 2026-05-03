@@ -501,14 +501,14 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 <button
                   onClick={() => setManualPrice((p) => { localStorage.setItem('pos_manual_price', String(!p)); return !p; })}
                   title={manualPrice ? 'ราคาอิสระ: เปิดอยู่ — ราคาจะไม่ถูกดึงจากสต็อก' : 'ราคาอิสระ: ปิดอยู่ — เลือกต้นไม้จะดึงราคามาให้'}
-                  style={{ display: 'none',
+                  style={{
                     appearance: 'none',
                     border: manualPrice ? '1px solid rgba(180,80,30,0.4)' : '1px solid rgba(62,122,58,0.35)',
                     background: manualPrice ? 'rgba(180,80,30,0.08)' : 'rgba(62,122,58,0.08)',
                     color: manualPrice ? '#B6452F' : 'var(--clay-d)',
                     padding: '3px 10px', borderRadius: '7px', cursor: 'pointer',
                     fontFamily: 'var(--font-ui)', fontSize: '15.5px', fontWeight: 500,
-                    display: 'inline-flex', alignItems: 'center', gap: '5px',
+                    display: 'none', alignItems: 'center', gap: '5px',
                     whiteSpace: 'nowrap', transition: 'all 0.15s',
                   }}
                 >
