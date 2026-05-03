@@ -69,6 +69,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const [manualPrice, setManualPrice] = useState(
     () => localStorage.getItem('pos_manual_price') === 'true'
   );
+  const [priceMode, setPriceMode] = useState<'retail' | 'wholesale'>(
+    () => (localStorage.getItem('pos_price_mode') as 'retail' | 'wholesale') || 'retail'
+  );
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [btPrinting, setBtPrinting] = useState(false);
@@ -126,8 +129,8 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const submit = () => {
     const valid = items.filter((i) => i.name && Number(i.qty) > 0);
     if (valid.length === 0) { setShowErrors(true); setError('กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ'); return; }
-    const missingPrice = valid.some((i) => !i.treeId && (!i.price || Number(i.price) <= 0));
-    if (missingPrice) { setShowErrors(true); setError('กรุณาใส่ราคาสำหรับรายการที่ไม่มีในระบบ'); return; }
+    const missingPrice = valid.some((i) => !i.price || Number(i.price) <= 0);
+    if (missingPrice) { setShowErrors(true); setError('กรุณาใส่ราคาสำหรับทุกรายการสินค้า'); return; }
     setShowErrors(false);
     setError(null);
     setShowConfirm(true);
@@ -144,7 +147,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     if (!showErrors) return;
     const valid = items.filter((i) => i.name && Number(i.qty) > 0);
     const hasItems = valid.length > 0;
-    const missingPrice = valid.some((i) => !i.treeId && (!i.price || Number(i.price) <= 0));
+    const missingPrice = valid.some((i) => !i.price || Number(i.price) <= 0);
     if (hasItems && !missingPrice) {
       setShowErrors(false);
       setError(null);
@@ -468,29 +471,57 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   <div style={s.sectionTitle}>รายการสินค้า</div>
                 </div>
               </div>
-              <button
-                onClick={() => setManualPrice((p) => { localStorage.setItem('pos_manual_price', String(!p)); return !p; })}
-                title={manualPrice ? 'ราคาอิสระ: เปิดอยู่ — ราคาจะไม่ถูกดึงจากสต็อก' : 'ราคาอิสระ: ปิดอยู่ — เลือกต้นไม้จะดึงราคามาให้'}
-                style={{
-                  appearance: 'none',
-                  border: manualPrice ? '1px solid rgba(180,80,30,0.4)' : '1px solid rgba(62,122,58,0.35)',
-                  background: manualPrice ? 'rgba(180,80,30,0.08)' : 'rgba(62,122,58,0.08)',
-                  color: manualPrice ? '#B6452F' : 'var(--clay-d)',
-                  padding: '6px 12px', borderRadius: '7px', cursor: 'pointer',
-                  fontFamily: 'var(--font-ui)', fontSize: '15.5px', fontWeight: 500,
-                  display: 'inline-flex', alignItems: 'center', gap: '5px',
-                  whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.15s',
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                  <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
-                  {manualPrice
-                    ? <path d="M5 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    : <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  }
-                </svg>
-                {manualPrice ? 'ราคาอิสระ' : 'ดึงราคา'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                {/* ปลีก/ส่ง toggle */}
+                <div style={{
+                  display: 'flex', border: '1px solid rgba(62,122,58,0.35)',
+                  borderRadius: '7px', overflow: 'hidden',
+                  opacity: manualPrice ? 0.4 : 1,
+                  pointerEvents: manualPrice ? 'none' : undefined,
+                }}>
+                  {(['retail', 'wholesale'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => { setPriceMode(mode); localStorage.setItem('pos_price_mode', mode); }}
+                      style={{
+                        appearance: 'none', border: 'none',
+                        background: priceMode === mode ? 'rgba(62,122,58,0.15)' : 'transparent',
+                        color: priceMode === mode ? 'var(--clay-d)' : 'var(--ink-3)',
+                        padding: '6px 12px', cursor: 'pointer',
+                        fontFamily: 'var(--font-ui)', fontSize: '15.5px',
+                        fontWeight: priceMode === mode ? 600 : 400,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      {mode === 'retail' ? 'ปลีก' : 'ส่ง'}
+                    </button>
+                  ))}
+                </div>
+                {/* ราคาอิสระ toggle */}
+                <button
+                  onClick={() => setManualPrice((p) => { localStorage.setItem('pos_manual_price', String(!p)); return !p; })}
+                  title={manualPrice ? 'ราคาอิสระ: เปิดอยู่ — ราคาจะไม่ถูกดึงจากสต็อก' : 'ราคาอิสระ: ปิดอยู่ — เลือกต้นไม้จะดึงราคามาให้'}
+                  style={{
+                    appearance: 'none',
+                    border: manualPrice ? '1px solid rgba(180,80,30,0.4)' : '1px solid rgba(62,122,58,0.35)',
+                    background: manualPrice ? 'rgba(180,80,30,0.08)' : 'rgba(62,122,58,0.08)',
+                    color: manualPrice ? '#B6452F' : 'var(--clay-d)',
+                    padding: '6px 12px', borderRadius: '7px', cursor: 'pointer',
+                    fontFamily: 'var(--font-ui)', fontSize: '15.5px', fontWeight: 500,
+                    display: 'inline-flex', alignItems: 'center', gap: '5px',
+                    whiteSpace: 'nowrap', transition: 'all 0.15s',
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
+                    {manualPrice
+                      ? <path d="M5 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      : <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    }
+                  </svg>
+                  {manualPrice ? 'ราคาอิสระ' : 'ดึงราคา'}
+                </button>
+              </div>
             </div>
 
             {/* Table (desktop) */}
@@ -517,6 +548,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     onRemove={removeItem}
                     showErrors={showErrors}
                     autoFillPrice={!manualPrice}
+                    priceMode={priceMode}
                   />
                 ))}
               </div>
@@ -535,6 +567,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     onRemove={removeItem}
                     showErrors={showErrors}
                     autoFillPrice={!manualPrice}
+                    priceMode={priceMode}
                   />
                 ))}
               </div>

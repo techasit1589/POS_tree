@@ -23,9 +23,10 @@ interface Props {
   onRemove: (idx: number) => void;
   showErrors?: boolean;
   autoFillPrice?: boolean;
+  priceMode?: 'retail' | 'wholesale';
 }
 
-export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRemove, showErrors, autoFillPrice = true }: Props) {
+export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRemove, showErrors, autoFillPrice = true, priceMode = 'retail' }: Props) {
   const [query, setQuery] = useState(item.name);
   const [showSuggest, setShowSuggest] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -52,10 +53,11 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
   }, [query, catalog]);
 
   const pick = (tree: Tree) => {
+    const filledPrice = priceMode === 'wholesale' ? (tree.priceWholesale ?? '') : tree.price;
     onUpdate(idx, {
       ...item,
       name: tree.name,
-      price: autoFillPrice ? tree.price : item.price,
+      price: autoFillPrice ? filledPrice : item.price,
       unit: tree.unit || 'ต้น',
       category: tree.category || '',
       treeId: tree.id,
@@ -244,7 +246,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
 }
 
 /* Mobile card layout (injected via className hook) */
-export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, showErrors, autoFillPrice = true }: Omit<Props, 'isLast'>) {
+export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, showErrors, autoFillPrice = true, priceMode = 'retail' }: Omit<Props, 'isLast'>) {
   const [query, setQuery] = useState(item.name);
   const [showSuggest, setShowSuggest] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -267,7 +269,8 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
   }, [query, catalog]);
 
   const pick = (tree: Tree) => {
-    onUpdate(idx, { ...item, name: tree.name, price: autoFillPrice ? tree.price : item.price, unit: tree.unit || 'ต้น', category: tree.category || '', treeId: tree.id });
+    const filledPrice = priceMode === 'wholesale' ? (tree.priceWholesale ?? '') : tree.price;
+    onUpdate(idx, { ...item, name: tree.name, price: autoFillPrice ? filledPrice : item.price, unit: tree.unit || 'ต้น', category: tree.category || '', treeId: tree.id });
     setQuery(tree.name);
     setShowSuggest(false);
   };
