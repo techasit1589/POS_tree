@@ -374,8 +374,8 @@ export default function HistoryPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-        <div className="flex gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-52">
+        <div className="flex gap-3">
+          <div className="relative flex-1 min-w-0">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input value={search} onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleSearchKey}
@@ -386,16 +386,16 @@ export default function HistoryPage() {
             className="flex items-center gap-1.5 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white text-base font-medium rounded-lg transition shrink-0">
             <Search size={16} /> ค้นหา
           </button>
-          <div className="flex items-center gap-2 flex-nowrap">
-            <Calendar size={16} className="text-gray-400 shrink-0" />
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 min-w-0" />
-            <span className="text-gray-400 text-base shrink-0">ถึง</span>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400 min-w-0" />
-          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar size={16} className="text-gray-400 shrink-0" />
+          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+            className="flex-1 min-w-0 px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
+          <span className="text-gray-400 text-base shrink-0">ถึง</span>
+          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+            className="flex-1 min-w-0 px-2 py-2.5 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400" />
           {hasFilter && (
-            <button onClick={clearFilters} className="flex items-center gap-1 text-base text-red-400 hover:text-red-600">
+            <button onClick={clearFilters} className="flex items-center gap-1 text-base text-red-400 hover:text-red-600 shrink-0">
               <X size={16} /> ล้าง
             </button>
           )}
