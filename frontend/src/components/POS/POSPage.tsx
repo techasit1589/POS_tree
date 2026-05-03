@@ -1,13 +1,4 @@
-import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useSyncExternalStore } from 'react';
-
-function useIsMobile() {
-  const getSnapshot = () => window.innerWidth < 720;
-  const subscribe = (cb: () => void) => {
-    window.addEventListener('resize', cb);
-    return () => window.removeEventListener('resize', cb);
-  };
-  return useSyncExternalStore(subscribe, getSnapshot, () => false);
-}
+import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { getAllTrees, createOrder } from '../../api';
 import type { Tree, Order } from '../../types';
 import LineItemRow, { LineItemRowMobile, emptyItem } from './LineItemRow';
@@ -82,8 +73,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const [showErrors, setShowErrors] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
   const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
-
-  const isMobile = useIsMobile();
 
   // Load trees once
   useEffect(() => {
