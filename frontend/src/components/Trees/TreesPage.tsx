@@ -482,7 +482,6 @@ export default function TreesPage() {
                   />
                 </div>
               </div>
-              <div>
               {addError && <p className="text-base text-red-600 bg-red-50 px-3 py-2 rounded-lg">{addError}</p>}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
