@@ -1,7 +1,6 @@
 export interface Tree {
   id: number;
   name: string;
-  nameLatin?: string;
   category?: string;
   price: number;
   priceWholesale?: number;

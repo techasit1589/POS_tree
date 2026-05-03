@@ -8,7 +8,6 @@ import type { Tree, Order, OrderItem } from '../types';
 interface DbTree {
   id: number;
   name: string;
-  name_latin: string | null;
   category: string | null;
   price: string | number;
   price_wholesale: string | number | null;
@@ -45,7 +44,6 @@ const num = (v: string | number | null | undefined) => v === null || v === undef
 const toTree = (r: DbTree): Tree => ({
   id: r.id,
   name: r.name,
-  nameLatin: r.name_latin ?? undefined,
   category: r.category ?? undefined,
   price: num(r.price),
   priceWholesale: r.price_wholesale != null ? num(r.price_wholesale) : undefined,
@@ -108,7 +106,7 @@ export async function searchTrees(q: string): Promise<Tree[]> {
   const safe = q.trim().replace(/[,()]/g, ' ').trim();
   if (safe !== '') {
     const pattern = `%${safe}%`;
-    query.or(`name.ilike.${pattern},name_latin.ilike.${pattern},category.ilike.${pattern}`);
+    query.or(`name.ilike.${pattern},category.ilike.${pattern}`);
   }
   const { data, error } = await query;
   if (error) unwrapSupabaseError(error);
@@ -133,7 +131,6 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
       const { data, error } = await supabase
         .from('trees')
         .update({
-          name_latin: input.nameLatin ?? null,
           category: input.category ?? null,
           price: input.price,
           price_wholesale: input.priceWholesale ?? null,
@@ -153,7 +150,6 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
     .from('trees')
     .insert({
       name: input.name,
-      name_latin: input.nameLatin ?? null,
       category: input.category ?? null,
       price: input.price,
       price_wholesale: input.priceWholesale ?? null,
@@ -168,7 +164,6 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
 export async function updateTree(id: number, input: Partial<Tree>): Promise<Tree> {
   const patch: Partial<DbTree> = {};
   if (input.name !== undefined)              patch.name = input.name;
-  if (input.nameLatin !== undefined)         patch.name_latin = input.nameLatin || null;
   if (input.category !== undefined)          patch.category = input.category || null;
   if (input.price !== undefined)             patch.price = input.price;
   if (input.priceWholesale !== undefined)    patch.price_wholesale = input.priceWholesale ?? null;
