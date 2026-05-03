@@ -11,6 +11,7 @@ interface DbTree {
   name_latin: string | null;
   category: string | null;
   price: string | number;
+  price_wholesale: string | number | null;
   unit: string | null;
   description: string | null;
   is_active?: boolean;
@@ -47,6 +48,7 @@ const toTree = (r: DbTree): Tree => ({
   nameLatin: r.name_latin ?? undefined,
   category: r.category ?? undefined,
   price: num(r.price),
+  priceWholesale: r.price_wholesale != null ? num(r.price_wholesale) : undefined,
   unit: r.unit ?? undefined,
   description: r.description ?? undefined,
 });
@@ -134,6 +136,7 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
           name_latin: input.nameLatin ?? null,
           category: input.category ?? null,
           price: input.price,
+          price_wholesale: input.priceWholesale ?? null,
           unit: input.unit || 'ต้น',
           description: input.description ?? null,
           is_active: true,
@@ -153,6 +156,7 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
       name_latin: input.nameLatin ?? null,
       category: input.category ?? null,
       price: input.price,
+      price_wholesale: input.priceWholesale ?? null,
       unit: input.unit || 'ต้น',
       description: input.description ?? null,
     })
@@ -163,12 +167,13 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
 
 export async function updateTree(id: number, input: Partial<Tree>): Promise<Tree> {
   const patch: Partial<DbTree> = {};
-  if (input.name !== undefined)        patch.name = input.name;
-  if (input.nameLatin !== undefined)   patch.name_latin = input.nameLatin || null;
-  if (input.category !== undefined)    patch.category = input.category || null;
-  if (input.price !== undefined)       patch.price = input.price;
-  if (input.unit !== undefined)        patch.unit = input.unit || null;
-  if (input.description !== undefined) patch.description = input.description || null;
+  if (input.name !== undefined)              patch.name = input.name;
+  if (input.nameLatin !== undefined)         patch.name_latin = input.nameLatin || null;
+  if (input.category !== undefined)          patch.category = input.category || null;
+  if (input.price !== undefined)             patch.price = input.price;
+  if (input.priceWholesale !== undefined)    patch.price_wholesale = input.priceWholesale ?? null;
+  if (input.unit !== undefined)              patch.unit = input.unit || null;
+  if (input.description !== undefined)       patch.description = input.description || null;
 
   const { data, error } = await supabase
     .from('trees').update(patch).eq('id', id).select('*').single();

@@ -4,6 +4,7 @@ export interface Tree {
   nameLatin?: string;
   category?: string;
   price: number;
+  priceWholesale?: number;
   unit?: string;
   description?: string;
 }
