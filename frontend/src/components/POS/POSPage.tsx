@@ -589,42 +589,26 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
       </div>
 
       {/* ── Mobile bottom action bar ── */}
-      {isMobile && (
-        <div style={{
-          position: 'fixed', bottom: 56, left: 0, right: 0, zIndex: 30,
-          background: 'var(--cream-0)', borderTop: '1px solid var(--rule-soft)',
-          boxShadow: '0 -4px 20px rgba(28,46,26,0.10)',
-          padding: '10px 16px 10px',
-        }}>
+      <div className="md:hidden fixed bottom-14 inset-x-0 z-30 bg-[var(--cream-0)] border-t border-[var(--rule-soft)] shadow-[0_-4px_20px_rgba(28,46,26,0.10)] px-4 py-2.5">
           {!savedOrder ? (
             /* ก่อน save: ยอดรวม + ปุ่มออกใบเสร็จ */
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 min-w-0">
                 {validItemCount > 0 ? (
                   <>
-                    <div style={{ fontSize: '14px', color: 'var(--ink-4)', lineHeight: 1.2 }}>ยอดรวม {validItemCount} รายการ</div>
-                    <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--clay-d)', fontFamily: 'var(--font-mono)', lineHeight: 1.2 }}>
+                    <div className="text-[14px] text-[var(--ink-4)] leading-tight">ยอดรวม {validItemCount} รายการ</div>
+                    <div className="text-[22px] font-bold text-[var(--clay-d)] font-[var(--font-mono)] leading-tight">
                       ฿{subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontSize: '16px', color: 'var(--ink-4)' }}>ยังไม่มีรายการ</div>
+                  <div className="text-[16px] text-[var(--ink-4)]">ยังไม่มีรายการ</div>
                 )}
               </div>
               <button
                 onClick={submit}
                 disabled={saving}
-                style={{
-                  background: 'linear-gradient(180deg, var(--clay) 0%, var(--clay-d) 100%)',
-                  color: 'var(--cream-0)', border: '1px solid var(--clay-d)',
-                  padding: '13px 22px', borderRadius: '10px',
-                  fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 600,
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  boxShadow: '0 2px 8px rgba(62,122,58,0.35)',
-                  whiteSpace: 'nowrap', flexShrink: 0,
-                  opacity: saving ? 0.7 : 1,
-                }}
+                className={`bg-gradient-to-b from-[var(--clay)] to-[var(--clay-d)] text-[var(--cream-0)] border border-[var(--clay-d)] px-5 py-3 rounded-[10px] font-[var(--font-ui)] text-[17px] font-semibold flex items-center gap-2 shadow-[0_2px_8px_rgba(62,122,58,0.35)] whitespace-nowrap shrink-0 ${saving ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M2 7l3 3 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -634,9 +618,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
             </div>
           ) : (
             /* หลัง save: ปุ่ม print */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {(btError || exportError) && <div style={{ fontSize: '14px', color: '#B6452F' }}>{btError || exportError}</div>}
-              <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="flex flex-col gap-2">
+              {(btError || exportError) && <div className="text-[14px] text-[#B6452F]">{btError || exportError}</div>}
+              <div className="flex gap-2">
                 <ActionBtn
                   onClick={handleBtPrint}
                   disabled={printerStatus !== 'connected' || btPrinting}
@@ -655,19 +639,13 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               </div>
               <button
                 onClick={clear}
-                style={{
-                  width: '100%', padding: '10px', borderRadius: '8px',
-                  border: '1px solid var(--rule)', background: 'transparent',
-                  color: 'var(--ink-3)', fontFamily: 'var(--font-ui)', fontSize: '16px',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                }}
+                className="w-full py-2.5 rounded-lg border border-[var(--rule)] bg-transparent text-[var(--ink-3)] font-[var(--font-ui)] text-[16px] cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span style={{ fontSize: '14px' }}>✦</span> ออเดอร์ใหม่
+                <span className="text-[14px]">✦</span> ออเดอร์ใหม่
               </button>
             </div>
           )}
         </div>
-      )}
 
       {/* ── Confirm Modal ── */}
       {showConfirm && (
