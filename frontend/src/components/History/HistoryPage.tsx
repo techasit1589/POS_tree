@@ -503,28 +503,31 @@ export default function HistoryPage() {
                     </div>
                   </button>
 
-                  {/* Action buttons — แสดงเมื่อ hover (desktop) หรือเสมอ (mobile) */}
-                  <div className="flex items-center gap-0.5 pr-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-1 pr-2">
                     <button
                       onClick={() => openPrint(order)}
-                      className="p-2 text-forest-600 hover:bg-forest-50 rounded-lg"
+                      className="flex items-center gap-1 px-3 py-2 text-forest-600 hover:bg-forest-50 rounded-lg text-sm font-medium"
                       title="พิมพ์ / บันทึกใบเสร็จ"
                     >
                       <ReceiptIcon size={15} />
+                      <span>ใบเสร็จ</span>
                     </button>
                     <button
                       onClick={() => openEdit(order)}
-                      className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                      className="flex items-center gap-1 px-3 py-2 text-blue-500 hover:bg-blue-50 rounded-lg text-sm font-medium"
                       title="แก้ไข"
                     >
                       <Pencil size={15} />
+                      <span>แก้ไข</span>
                     </button>
                     <button
                       onClick={() => setDeleteTarget(order)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                      className="flex items-center gap-1 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium"
                       title="ลบ"
                     >
                       <Trash2 size={15} />
+                      <span>ลบ</span>
                     </button>
                   </div>
                 </div>
