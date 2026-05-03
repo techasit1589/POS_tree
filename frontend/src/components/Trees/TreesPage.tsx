@@ -30,11 +30,10 @@ type FormState = {
   price: string;
   priceWholesale: string;
   unit: string;
-  description: string;
 };
 
 const emptyForm = (): FormState => ({
-  name: '', category: 'ไม้ผล', price: '', priceWholesale: '', unit: 'ต้น', description: '',
+  name: '', category: 'ไม้ผล', price: '', priceWholesale: '', unit: 'ต้น',
 });
 
 export default function TreesPage() {
@@ -103,7 +102,6 @@ export default function TreesPage() {
         price,
         priceWholesale,
         unit: addForm.unit,
-        description: addForm.description.trim() || undefined,
       } as Omit<Tree, 'id'>);
       setTrees((prev) => [...prev, created]);
       setHasLoaded(true);
@@ -127,7 +125,6 @@ export default function TreesPage() {
       price: String(Number(tree.price)),
       priceWholesale: tree.priceWholesale !== undefined ? String(Number(tree.priceWholesale)) : '',
       unit: tree.unit || 'ต้น',
-      description: tree.description || '',
     });
   };
 
@@ -151,7 +148,6 @@ export default function TreesPage() {
         price,
         priceWholesale,
         unit: editForm.unit,
-        description: editForm.description.trim() || undefined,
       });
       setTrees((prev) => prev.map((t) => (t.id === editTarget.id ? { ...t, ...updated } : t)));
       closeEdit();
@@ -272,7 +268,6 @@ export default function TreesPage() {
                 <th className="text-right px-4 py-3">ราคาปลีก</th>
                 <th className="text-right px-4 py-3 hidden sm:table-cell">ราคาส่ง</th>
                 <th className="text-center px-4 py-3 hidden md:table-cell">หน่วย</th>
-                <th className="text-left px-4 py-3 hidden lg:table-cell">คำอธิบาย</th>
                 <th className="px-4 py-3 text-right">จัดการ</th>
               </tr>
             </thead>
@@ -297,9 +292,6 @@ export default function TreesPage() {
                   </td>
                   <td className="px-4 py-3 text-center text-gray-500 hidden md:table-cell">
                     {tree.unit || 'ต้น'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-400 text-sm hidden lg:table-cell max-w-xs truncate">
-                    {tree.description || '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
@@ -390,15 +382,6 @@ export default function TreesPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
-                <input
-                  value={editForm.description}
-                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="รายละเอียดเพิ่มเติม"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
-                />
               </div>
               {editError && <p className="text-base text-red-600 bg-red-50 px-3 py-2 rounded-lg">{editError}</p>}
             </div>
@@ -500,14 +483,6 @@ export default function TreesPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600 mb-1 block">คำอธิบาย</label>
-                <input
-                  value={addForm.description}
-                  onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="รายละเอียดเพิ่มเติม"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
-                />
-              </div>
               {addError && <p className="text-base text-red-600 bg-red-50 px-3 py-2 rounded-lg">{addError}</p>}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">

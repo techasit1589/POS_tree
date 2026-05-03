@@ -5,7 +5,6 @@ export interface Tree {
   price: number;
   priceWholesale?: number;
   unit?: string;
-  description?: string;
 }
 
 export interface CartItem {
