@@ -305,16 +305,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     order: savedOrder,
   };
 
-  // ── Styles ──────────────────────────────────────────────────────────────────
-  const s = {
-    previewPane: {
-      overflowY: 'auto' as const,
-      padding: '20px 32px 80px',
-      position: 'relative' as const,
-      background: 'radial-gradient(ellipse at 20% 10%, #8FAE6A 0%, transparent 55%), radial-gradient(ellipse at 80% 100%, #557A3A 0%, transparent 55%), linear-gradient(135deg, #6F8F52 0%, #3E5F28 100%)',
-    } as React.CSSProperties,
-  };
-
   return (
     <>
       {/* Mobile tab switcher */}
@@ -543,21 +533,18 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
         </div>
 
         {/* ── Right: Preview ── */}
-        <div style={{ ...s.previewPane, display: isMobile && mobileTab !== 'preview' ? 'none' : undefined }}>
+        <div
+          className={`overflow-y-auto px-8 py-5 pb-20 relative ${mobileTab !== 'preview' ? 'hidden md:block' : ''}`}
+          style={{ background: 'radial-gradient(ellipse at 20% 10%, #8FAE6A 0%, transparent 55%), radial-gradient(ellipse at 80% 100%, #557A3A 0%, transparent 55%), linear-gradient(135deg, #6F8F52 0%, #3E5F28 100%)' }}
+        >
           {/* Preview bar */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px 20px', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', color: 'var(--cream-0)', letterSpacing: '0.02em' }}>
+          <div className="flex items-center justify-between px-1 pt-2 pb-5 gap-3 flex-wrap">
+            <div className="flex items-center gap-2 text-[15px] text-[var(--cream-0)] tracking-[0.02em]">
               <span>ตัวอย่างใบเสร็จ</span>
             </div>
             <button
               onClick={openSettings}
-              style={{
-                appearance: 'none', border: '1px solid rgba(251,245,232,0.4)',
-                background: 'rgba(251,245,232,0.15)', backdropFilter: 'blur(8px)',
-                color: 'var(--cream-0)', padding: '7px 12px', borderRadius: '7px',
-                fontFamily: 'var(--font-ui)', fontSize: '15.5px', cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', gap: '7px', transition: 'all 0.15s',
-              }}
+              className="appearance-none border border-[rgba(251,245,232,0.4)] bg-[rgba(251,245,232,0.15)] backdrop-blur-[8px] text-[var(--cream-0)] px-3 py-1.5 rounded-[7px] font-[var(--font-ui)] text-[15.5px] cursor-pointer inline-flex items-center gap-1.5 transition-all"
             >
               <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                 <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.3"/>
@@ -568,17 +555,13 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           </div>
 
           {/* Receipt paper */}
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0 40px' }}>
+          <div className="flex justify-center py-4 pb-10">
             <ReceiptPaper ref={receiptRef} {...paperProps} />
           </div>
 
           {/* Post-save print actions (desktop only — mobile uses bottom bar) */}
-          {savedOrder && !isMobile && (
-            <div style={{
-              display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center',
-              background: 'rgba(251,245,232,0.12)', borderRadius: '12px', padding: '14px',
-              backdropFilter: 'blur(8px)',
-            }}>
+          {savedOrder && (
+            <div className="hidden md:flex flex-wrap gap-2 justify-center bg-[rgba(251,245,232,0.12)] rounded-xl p-3.5 backdrop-blur-[8px]">
               <ActionBtn
                 onClick={handleBtPrint}
                 disabled={printerStatus !== 'connected' || btPrinting}
@@ -600,7 +583,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           )}
 
           {(btError || exportError) && (
-            <div style={{ color: 'var(--cream-0)', fontSize: '15px', textAlign: 'center', marginTop: '8px', opacity: 0.8 }}>{btError || exportError}</div>
+            <div className="text-[var(--cream-0)] text-[15px] text-center mt-2 opacity-80">{btError || exportError}</div>
           )}
         </div>
       </div>
