@@ -82,23 +82,12 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
   const priceErr = !!showErrors && !!item.name && (!item.price || Number(item.price) === 0);
 
   return (
-    <div
-      className="lineitem-row"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '28px 1fr 100px 110px 94px 28px',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px 14px',
-        borderBottom: isLast ? 'none' : '1px solid var(--rule-soft)',
-        position: 'relative',
-      }}
-    >
+    <div className={`lineitem-row grid grid-cols-[28px_1fr_100px_110px_94px_28px] items-center gap-2 px-3.5 py-2.5 relative ${!isLast ? 'border-b border-[var(--rule-soft)]' : ''}`}>
       {/* # */}
-      <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '14px' }}>{idx + 1}</div>
+      <div className="font-[var(--font-mono)] text-[var(--ink-4)] text-[14px]">{idx + 1}</div>
 
       {/* Name + autocomplete */}
-      <div style={{ position: 'relative' }} ref={wrapRef}>
+      <div className="relative" ref={wrapRef}>
         <input
           value={query}
           onChange={(e) => {
@@ -110,59 +99,33 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
           onFocus={() => { if (query.trim()) setShowSuggest(true); }}
           onKeyDown={handleKey}
           placeholder="พิมพ์ชื่อสินค้า หรือค้นหา..."
-          style={{
-            width: '100%',
-            border: nameErr ? '1px solid #EF4444' : '1px solid var(--rule)',
-            boxShadow: nameErr ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none',
-            background: 'var(--cream-0)',
-            padding: '8px 10px',
-            borderRadius: '7px',
-            fontFamily: 'var(--font-ui)',
-            fontSize: '19px',
-            color: 'var(--ink)',
-            outline: 'none',
-            transition: 'border-color 0.15s, box-shadow 0.15s',
-          }}
-          onFocusCapture={(e) => { (e.target as HTMLInputElement).style.borderColor = 'var(--clay)'; (e.target as HTMLInputElement).style.boxShadow = '0 0 0 3px rgba(62,122,58,0.18)'; }}
-          onBlurCapture={(e) => { const err = showErrors && !item.name; (e.target as HTMLInputElement).style.borderColor = err ? '#EF4444' : 'var(--rule)'; (e.target as HTMLInputElement).style.boxShadow = err ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none'; }}
+          className={`w-full px-2.5 py-2 rounded-[7px] font-[var(--font-ui)] text-[19px] text-[var(--ink)] bg-[var(--cream-0)] outline-none transition-all focus:border-[var(--clay)] focus:shadow-[0_0_0_3px_rgba(62,122,58,0.18)]
+  ${nameErr
+    ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)]'
+    : 'border border-[var(--rule)]'}`}
         />
         {item.category && !showSuggest && (
-          <div style={{
-            position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-            fontSize: '12px', color: 'var(--sage-d)',
-            background: 'rgba(138,154,91,0.18)', padding: '2px 7px', borderRadius: '3px',
-            fontWeight: 500, pointerEvents: 'none',
-          }}>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[12px] text-[var(--sage-d)] bg-[rgba(138,154,91,0.18)] px-1.5 py-px rounded-[3px] font-medium pointer-events-none">
             {item.category}
           </div>
         )}
         {showSuggest && matches.length > 0 && (
-          <div style={{
-            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-            background: '#fff', border: '1px solid var(--rule)', borderRadius: '8px',
-            boxShadow: '0 10px 28px rgba(28,46,26,0.18)', zIndex: 50,
-            overflow: 'hidden', maxHeight: '220px', overflowY: 'auto',
-          }}>
+          <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white border border-[var(--rule)] rounded-lg shadow-[0_10px_28px_rgba(28,46,26,0.18)] z-50 overflow-hidden max-h-[220px] overflow-y-auto">
             {matches.map((m, i) => (
               <div
                 key={m.id}
                 onMouseEnter={() => setActiveIdx(i)}
                 onMouseDown={(e) => { e.preventDefault(); pick(m); }}
-                style={{
-                  padding: '9px 12px', cursor: 'pointer',
-                  borderBottom: '1px solid var(--rule-soft)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-                  background: i === activeIdx ? 'rgba(62,122,58,0.08)' : 'transparent',
-                }}
+                className={`px-3 py-2.5 cursor-pointer border-b border-[var(--rule-soft)] flex items-center justify-between gap-3 ${i === activeIdx ? 'bg-[rgba(62,122,58,0.08)]' : 'bg-transparent'}`}
               >
-                <div style={{ fontSize: '18px', color: 'var(--ink)' }}>{m.name}</div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '13.5px' }}>
+                <div className="text-[18px] text-[var(--ink)]">{m.name}</div>
+                <div className="flex gap-2.5 items-center text-[13.5px]">
                   {m.category && (
-                    <span style={{ color: 'var(--sage-d)', background: 'rgba(138,154,91,0.18)', padding: '2px 6px', borderRadius: '3px', fontWeight: 500 }}>
+                    <span className="text-[var(--sage-d)] bg-[rgba(138,154,91,0.18)] px-1.5 py-px rounded-[3px] font-medium">
                       {m.category}
                     </span>
                   )}
-                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontWeight: 600 }}>
+                  <span className="font-[var(--font-mono)] text-[var(--clay-d)] font-semibold">
                     ฿{Number(priceMode === 'wholesale' ? (m.priceWholesale ?? m.price) : m.price).toLocaleString('th-TH')}
                   </span>
                 </div>
@@ -173,55 +136,42 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
       </div>
 
       {/* Qty */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div className="flex items-center gap-1.5">
         <input
           type="number"
           min="0"
           value={item.qty}
           onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
-          style={{
-            width: '100%', border: '1px solid var(--rule)', background: 'var(--cream-0)',
-            padding: '8px 8px', borderRadius: '7px',
-            fontFamily: 'var(--font-mono)', fontSize: '15px', textAlign: 'right',
-            color: 'var(--ink)', outline: 'none',
-          }}
+          className="w-full border border-[var(--rule)] bg-[var(--cream-0)] px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[15px] text-right text-[var(--ink)] outline-none"
         />
-        <span style={{ fontSize: '13px', color: 'var(--ink-4)', minWidth: '22px' }}>{item.unit || '—'}</span>
+        <span className="text-[13px] text-[var(--ink-4)] min-w-[22px]">{item.unit || '—'}</span>
       </div>
 
       {/* Price */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '15px' }}>฿</span>
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-1.5">
+          <span className="font-[var(--font-mono)] text-[var(--ink-4)] text-[15px]">฿</span>
           <input
             type="number"
             min="0"
             value={item.price}
             onChange={(e) => onUpdate(idx, { ...item, price: e.target.value })}
             placeholder={isCustom ? 'ใส่ราคา' : ''}
-            style={{
-              width: '100%',
-              border: priceErr ? '1px solid #EF4444' : '1px solid var(--rule)',
-              boxShadow: priceErr ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none',
-              background: priceErr ? '#FEF2F2' : 'var(--cream-0)',
-              padding: '8px 8px', borderRadius: '7px',
-              fontFamily: 'var(--font-mono)', fontSize: '15px', textAlign: 'right',
-              color: 'var(--ink)', outline: 'none',
-            }}
+            className={`w-full px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[15px] text-right text-[var(--ink)] outline-none
+  ${priceErr
+    ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
+    : 'border border-[var(--rule)] bg-[var(--cream-0)]'}`}
           />
         </div>
         {priceErr && isCustom && (
-          <div style={{ fontSize: '12px', color: '#EF4444', textAlign: 'right', paddingRight: '2px' }}>
+          <div className="text-[12px] text-[#EF4444] text-right pr-0.5">
             ต้องใส่ราคา
           </div>
         )}
       </div>
 
       {/* Subtotal */}
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: '15.5px', fontWeight: 600,
-        textAlign: 'right', color: 'var(--clay-d)',
-      }}>
+      <div className="font-[var(--font-mono)] text-[15.5px] font-semibold text-right text-[var(--clay-d)]">
         ฿{fmt(subtotal)}
       </div>
 
@@ -229,13 +179,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
       <button
         onClick={() => onRemove(idx)}
         title="ลบแถว"
-        style={{
-          background: 'none', border: 'none', color: 'var(--ink-4)',
-          cursor: 'pointer', padding: '6px', borderRadius: '5px',
-          display: 'grid', placeItems: 'center', transition: 'all 0.15s',
-        }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#B6452F'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(164,58,31,0.08)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-4)'; (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
+        className="bg-transparent border-0 text-[var(--ink-4)] cursor-pointer p-1.5 rounded-[5px] grid place-items-center transition-all hover:text-[#B6452F] hover:bg-[rgba(164,58,31,0.08)]"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
