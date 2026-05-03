@@ -50,6 +50,8 @@ export default function TreesPage() {
   const [addError, setAddError] = useState<string | null>(null);
   const [addSaving, setAddSaving] = useState(false);
 
+  const [expandedName, setExpandedName] = useState<number | null>(null);
+
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<Tree | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -273,8 +275,8 @@ export default function TreesPage() {
             <tbody className="divide-y divide-gray-50">
               {filtered.map((tree) => (
                 <tr key={tree.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 min-w-0">
-                    <p className="font-medium text-gray-800 truncate" title={tree.name}>{tree.name}</p>
+                  <td className="px-4 py-3 min-w-0 cursor-pointer" onClick={() => setExpandedName(expandedName === tree.id ? null : tree.id)}>
+                    <p className={`font-medium text-gray-800 ${expandedName === tree.id ? 'whitespace-normal' : 'truncate'}`}>{tree.name}</p>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     {tree.category && (
