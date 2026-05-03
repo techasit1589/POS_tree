@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
-  History, ChevronDown, ChevronUp, RefreshCw, Search,
+  History, ChevronDown, ChevronUp, Search,
   Calendar, User, X, Pencil, Trash2, Plus, Check, AlertCircle,
   FileDown, ImageDown, Bluetooth, BluetoothOff, Receipt as ReceiptIcon,
 } from 'lucide-react';
@@ -393,11 +393,6 @@ export default function HistoryPage() {
           <History size={22} className="text-forest-600" /> ประวัติการขาย
         </h2>
         <div className="flex items-center gap-3">
-          {hasSearched && (
-            <button onClick={load} className="flex items-center gap-1.5 text-base text-forest-600 hover:text-forest-800">
-              <RefreshCw size={16} /> รีเฟรช
-            </button>
-          )}
           {filtered.length > 0 && (
             <button onClick={exportCSV} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-lg transition">
               <FileDown size={16} /> Export CSV
