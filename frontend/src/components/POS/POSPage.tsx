@@ -649,27 +649,19 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
       {/* ── Confirm Modal ── */}
       {showConfirm && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(28,46,26,0.45)',
-          backdropFilter: 'blur(4px)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
-        }} onClick={() => setShowConfirm(false)}>
-          <div style={{
-            background: '#fff', borderRadius: '14px', width: '100%', maxWidth: '400px',
-            boxShadow: '0 24px 60px rgba(28,46,26,0.35)',
-            animation: 'rsPop 0.18s cubic-bezier(0.2,0.8,0.2,1)',
-          }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '28px 24px 20px', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>🧾</div>
-              <div style={{ fontSize: '21px', fontWeight: 700, color: 'var(--ink)', marginBottom: '4px' }}>ยืนยันออกใบเสร็จ?</div>
-              <div style={{ fontSize: '16px', color: 'var(--ink-3)', marginBottom: '16px' }}>กรุณาตรวจสอบรายการก่อนยืนยัน</div>
-              <div style={{ background: 'var(--cream-1)', borderRadius: '8px', padding: '12px 14px', textAlign: 'left' }}>
+        <div className="fixed inset-0 bg-[rgba(28,46,26,0.45)] backdrop-blur-[4px] z-[100] flex items-center justify-center p-6" onClick={() => setShowConfirm(false)}>
+          <div className="bg-white rounded-[14px] w-full max-w-[400px] shadow-[0_24px_60px_rgba(28,46,26,0.35)] animate-[rsPop_0.18s_cubic-bezier(0.2,0.8,0.2,1)]" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 pt-7 pb-5 text-center">
+              <div className="text-[32px] mb-2">🧾</div>
+              <div className="text-[21px] font-bold text-[var(--ink)] mb-1">ยืนยันออกใบเสร็จ?</div>
+              <div className="text-[16px] text-[var(--ink-3)] mb-4">กรุณาตรวจสอบรายการก่อนยืนยัน</div>
+              <div className="bg-[var(--cream-1)] rounded-lg px-3.5 py-3 text-left">
                 {customerName && <SummaryRow label="ลูกค้า" value={customerName} />}
                 <SummaryRow label="รายการสินค้า" value={`${validItemCount} รายการ`} />
                 <SummaryRow label="ยอดรวม" value={`฿${subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`} bold />
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '8px', padding: '0 24px 24px' }}>
+            <div className="flex gap-2 px-6 pb-6">
               <ModalBtn onClick={() => setShowConfirm(false)}>ยกเลิก</ModalBtn>
               <ModalBtn primary onClick={handleConfirm} disabled={saving}>
                 {saving ? 'กำลังบันทึก...' : '✓ ยืนยัน'}
@@ -681,70 +673,50 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
       {/* ── Receipt Settings Modal ── */}
       {showSettingsModal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(28,46,26,0.45)',
-          backdropFilter: 'blur(4px)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
-        }} onClick={() => setShowSettingsModal(false)}>
-          <div style={{
-            background: '#fff', borderRadius: '14px', width: '100%', maxWidth: '440px',
-            maxHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            boxShadow: '0 24px 60px rgba(28,46,26,0.35)',
-          }} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-[rgba(28,46,26,0.45)] backdrop-blur-[4px] z-[100] flex items-center justify-center p-6" onClick={() => setShowSettingsModal(false)}>
+          <div className="bg-white rounded-[14px] w-full max-w-[440px] max-h-[calc(100vh-48px)] flex flex-col overflow-hidden shadow-[0_24px_60px_rgba(28,46,26,0.35)]" onClick={(e) => e.stopPropagation()}>
             {/* Modal header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 14px', borderBottom: '1px solid var(--rule-soft)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '18px', color: 'var(--clay-d)' }}>
+            <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-[var(--rule-soft)]">
+              <div className="flex items-center gap-2 font-semibold text-[18px] text-[var(--clay-d)]">
                 <svg width="15" height="15" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.8 2.8l1.4 1.4M9.8 9.8l1.4 1.4M2.8 11.2l1.4-1.4M9.8 4.2l1.4-1.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
                 ตั้งค่าใบเสร็จ
               </div>
-              <button onClick={() => setShowSettingsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-3)', padding: '6px', borderRadius: '6px', display: 'inline-flex' }}>
+              <button onClick={() => setShowSettingsModal(false)} className="bg-transparent border-0 cursor-pointer text-[var(--ink-3)] p-1.5 rounded-[6px] inline-flex">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
 
             {/* Modal body */}
-            <div style={{ padding: '18px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="px-5 py-[18px] overflow-y-auto flex flex-col gap-3.5">
               <SettingsField label="ชื่อร้าน">
-                <input value={draftSettings.shopName} onChange={(e) => setDraftSettings((d) => ({ ...d, shopName: e.target.value }))} style={modalInputStyle} />
+                <input value={draftSettings.shopName} onChange={(e) => setDraftSettings((d) => ({ ...d, shopName: e.target.value }))} className="appearance-none border border-[var(--rule)] rounded-[7px] px-[11px] py-[9px] font-[var(--font-ui)] text-[16.5px] text-[var(--ink)] bg-white outline-none w-full transition-all" />
               </SettingsField>
               <SettingsField label="คำอธิบายร้าน">
-                <textarea rows={2} value={draftSettings.shopTagline} onChange={(e) => setDraftSettings((d) => ({ ...d, shopTagline: e.target.value }))} style={{ ...modalInputStyle, resize: 'vertical', minHeight: '56px' }} />
+                <textarea rows={2} value={draftSettings.shopTagline} onChange={(e) => setDraftSettings((d) => ({ ...d, shopTagline: e.target.value }))} className="appearance-none border border-[var(--rule)] rounded-[7px] px-[11px] py-[9px] font-[var(--font-ui)] text-[16.5px] text-[var(--ink)] bg-white outline-none w-full transition-all resize-y min-h-[56px]" />
               </SettingsField>
               <SettingsField label="ข้อมูลติดต่อ">
-                <textarea rows={2} value={draftSettings.shopContact} onChange={(e) => setDraftSettings((d) => ({ ...d, shopContact: e.target.value }))} style={{ ...modalInputStyle, resize: 'vertical', minHeight: '56px' }} />
+                <textarea rows={2} value={draftSettings.shopContact} onChange={(e) => setDraftSettings((d) => ({ ...d, shopContact: e.target.value }))} className="appearance-none border border-[var(--rule)] rounded-[7px] px-[11px] py-[9px] font-[var(--font-ui)] text-[16.5px] text-[var(--ink)] bg-white outline-none w-full transition-all resize-y min-h-[56px]" />
               </SettingsField>
               <SettingsField label="ข้อความขอบคุณ">
-                <textarea rows={3} value={draftSettings.thanksMsg} onChange={(e) => setDraftSettings((d) => ({ ...d, thanksMsg: e.target.value }))} style={{ ...modalInputStyle, resize: 'vertical', minHeight: '72px' }} />
+                <textarea rows={3} value={draftSettings.thanksMsg} onChange={(e) => setDraftSettings((d) => ({ ...d, thanksMsg: e.target.value }))} className="appearance-none border border-[var(--rule)] rounded-[7px] px-[11px] py-[9px] font-[var(--font-ui)] text-[16.5px] text-[var(--ink)] bg-white outline-none w-full transition-all resize-y min-h-[72px]" />
               </SettingsField>
-              <div style={{ height: '1px', background: 'var(--rule-soft)', margin: '2px 0' }} />
+              <div className="h-px bg-[var(--rule-soft)] my-0.5" />
               {/* Logo toggle */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                <span style={{ fontSize: '16px', color: 'var(--ink)' }}>แสดงโลโก้บนใบเสร็จ</span>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[16px] text-[var(--ink)]">แสดงโลโก้บนใบเสร็จ</span>
                 <button
                   onClick={() => setDraftSettings((d) => ({ ...d, showLogo: !d.showLogo }))}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    display: 'flex', alignItems: 'center',
-                  }}
+                  className="bg-transparent border-0 cursor-pointer p-0 flex items-center"
                 >
-                  <div style={{
-                    width: '32px', height: '18px', borderRadius: '9px',
-                    background: draftSettings.showLogo ? 'var(--clay)' : 'var(--rule)',
-                    position: 'relative', transition: 'background 0.15s',
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: '2px', left: '2px', width: '14px', height: '14px',
-                      borderRadius: '50%', background: '#fff',
-                      transition: 'transform 0.15s',
-                      transform: draftSettings.showLogo ? 'translateX(14px)' : 'none',
-                    }} />
+                  <div className={`w-8 h-[18px] rounded-[9px] relative transition-colors ${draftSettings.showLogo ? 'bg-[var(--clay)]' : 'bg-[var(--rule)]'}`}>
+                    <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform ${draftSettings.showLogo ? 'translate-x-3.5' : ''}`} />
                   </div>
                 </button>
               </div>
             </div>
 
             {/* Modal footer */}
-            <div style={{ display: 'flex', gap: '8px', padding: '14px 20px 18px', borderTop: '1px solid var(--rule-soft)', background: 'var(--cream-1)' }}>
+            <div className="flex gap-2 px-5 pt-3.5 pb-[18px] border-t border-[var(--rule-soft)] bg-[var(--cream-1)]">
               <ModalBtn onClick={() => setShowSettingsModal(false)}>ยกเลิก</ModalBtn>
               <ModalBtn primary onClick={saveSettings}>✓ บันทึก</ModalBtn>
             </div>
@@ -778,9 +750,9 @@ function PayIcon({ kind }: { kind: 'cash' | 'transfer' }) {
 
 function SummaryRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '16px' }}>
-      <span style={{ color: 'var(--ink-3)' }}>{label}</span>
-      <span style={{ color: 'var(--ink)', fontWeight: bold ? 700 : 500 }}>{value}</span>
+    <div className="flex justify-between py-1 text-[16px]">
+      <span className="text-[var(--ink-3)]">{label}</span>
+      <span className={`text-[var(--ink)] ${bold ? 'font-bold' : 'font-medium'}`}>{value}</span>
     </div>
   );
 }
@@ -790,17 +762,11 @@ function ModalBtn({ onClick, children, primary, disabled }: { onClick?: () => vo
     <button
       onClick={onClick}
       disabled={disabled}
-      style={{
-        flex: 1, appearance: 'none', fontFamily: 'var(--font-ui)',
-        border: primary ? '1px solid var(--clay-d)' : '1px solid var(--rule)',
-        background: primary ? 'linear-gradient(180deg, var(--clay) 0%, var(--clay-d) 100%)' : '#fff',
-        color: primary ? '#fff' : 'var(--ink)',
-        fontSize: '16.5px', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-        fontWeight: 500, transition: 'all 0.15s',
-        boxShadow: primary ? '0 1px 0 rgba(255,255,255,0.2) inset, 0 2px 6px rgba(62,122,58,0.32)' : 'none',
-        opacity: disabled ? 0.6 : 1,
-      }}
+      className={`flex-1 appearance-none font-[var(--font-ui)] text-[16.5px] px-4 py-2.5 rounded-lg cursor-pointer inline-flex items-center justify-center gap-1.5 font-medium transition-all
+        ${primary
+          ? 'border border-[var(--clay-d)] bg-gradient-to-b from-[var(--clay)] to-[var(--clay-d)] text-white shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_6px_rgba(62,122,58,0.32)]'
+          : 'border border-[var(--rule)] bg-white text-[var(--ink)]'}
+        ${disabled ? 'opacity-60' : ''}`}
     >
       {children}
     </button>
@@ -840,20 +806,11 @@ function ActionBtn({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      style={{
-        appearance: 'none',
-        border: ghost ? '1px solid rgba(251,245,232,0.35)' : '1px solid rgba(251,245,232,0.55)',
-        background: ghost ? 'transparent' : 'rgba(251,245,232,0.92)',
-        color: ghost ? 'rgba(251,245,232,0.75)' : 'var(--ink-2)',
-        padding: '8px 14px', borderRadius: '8px',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'var(--font-ui)', fontSize: '16px', fontWeight: 500,
-        display: 'inline-flex', alignItems: 'center', gap: '6px',
-        transition: 'all 0.15s', whiteSpace: 'nowrap',
-        backdropFilter: 'blur(6px)',
-        opacity: disabled ? 0.38 : 1,
-        boxShadow: ghost ? 'none' : '0 1px 0 rgba(255,255,255,0.6) inset',
-      }}
+      className={`appearance-none rounded-lg font-[var(--font-ui)] text-[16px] font-medium inline-flex items-center gap-1.5 transition-all whitespace-nowrap backdrop-blur-[6px] px-3.5 py-2
+        ${ghost
+          ? 'border border-[rgba(251,245,232,0.35)] bg-transparent text-[rgba(251,245,232,0.75)]'
+          : 'border border-[rgba(251,245,232,0.55)] bg-[rgba(251,245,232,0.92)] text-[var(--ink-2)] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]'}
+        ${disabled ? 'opacity-[0.38] cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {icon}
       {children}
@@ -863,18 +820,11 @@ function ActionBtn({
 
 function SettingsField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-      <label style={{ fontSize: '15px', color: 'var(--ink-2)', fontWeight: 500 }}>{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[15px] text-[var(--ink-2)] font-medium">{label}</label>
       {children}
     </div>
   );
 }
-
-const modalInputStyle: React.CSSProperties = {
-  appearance: 'none', border: '1px solid var(--rule)', borderRadius: '7px',
-  padding: '9px 11px', fontFamily: 'var(--font-ui)', fontSize: '16.5px',
-  color: 'var(--ink)', background: '#fff', outline: 'none', width: '100%',
-  transition: 'border-color 0.15s, box-shadow 0.15s',
-};
 
 export default POSPage;
