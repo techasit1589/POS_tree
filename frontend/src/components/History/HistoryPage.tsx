@@ -399,7 +399,7 @@ export default function HistoryPage() {
             </button>
           )}
           {filtered.length > 0 && (
-            <button onClick={exportCSV} className="flex items-center gap-1.5 text-base text-blue-600 hover:text-blue-800">
+            <button onClick={exportCSV} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-lg transition">
               <FileDown size={16} /> Export CSV
             </button>
           )}
