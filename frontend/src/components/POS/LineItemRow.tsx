@@ -227,79 +227,69 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
   const priceErrM = !!showErrors && !!item.name && (!item.price || Number(item.price) === 0);
 
   return (
-    <div style={{
-      background: 'var(--cream-0)', border: '1px solid var(--rule-soft)', borderRadius: '10px',
-      padding: '14px', marginBottom: '10px',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '10px' }}>
+    <div className="bg-[var(--cream-0)] border border-[var(--rule-soft)] rounded-[10px] p-3.5 mb-2.5">
+      <div className="flex justify-between items-start gap-2 mb-2.5">
         {/* Name */}
-        <div style={{ flex: 1, position: 'relative' }} ref={wrapRef}>
+        <div className="flex-1 relative" ref={wrapRef}>
           <input
             value={query}
             onChange={(e) => { setQuery(e.target.value); setShowSuggest(true); setActiveIdx(0); onUpdate(idx, { ...item, name: e.target.value }); }}
             onFocus={() => { if (query.trim()) setShowSuggest(true); }}
             placeholder="ชื่อสินค้า..."
-            style={{
-              width: '100%',
-              border: nameErrM ? '1px solid #EF4444' : '1px solid var(--rule)',
-              boxShadow: nameErrM ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none',
-              background: '#fff',
-              padding: '9px 12px', borderRadius: '7px', fontFamily: 'var(--font-ui)',
-              fontSize: '19px', color: 'var(--ink)', outline: 'none',
-            }}
+            className={`w-full px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[19px] text-[var(--ink)] outline-none
+  ${nameErrM
+    ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-white'
+    : 'border border-[var(--rule)] bg-white'}`}
           />
           {showSuggest && matches.length > 0 && (
-            <div style={{
-              position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-              background: '#fff', border: '1px solid var(--rule)', borderRadius: '8px',
-              boxShadow: '0 10px 28px rgba(28,46,26,0.18)', zIndex: 50,
-              overflow: 'hidden', maxHeight: '200px', overflowY: 'auto',
-            }}>
+            <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white border border-[var(--rule)] rounded-lg shadow-[0_10px_28px_rgba(28,46,26,0.18)] z-50 overflow-hidden max-h-[200px] overflow-y-auto">
               {matches.map((m, i) => (
-                <div key={m.id} onMouseEnter={() => setActiveIdx(i)}
+                <div
+                  key={m.id}
+                  onMouseEnter={() => setActiveIdx(i)}
                   onMouseDown={(e) => { e.preventDefault(); pick(m); }}
-                  style={{
-                    padding: '9px 12px', cursor: 'pointer', borderBottom: '1px solid var(--rule-soft)',
-                    display: 'flex', justifyContent: 'space-between',
-                    background: i === activeIdx ? 'rgba(62,122,58,0.08)' : 'transparent',
-                  }}>
-                  <span style={{ fontSize: '18px' }}>{m.name}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--clay-d)', fontSize: '14px', fontWeight: 600 }}>฿{Number(priceMode === 'wholesale' ? (m.priceWholesale ?? m.price) : m.price).toLocaleString('th-TH')}</span>
+                  className={`px-3 py-2.5 cursor-pointer border-b border-[var(--rule-soft)] flex justify-between ${i === activeIdx ? 'bg-[rgba(62,122,58,0.08)]' : 'bg-transparent'}`}
+                >
+                  <span className="text-[18px]">{m.name}</span>
+                  <span className="font-[var(--font-mono)] text-[var(--clay-d)] text-[14px] font-semibold">฿{Number(priceMode === 'wholesale' ? (m.priceWholesale ?? m.price) : m.price).toLocaleString('th-TH')}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
         {/* Delete */}
-        <button onClick={() => onRemove(idx)} style={{ background: 'none', border: 'none', color: 'var(--ink-4)', cursor: 'pointer', padding: '8px', borderRadius: '5px' }}>
+        <button onClick={() => onRemove(idx)} className="bg-transparent border-0 text-[var(--ink-4)] cursor-pointer p-2 rounded-[5px] hover:text-[#B6452F]">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
         </button>
       </div>
-      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>จำนวน</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div className="flex gap-4 flex-wrap">
+        <label className="flex flex-col gap-1">
+          <span className="text-[12px] text-[var(--ink-4)] uppercase tracking-[0.06em]">จำนวน</span>
+          <div className="flex items-center gap-1.5">
             <input type="number" min="0" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
-              style={{ width: '72px', border: '1px solid var(--rule)', background: '#fff', padding: '8px', borderRadius: '7px', fontFamily: 'var(--font-mono)', fontSize: '16px', outline: 'none', textAlign: 'center' }} />
-            <span style={{ fontSize: '13px', color: 'var(--ink-4)' }}>{item.unit || '—'}</span>
+              className="w-[72px] border border-[var(--rule)] bg-white p-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-center" />
+            <span className="text-[13px] text-[var(--ink-4)]">{item.unit || '—'}</span>
           </div>
         </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ราคา/หน่วย</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-4)', fontSize: '15px' }}>฿</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <label className="flex flex-col gap-1">
+          <span className="text-[12px] text-[var(--ink-4)] uppercase tracking-[0.06em]">ราคา/หน่วย</span>
+          <div className="flex items-center gap-1">
+            <span className="font-[var(--font-mono)] text-[var(--ink-4)] text-[15px]">฿</span>
+            <div className="flex flex-col gap-0.5">
               <input type="number" min="0" value={item.price} onChange={(e) => onUpdate(idx, { ...item, price: e.target.value })}
                 placeholder={isCustomM ? 'ใส่ราคา' : ''}
-                style={{ width: '96px', border: priceErrM ? '1px solid #EF4444' : '1px solid var(--rule)', boxShadow: priceErrM ? '0 0 0 3px rgba(239,68,68,0.18)' : 'none', background: priceErrM ? '#FEF2F2' : '#fff', padding: '8px', borderRadius: '7px', fontFamily: 'var(--font-mono)', fontSize: '16px', outline: 'none', textAlign: 'right' }} />
+                className={`w-[96px] px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-right
+  ${priceErrM
+    ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
+    : 'border border-[var(--rule)] bg-white'}`} />
               {priceErrM && isCustomM && (
-                <div style={{ fontSize: '12px', color: '#EF4444', textAlign: 'right' }}>ต้องใส่ราคา</div>
+                <div className="text-[12px] text-[#EF4444] text-right">ต้องใส่ราคา</div>
               )}
             </div>
           </div>
         </label>
       </div>
-      <div style={{ textAlign: 'right', paddingTop: '8px', marginTop: '8px', borderTop: '1px dashed var(--rule-soft)', fontFamily: 'var(--font-mono)', fontSize: '17px', fontWeight: 600, color: 'var(--clay-d)' }}>
+      <div className="text-right pt-2 mt-2 border-t border-dashed border-[var(--rule-soft)] font-[var(--font-mono)] text-[17px] font-semibold text-[var(--clay-d)]">
         ฿{fmt(subtotal)}
       </div>
     </div>
