@@ -519,7 +519,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                       : <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     }
                   </svg>
-                  {manualPrice ? 'ราคาอิสระ' : 'ดึงราคา'}
+                  {manualPrice ? 'กรอกราคาเอง' : 'ราคาจากระบบ'}
                 </button>
               </div>
             </div>
