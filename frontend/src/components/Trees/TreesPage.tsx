@@ -265,8 +265,7 @@ export default function TreesPage() {
               <tr>
                 <th className="text-left px-4 py-3">ชื่อต้นไม้</th>
                 <th className="text-left px-4 py-3 hidden md:table-cell">หมวดหมู่</th>
-                <th className="text-right px-4 py-3">ราคาปลีก</th>
-                <th className="text-right px-4 py-3 hidden sm:table-cell">ราคาส่ง</th>
+                <th className="text-right px-4 py-3">ราคา (ปลีก/ส่ง)</th>
                 <th className="text-center px-4 py-3 hidden md:table-cell">หน่วย</th>
                 <th className="px-4 py-3 text-right">จัดการ</th>
               </tr>
@@ -285,10 +284,10 @@ export default function TreesPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-forest-700">
-                    {fmtPrice(tree.price)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold text-blue-600 hidden sm:table-cell">
-                    {fmtPrice(tree.priceWholesale)}
+                    {tree.priceWholesale !== undefined
+                      ? <>{fmtPrice(tree.price)}<span className="text-gray-300 font-normal mx-1">/</span><span className="text-blue-600">{fmtPrice(tree.priceWholesale)}</span></>
+                      : fmtPrice(tree.price)
+                    }
                   </td>
                   <td className="px-4 py-3 text-center text-gray-500 hidden md:table-cell">
                     {tree.unit || 'ต้น'}
