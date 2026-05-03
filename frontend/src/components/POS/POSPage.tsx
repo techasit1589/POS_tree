@@ -307,34 +307,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
   // ── Styles ──────────────────────────────────────────────────────────────────
   const s = {
-    section: { marginBottom: '32px' } as React.CSSProperties,
-    sectionHead: { display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' } as React.CSSProperties,
-    sectionNum: {
-      fontFamily: 'var(--font-mono)', fontSize: '14px', color: 'var(--clay-d)',
-      background: 'rgba(62,122,58,0.12)', border: '1px solid rgba(62,122,58,0.22)',
-      padding: '4px 8px', borderRadius: '4px', marginTop: '2px',
-      letterSpacing: '0.08em', fontWeight: 600,
-    } as React.CSSProperties,
-    sectionTitle: { fontSize: '20px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em' } as React.CSSProperties,
-    sectionSub: { fontSize: '15.5px', color: 'var(--ink-3)', marginTop: '2px' } as React.CSSProperties,
-    fld: {
-      appearance: 'none' as const,
-      border: '1px solid var(--rule)',
-      background: 'var(--cream-0)',
-      padding: '10px 12px',
-      borderRadius: '7px',
-      fontFamily: 'var(--font-ui)',
-      fontSize: '17px',
-      color: 'var(--ink)',
-      width: '100%',
-      outline: 'none',
-      transition: 'all 0.15s',
-    } as React.CSSProperties,
-    lbl: {
-      fontSize: '14.5px', color: 'var(--ink-3)',
-      textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 500,
-      display: 'block', marginBottom: '6px',
-    } as React.CSSProperties,
     previewPane: {
       overflowY: 'auto' as const,
       padding: '20px 32px 80px',
@@ -384,12 +356,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
           {/* Locked notice */}
           {savedOrder && (
-            <div style={{
-              marginBottom: '20px', padding: '12px 14px',
-              background: 'rgba(62,122,58,0.10)', border: '1px solid rgba(62,122,58,0.25)',
-              borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px',
-              fontSize: '16px', color: 'var(--clay-d)',
-            }}>
+            <div className="mb-5 px-3.5 py-3 bg-[rgba(62,122,58,0.10)] border border-[rgba(62,122,58,0.25)] rounded-lg flex items-center gap-2.5 text-[16px] text-[var(--clay-d)]">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <rect x="4" y="7" width="8" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
                 <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -399,70 +366,56 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           )}
 
           {/* 01 Customer */}
-          <div style={s.section}>
-            <div style={s.sectionHead}>
-              <div style={s.sectionNum}>01</div>
+          <div className="mb-8">
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="font-[var(--font-mono)] text-[14px] text-[var(--clay-d)] bg-[rgba(62,122,58,0.12)] border border-[rgba(62,122,58,0.22)] px-2 py-1 rounded mt-0.5 tracking-[0.08em] font-semibold">01</div>
               <div>
-                <div style={s.sectionTitle}>ข้อมูลลูกค้า</div>
+                <div className="text-[20px] font-semibold text-[var(--ink)] tracking-[-0.01em]">ข้อมูลลูกค้า</div>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '14px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <label>
-                <span style={s.lbl}>ชื่อลูกค้า <span style={{ fontWeight: 400, opacity: 0.6 }}>(ไม่บังคับ)</span></span>
+                <span className="text-[14.5px] text-[var(--ink-3)] uppercase tracking-[0.06em] font-medium block mb-1.5">ชื่อลูกค้า <span style={{ fontWeight: 400, opacity: 0.6 }}>(ไม่บังคับ)</span></span>
                 <input
-                  style={s.fld}
+                  className="appearance-none border border-[var(--rule)] bg-[var(--cream-0)] px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[17px] text-[var(--ink)] w-full outline-none transition-all focus:border-[var(--clay)] focus:shadow-[0_0_0_3px_rgba(62,122,58,0.18)]"
                   placeholder="คุณ..."
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  onFocus={(e) => { e.target.style.borderColor = 'var(--clay)'; e.target.style.boxShadow = '0 0 0 3px rgba(62,122,58,0.18)'; }}
-                  onBlur={(e) => { e.target.style.borderColor = 'var(--rule)'; e.target.style.boxShadow = 'none'; }}
                 />
               </label>
               <label>
-                <span style={s.lbl}>เบอร์โทร <span style={{ fontWeight: 400, opacity: 0.6 }}>(ไม่บังคับ)</span></span>
+                <span className="text-[14.5px] text-[var(--ink-3)] uppercase tracking-[0.06em] font-medium block mb-1.5">เบอร์โทร <span style={{ fontWeight: 400, opacity: 0.6 }}>(ไม่บังคับ)</span></span>
                 <input
-                  style={s.fld}
+                  className="appearance-none border border-[var(--rule)] bg-[var(--cream-0)] px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[17px] text-[var(--ink)] w-full outline-none transition-all focus:border-[var(--clay)] focus:shadow-[0_0_0_3px_rgba(62,122,58,0.18)]"
                   placeholder="08X-XXX-XXXX"
                   type="tel"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
-                  onFocus={(e) => { e.target.style.borderColor = 'var(--clay)'; e.target.style.boxShadow = '0 0 0 3px rgba(62,122,58,0.18)'; }}
-                  onBlur={(e) => { e.target.style.borderColor = 'var(--rule)'; e.target.style.boxShadow = 'none'; }}
                 />
               </label>
             </div>
           </div>
 
           {/* 02 Line Items */}
-          <div style={s.section}>
-            <div style={{ ...s.sectionHead, justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={s.sectionNum}>02</div>
+          <div className="mb-8">
+            <div className="flex items-center justify-between gap-3.5 mb-4">
+              <div className="flex items-center gap-3.5">
+                <div className="font-[var(--font-mono)] text-[14px] text-[var(--clay-d)] bg-[rgba(62,122,58,0.12)] border border-[rgba(62,122,58,0.22)] px-2 py-1 rounded mt-0.5 tracking-[0.08em] font-semibold">02</div>
                 <div>
-                  <div style={s.sectionTitle}>รายการสินค้า</div>
+                  <div className="text-[20px] font-semibold text-[var(--ink)] tracking-[-0.01em]">รายการสินค้า</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                 {/* ปลีก/ส่ง toggle */}
-                <div style={{
-                  display: 'flex', border: '1px solid rgba(62,122,58,0.35)',
-                  borderRadius: '7px', overflow: 'hidden',
-                  opacity: manualPrice ? 0.4 : 1,
-                  pointerEvents: manualPrice ? 'none' : undefined,
-                }}>
+                <div className={`flex border border-[rgba(62,122,58,0.35)] rounded-[7px] overflow-hidden transition-opacity ${manualPrice ? 'opacity-40 pointer-events-none' : ''}`}>
                   {(['retail', 'wholesale'] as const).map((mode) => (
                     <button
                       key={mode}
                       onClick={() => { setPriceMode(mode); localStorage.setItem('pos_price_mode', mode); }}
-                      style={{
-                        appearance: 'none', border: 'none',
-                        background: priceMode === mode ? 'rgba(62,122,58,0.15)' : 'transparent',
-                        color: priceMode === mode ? 'var(--clay-d)' : 'var(--ink-3)',
-                        padding: '3px 10px', cursor: 'pointer',
-                        fontFamily: 'var(--font-ui)', fontSize: '15.5px',
-                        fontWeight: priceMode === mode ? 600 : 400,
-                        transition: 'all 0.15s',
-                      }}
+                      className={`appearance-none border-0 px-2.5 py-0.5 cursor-pointer font-[var(--font-ui)] text-[15.5px] transition-all
+  ${priceMode === mode
+    ? 'bg-[rgba(62,122,58,0.15)] text-[var(--clay-d)] font-semibold'
+    : 'bg-transparent text-[var(--ink-3)] font-normal'}`}
                     >
                       {mode === 'retail' ? 'ปลีก' : 'ส่ง'}
                     </button>
@@ -497,15 +450,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
             {/* Table (desktop) */}
             {!isMobile && (
-              <div style={{ background: 'var(--cream-0)', border: '1px solid var(--rule-soft)', borderRadius: '10px', overflow: 'visible', marginBottom: '10px' }}>
+              <div className="bg-[var(--cream-0)] border border-[var(--rule-soft)] rounded-[10px] overflow-visible mb-2.5">
                 {/* Header */}
-                <div style={{
-                  display: 'grid', gridTemplateColumns: '28px 1fr 100px 110px 94px 28px',
-                  alignItems: 'center', gap: '8px', padding: '10px 14px',
-                  background: 'var(--cream-2)', borderBottom: '1px solid var(--rule-soft)',
-                  fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.08em',
-                  color: 'var(--ink-3)', fontWeight: 600, borderRadius: '10px 10px 0 0',
-                }}>
+                <div className="grid grid-cols-[28px_1fr_100px_110px_94px_28px] items-center gap-2 px-3.5 py-2.5 bg-[var(--cream-2)] border-b border-[var(--rule-soft)] text-[14px] uppercase tracking-[0.08em] text-[var(--ink-3)] font-semibold rounded-t-[10px]">
                   <div>#</div><div>รายการ</div><div>จำนวน</div><div>ราคา/หน่วย</div><div style={{ textAlign: 'right' }}>รวม</div><div />
                 </div>
                 {items.map((it, i) => (
@@ -546,15 +493,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
             <button
               onClick={addItem}
-              style={{
-                appearance: 'none', border: '1.5px dashed var(--rule)', background: 'transparent',
-                color: 'var(--ink-3)', padding: '12px 14px', borderRadius: '8px',
-                cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: '16px',
-                display: 'inline-flex', alignItems: 'center', gap: '7px',
-                width: '100%', justifyContent: 'center', transition: 'all 0.15s', fontWeight: 500,
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--clay)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--clay-d)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(62,122,58,0.06)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--rule)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-3)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+              className="appearance-none border-[1.5px] border-dashed border-[var(--rule)] bg-transparent text-[var(--ink-3)] px-3.5 py-3 rounded-lg cursor-pointer font-[var(--font-ui)] text-[16px] inline-flex items-center gap-1.5 w-full justify-center transition-all font-medium hover:border-[var(--clay)] hover:text-[var(--clay-d)] hover:bg-[rgba(62,122,58,0.06)]"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
               เพิ่มรายการ
@@ -562,14 +501,14 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           </div>
 
           {/* 03 Payment */}
-          <div style={s.section}>
-            <div style={s.sectionHead}>
-              <div style={s.sectionNum}>03</div>
+          <div className="mb-8">
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="font-[var(--font-mono)] text-[14px] text-[var(--clay-d)] bg-[rgba(62,122,58,0.12)] border border-[rgba(62,122,58,0.22)] px-2 py-1 rounded mt-0.5 tracking-[0.08em] font-semibold">03</div>
               <div>
-                <div style={s.sectionTitle}>วิธีชำระเงิน</div>
+                <div className="text-[20px] font-semibold text-[var(--ink)] tracking-[-0.01em]">วิธีชำระเงิน</div>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="grid grid-cols-2 gap-2.5">
               {([
                 { id: 'cash', label: 'เงินสด', icon: 'cash' },
                 { id: 'transfer', label: 'โอนเงิน', icon: 'transfer' },
@@ -577,33 +516,25 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 <button
                   key={p.id}
                   onClick={() => setPayment(p.id)}
-                  style={{
-                    appearance: 'none',
-                    border: payment === p.id ? '1px solid var(--clay-d)' : '1px solid var(--rule)',
-                    background: payment === p.id
-                      ? 'linear-gradient(180deg, var(--clay) 0%, var(--clay-d) 100%)'
-                      : 'var(--cream-0)',
-                    color: payment === p.id ? 'var(--cream-0)' : 'var(--ink-2)',
-                    padding: '16px 14px', borderRadius: '10px', cursor: 'pointer',
-                    fontFamily: 'var(--font-ui)', display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: '8px', minHeight: '80px', transition: 'all 0.15s',
-                    boxShadow: payment === p.id ? '0 3px 10px rgba(62,122,58,0.32)' : 'none',
-                  }}
+                  className={`appearance-none rounded-[10px] cursor-pointer flex flex-col items-center gap-2 min-h-[80px] transition-all px-3.5 py-4 font-[var(--font-ui)]
+  ${payment === p.id
+    ? 'border border-[var(--clay-d)] bg-gradient-to-b from-[var(--clay)] to-[var(--clay-d)] text-[var(--cream-0)] shadow-[0_3px_10px_rgba(62,122,58,0.32)]'
+    : 'border border-[var(--rule)] bg-[var(--cream-0)] text-[var(--ink-2)]'}`}
                 >
                   <PayIcon kind={p.icon} />
-                  <span style={{ fontSize: '17px', fontWeight: 500 }}>{p.label}</span>
+                  <span className="text-[17px] font-medium">{p.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* 04 Note */}
-          <div style={s.section}>
-            <div style={s.sectionHead}>
-              <div style={s.sectionNum}>04</div>
+          <div className="mb-8">
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="font-[var(--font-mono)] text-[14px] text-[var(--clay-d)] bg-[rgba(62,122,58,0.12)] border border-[rgba(62,122,58,0.22)] px-2 py-1 rounded mt-0.5 tracking-[0.08em] font-semibold">04</div>
               <div>
-                <div style={s.sectionTitle}>หมายเหตุ</div>
-                <div style={s.sectionSub}>ไม่บังคับ</div>
+                <div className="text-[20px] font-semibold text-[var(--ink)] tracking-[-0.01em]">หมายเหตุ</div>
+                <div className="text-[15.5px] text-[var(--ink-3)] mt-0.5">ไม่บังคับ</div>
               </div>
             </div>
             <textarea
@@ -611,15 +542,13 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               placeholder="เช่น ส่งวันเสาร์, ฝากไว้หน้าร้าน..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              style={{ ...s.fld, resize: 'vertical', minHeight: '64px', fontFamily: 'inherit' }}
-              onFocus={(e) => { e.target.style.borderColor = 'var(--clay)'; e.target.style.boxShadow = '0 0 0 3px rgba(62,122,58,0.18)'; }}
-              onBlur={(e) => { e.target.style.borderColor = 'var(--rule)'; e.target.style.boxShadow = 'none'; }}
+              className="appearance-none border border-[var(--rule)] bg-[var(--cream-0)] px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[17px] text-[var(--ink)] w-full outline-none transition-all focus:border-[var(--clay)] focus:shadow-[0_0_0_3px_rgba(62,122,58,0.18)] resize-y min-h-[64px]"
             />
           </div>
 
           {/* Error */}
           {error && (
-            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '12px 14px', fontSize: '16px', marginBottom: '16px' }}>
+            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3.5 py-3 text-[16px] mb-4">
               {error}
             </div>
           )}
