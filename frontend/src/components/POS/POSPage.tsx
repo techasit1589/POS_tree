@@ -307,24 +307,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
   // ── Styles ──────────────────────────────────────────────────────────────────
   const s = {
-    shell: {
-      display: 'grid' as const,
-      gridTemplateColumns: 'minmax(520px, 1fr) minmax(480px, 1fr)',
-      minHeight: 'calc(100vh - 56px)',
-      width: '100%',
-      overflow: 'hidden' as const,
-    } as React.CSSProperties,
-    formPane: {
-      padding: isMobile ? '20px 16px 110px' : '28px 32px 40px',
-      overflowY: 'auto' as const,
-      overflowX: 'hidden' as const,
-      borderRight: '1px solid var(--rule-soft)',
-      background: 'var(--cream-1)',
-      minWidth: 0,
-      pointerEvents: savedOrder ? 'none' as const : undefined,
-      opacity: savedOrder ? 0.55 : 1,
-      transition: 'opacity 0.2s',
-    } as React.CSSProperties,
     section: { marginBottom: '32px' } as React.CSSProperties,
     sectionHead: { display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' } as React.CSSProperties,
     sectionNum: {
@@ -393,10 +375,12 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
       </div>
 
       {/* Main layout */}
-      <div style={{ ...s.shell, gridTemplateColumns: isMobile ? '1fr' : s.shell.gridTemplateColumns }}>
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(520px,1fr)_minmax(480px,1fr)] min-h-[calc(100vh-56px)] w-full overflow-hidden">
 
         {/* ── Left: Form ── */}
-        <div style={{ ...s.formPane, display: isMobile && mobileTab !== 'form' ? 'none' : undefined }}>
+        <div className={`overflow-y-auto overflow-x-hidden border-r border-[var(--rule-soft)] bg-[var(--cream-1)] min-w-0 transition-[opacity] duration-200 p-5 pb-[110px] px-4 md:pt-7 md:px-8 md:pb-10
+  ${savedOrder ? 'opacity-[0.55] pointer-events-none' : 'opacity-100'}
+  ${mobileTab !== 'form' ? 'hidden md:block' : ''}`}>
 
           {/* Locked notice */}
           {savedOrder && (
