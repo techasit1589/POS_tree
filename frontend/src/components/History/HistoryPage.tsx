@@ -489,7 +489,7 @@ export default function HistoryPage() {
                     className="flex-1 px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition text-left min-w-0"
                   >
                     <div className="flex items-center gap-3 flex-wrap min-w-0">
-                      <span className="font-mono text-base font-semibold text-forest-700 shrink-0">{order.receiptNumber}</span>
+                      <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
                       {order.customerName && (
                         <span className="flex items-center gap-1 text-base text-gray-700 truncate">
                           <User size={15} className="text-gray-400 shrink-0" /> {order.customerName}
