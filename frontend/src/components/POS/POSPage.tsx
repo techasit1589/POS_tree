@@ -361,7 +361,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 <rect x="4" y="7" width="8" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
                 <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
               </svg>
-              ออกใบเสร็จแล้ว — กด <strong style={{ fontWeight: 600 }}>ออเดอร์ใหม่</strong> เพื่อเริ่มใหม่
+              ออกใบเสร็จแล้ว — กด <strong className="font-semibold">ออเดอร์ใหม่</strong> เพื่อเริ่มใหม่
             </div>
           )}
 
@@ -405,7 +405,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   <div className="text-[20px] font-semibold text-[var(--ink)] tracking-[-0.01em]">รายการสินค้า</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <div className="flex items-center gap-2 shrink-0">
                 {/* ปลีก/ส่ง toggle */}
                 <div className={`flex border border-[rgba(62,122,58,0.35)] rounded-[7px] overflow-hidden transition-opacity ${manualPrice ? 'opacity-40 pointer-events-none' : ''}`}>
                   {(['retail', 'wholesale'] as const).map((mode) => (
@@ -425,16 +425,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 <button
                   onClick={() => setManualPrice((p) => { localStorage.setItem('pos_manual_price', String(!p)); return !p; })}
                   title={manualPrice ? 'ราคาอิสระ: เปิดอยู่ — ราคาจะไม่ถูกดึงจากสต็อก' : 'ราคาอิสระ: ปิดอยู่ — เลือกต้นไม้จะดึงราคามาให้'}
-                  style={{
-                    appearance: 'none',
-                    border: manualPrice ? '1px solid rgba(180,80,30,0.4)' : '1px solid rgba(62,122,58,0.35)',
-                    background: manualPrice ? 'rgba(180,80,30,0.08)' : 'rgba(62,122,58,0.08)',
-                    color: manualPrice ? '#B6452F' : 'var(--clay-d)',
-                    padding: '3px 10px', borderRadius: '7px', cursor: 'pointer',
-                    fontFamily: 'var(--font-ui)', fontSize: '15.5px', fontWeight: 500,
-                    display: 'none', alignItems: 'center', gap: '5px',
-                    whiteSpace: 'nowrap', transition: 'all 0.15s',
-                  }}
+                  className="hidden"
                 >
                   <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                     <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
@@ -449,8 +440,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
             </div>
 
             {/* Table (desktop) */}
-            {!isMobile && (
-              <div className="bg-[var(--cream-0)] border border-[var(--rule-soft)] rounded-[10px] overflow-visible mb-2.5">
+            <div className="hidden md:block bg-[var(--cream-0)] border border-[var(--rule-soft)] rounded-[10px] overflow-visible mb-2.5">
                 {/* Header */}
                 <div className="grid grid-cols-[28px_1fr_100px_110px_94px_28px] items-center gap-2 px-3.5 py-2.5 bg-[var(--cream-2)] border-b border-[var(--rule-soft)] text-[14px] uppercase tracking-[0.08em] text-[var(--ink-3)] font-semibold rounded-t-[10px]">
                   <div>#</div><div>รายการ</div><div>จำนวน</div><div>ราคา/หน่วย</div><div style={{ textAlign: 'right' }}>รวม</div><div />
@@ -469,27 +459,24 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     priceMode={priceMode}
                   />
                 ))}
-              </div>
-            )}
+            </div>
 
             {/* Card layout (mobile) */}
-            {isMobile && (
-              <div style={{ marginBottom: '10px' }}>
-                {items.map((it, i) => (
-                  <LineItemRowMobile
-                    key={i}
-                    item={it}
-                    idx={i}
-                    catalog={allTrees}
-                    onUpdate={updateItem}
-                    onRemove={removeItem}
-                    showErrors={showErrors}
-                    autoFillPrice={!manualPrice}
-                    priceMode={priceMode}
-                  />
-                ))}
-              </div>
-            )}
+            <div className="md:hidden mb-2.5">
+              {items.map((it, i) => (
+                <LineItemRowMobile
+                  key={i}
+                  item={it}
+                  idx={i}
+                  catalog={allTrees}
+                  onUpdate={updateItem}
+                  onRemove={removeItem}
+                  showErrors={showErrors}
+                  autoFillPrice={!manualPrice}
+                  priceMode={priceMode}
+                />
+              ))}
+            </div>
 
             <button
               onClick={addItem}
