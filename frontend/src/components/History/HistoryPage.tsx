@@ -537,22 +537,24 @@ export default function HistoryPage() {
                     onClick={() => setExpanded(expanded === order.id ? null : order.id)}
                     className="flex-1 px-4 py-3 hover:bg-gray-50 transition text-left min-w-0"
                   >
-                    {/* บรรทัด 1: เลขที่ + ยอด + chevron */}
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-base font-semibold text-gray-500 truncate">{order.receiptNumber}</span>
-                      <div className="flex items-center gap-1.5 shrink-0">
+                    {/* บรรทัด 1: เลขที่ + ชื่อลูกค้า */}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <User size={13} className="text-gray-300 shrink-0" />
+                        {order.customerName
+                          ? <span className="text-sm text-gray-600 truncate">{order.customerName}</span>
+                          : <span className="text-sm text-gray-300">—</span>
+                        }
+                      </div>
+                    </div>
+                    {/* บรรทัด 2: ยอด + chevron + วันที่ */}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-1.5">
                         <span className="font-bold text-lg text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
                         {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                       </div>
-                    </div>
-                    {/* บรรทัด 2: ชื่อลูกค้า + วันที่ */}
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <User size={13} className="text-gray-300 shrink-0" />
-                      {order.customerName
-                        ? <span className="text-sm text-gray-600 truncate">{order.customerName}</span>
-                        : <span className="text-sm text-gray-300">—</span>
-                      }
-                      <span className="text-xs text-gray-300 shrink-0 hidden sm:inline ml-1">{toLocalDateStr(order.createdAt)}</span>
+                      <span className="text-xs text-gray-300 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
                     </div>
                   </button>
 
