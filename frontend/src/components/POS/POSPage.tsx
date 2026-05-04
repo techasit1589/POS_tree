@@ -354,7 +354,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <label>
-                <span className="text-[14.5px] text-[var(--ink-3)] uppercase tracking-[0.06em] font-medium block mb-1.5">ชื่อลูกค้า <span style={{ fontWeight: 400, opacity: 0.6 }}>(ไม่บังคับ)</span></span>
+                <span className="text-[14.5px] text-[var(--ink-3)] uppercase tracking-[0.06em] font-medium block mb-1.5">ชื่อลูกค้า <span className="font-normal opacity-60">(ไม่บังคับ)</span></span>
                 <input
                   className="appearance-none border border-[var(--rule)] bg-[var(--cream-0)] px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[17px] text-[var(--ink)] w-full outline-none transition-all focus:border-[var(--clay)] focus:shadow-[0_0_0_3px_rgba(62,122,58,0.18)]"
                   placeholder="คุณ..."
@@ -363,7 +363,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 />
               </label>
               <label>
-                <span className="text-[14.5px] text-[var(--ink-3)] uppercase tracking-[0.06em] font-medium block mb-1.5">เบอร์โทร <span style={{ fontWeight: 400, opacity: 0.6 }}>(ไม่บังคับ)</span></span>
+                <span className="text-[14.5px] text-[var(--ink-3)] uppercase tracking-[0.06em] font-medium block mb-1.5">เบอร์โทร <span className="font-normal opacity-60">(ไม่บังคับ)</span></span>
                 <input
                   className="appearance-none border border-[var(--rule)] bg-[var(--cream-0)] px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[17px] text-[var(--ink)] w-full outline-none transition-all focus:border-[var(--clay)] focus:shadow-[0_0_0_3px_rgba(62,122,58,0.18)]"
                   placeholder="08X-XXX-XXXX"
@@ -422,7 +422,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
             <div className="hidden md:block bg-[var(--cream-0)] border border-[var(--rule-soft)] rounded-[10px] overflow-visible mb-2.5">
                 {/* Header */}
                 <div className="grid grid-cols-[28px_1fr_100px_110px_94px_28px] items-center gap-2 px-3.5 py-2.5 bg-[var(--cream-2)] border-b border-[var(--rule-soft)] text-[14px] uppercase tracking-[0.08em] text-[var(--ink-3)] font-semibold rounded-t-[10px]">
-                  <div>#</div><div>รายการ</div><div>จำนวน</div><div>ราคา/หน่วย</div><div style={{ textAlign: 'right' }}>รวม</div><div />
+                  <div>#</div><div>รายการ</div><div>จำนวน</div><div>ราคา/หน่วย</div><div className="text-right">รวม</div><div />
                 </div>
                 {items.map((it, i) => (
                   <LineItemRow
@@ -567,7 +567,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 disabled={pdfGenerating || imageGenerating}
                 icon={<ImgIcon />}
               >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
-              <ActionBtn onClick={clear} ghost icon={<span style={{ fontSize: '14px', opacity: 0.7 }}>✦</span>}>ออเดอร์ใหม่</ActionBtn>
+              <ActionBtn onClick={clear} ghost icon={<span className="text-[14px] opacity-70">✦</span>}>ออเดอร์ใหม่</ActionBtn>
             </div>
           )}
 
