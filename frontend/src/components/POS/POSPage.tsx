@@ -118,6 +118,24 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const submit = () => {
     const valid = items.filter((i) => i.name && Number(i.qty) > 0);
     if (valid.length === 0) { setShowErrors(true); setError('กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ'); return; }
+    // กันแถวที่ user กรอก qty/ราคาไว้แต่ลืมพิมพ์ชื่อ — ถ้าปล่อยผ่าน
+    // แถวจะถูก filter ทิ้งเงียบ ๆ ตอน save แต่ยอดใน popup ยืนยันจะรวมแถวนั้น
+    // ทำให้ยอดยืนยัน ≠ ยอดที่บันทึกจริง (HIGH-2)
+    const orphanedRows = items.some(
+      (i) => !i.name && (Number(i.qty) > 0 && Number(i.price) > 0),
+    );
+    if (orphanedRows) {
+      setShowErrors(true);
+      setError('มีรายการที่ยังไม่ได้กรอกชื่อสินค้า — กรุณาตรวจสอบ');
+      return;
+    }
+    // กันแถวที่มีชื่อแต่ไม่มี/เคลียร์จำนวน — ถ้าปล่อยผ่านจะถูก filter ทิ้งเงียบ ๆ เช่นกัน
+    const missingQty = items.some((i) => i.name && (!i.qty || Number(i.qty) <= 0));
+    if (missingQty) {
+      setShowErrors(true);
+      setError('กรุณาใส่จำนวนสำหรับทุกรายการสินค้า');
+      return;
+    }
     const missingPrice = valid.some((i) => !i.price || Number(i.price) <= 0);
     if (missingPrice) { setShowErrors(true); setError('กรุณาใส่ราคาสำหรับทุกรายการสินค้า'); return; }
     setShowErrors(false);
@@ -136,8 +154,12 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     if (!showErrors) return;
     const valid = items.filter((i) => i.name && Number(i.qty) > 0);
     const hasItems = valid.length > 0;
+    const orphanedRows = items.some(
+      (i) => !i.name && (Number(i.qty) > 0 && Number(i.price) > 0),
+    );
+    const missingQty = items.some((i) => i.name && (!i.qty || Number(i.qty) <= 0));
     const missingPrice = valid.some((i) => !i.price || Number(i.price) <= 0);
-    if (hasItems && !missingPrice) {
+    if (hasItems && !orphanedRows && !missingQty && !missingPrice) {
       setShowErrors(false);
       setError(null);
     }
@@ -279,8 +301,11 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     setShowSettingsModal(false);
   };
 
-  const validItemCount = items.filter((i) => i.name && Number(i.qty) > 0).length;
-  const subtotal = items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.price) || 0), 0);
+  // ใช้ชุด validItems เดียวกันทั้ง count และ subtotal เพื่อให้ยอดใน popup ยืนยัน
+  // ตรงกับยอดที่ส่งเข้า DB จริง (handleConfirm ใช้ filter เดียวกัน)
+  const validItems = items.filter((i) => i.name && Number(i.qty) > 0);
+  const validItemCount = validItems.length;
+  const subtotal = validItems.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.price) || 0), 0);
 
   // Shared receipt paper props
   const paperProps = {

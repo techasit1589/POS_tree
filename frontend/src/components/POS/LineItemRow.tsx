@@ -79,6 +79,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
 
   const isCustom = !!item.name && !item.treeId;
   const nameErr = !!showErrors && !item.name;
+  const qtyErr = !!showErrors && !!item.name && (!item.qty || Number(item.qty) <= 0);
   const priceErr = !!showErrors && !!item.name && (!item.price || Number(item.price) === 0);
 
   return (
@@ -142,7 +143,10 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
           min="0"
           value={item.qty}
           onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
-          className="w-full border border-[var(--rule)] bg-[var(--cream-0)] px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[15px] text-right text-[var(--ink)] outline-none"
+          className={`w-full px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[15px] text-right text-[var(--ink)] outline-none
+  ${qtyErr
+    ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
+    : 'border border-[var(--rule)] bg-[var(--cream-0)]'}`}
         />
         <span className="text-[13px] text-[var(--ink-4)] min-w-[22px]">{item.unit || '—'}</span>
       </div>
@@ -224,6 +228,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
 
   const isCustomM = !!item.name && !item.treeId;
   const nameErrM = !!showErrors && !item.name;
+  const qtyErrM = !!showErrors && !!item.name && (!item.qty || Number(item.qty) <= 0);
   const priceErrM = !!showErrors && !!item.name && (!item.price || Number(item.price) === 0);
 
   return (
@@ -267,7 +272,10 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
           <span className="text-[12px] text-[var(--ink-4)] uppercase tracking-[0.06em]">จำนวน</span>
           <div className="flex items-center gap-1.5">
             <input type="number" min="0" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
-              className="w-[72px] border border-[var(--rule)] bg-white p-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-center" />
+              className={`w-[72px] p-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-center
+  ${qtyErrM
+    ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
+    : 'border border-[var(--rule)] bg-white'}`} />
             <span className="text-[13px] text-[var(--ink-4)]">{item.unit || '—'}</span>
           </div>
         </label>
