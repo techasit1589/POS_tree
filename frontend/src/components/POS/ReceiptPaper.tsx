@@ -8,7 +8,7 @@ export interface POSSettings {
   shopContact: string;
   thanksMsg: string;
   showLogo: boolean;
-  layout: 'wide' | 'balanced' | 'narrow';
+  layout: 'default' | 'narrow';
 }
 
 export const DEFAULT_POS_SETTINGS: POSSettings = {
@@ -17,13 +17,18 @@ export const DEFAULT_POS_SETTINGS: POSSettings = {
   shopContact: 'ต.บางพึ่ง อ.บ้านหมี่ จ.ลพบุรี\n089-982-5167',
   thanksMsg: 'ขอบคุณที่อุดหนุน',
   showLogo: false,
-  layout: 'balanced',
+  layout: 'default',
 };
 
 export function loadPOSSettings(): POSSettings {
   try {
     const raw = localStorage.getItem('posSettings');
-    if (raw) return { ...DEFAULT_POS_SETTINGS, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // migrate legacy layout values ('wide'/'balanced' → 'default')
+      if (parsed.layout && parsed.layout !== 'narrow') parsed.layout = 'default';
+      return { ...DEFAULT_POS_SETTINGS, ...parsed };
+    }
     // Migrate from old receiptSettings
     const old = localStorage.getItem('receiptSettings');
     if (old) {
