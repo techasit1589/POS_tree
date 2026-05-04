@@ -532,7 +532,7 @@ export default function HistoryPage() {
             {filtered.map((order) => (
               <div key={order.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                 {/* Row header */}
-                <div className="flex items-center group">
+                <div className="flex items-end group">
                   <button
                     onClick={() => setExpanded(expanded === order.id ? null : order.id)}
                     className="flex-1 px-4 py-3 hover:bg-gray-50 transition text-left min-w-0"
@@ -558,8 +558,8 @@ export default function HistoryPage() {
                     </div>
                   </button>
 
-                  {/* Action buttons — icon-only on mobile, icon+text on desktop */}
-                  <div className="flex items-center gap-0.5 pr-2 shrink-0">
+                  {/* Action buttons — ชิดล่างให้ตรงกับแถวราคา */}
+                  <div className="flex items-center gap-0.5 pr-2 pb-3 shrink-0">
                     <button
                       onClick={() => openPrint(order)}
                       className="flex items-center gap-1 px-2 sm:px-3 py-2 text-forest-600 hover:bg-forest-50 rounded-lg text-sm font-medium"
