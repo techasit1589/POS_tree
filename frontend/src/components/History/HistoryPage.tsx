@@ -540,7 +540,7 @@ export default function HistoryPage() {
                     {/* บรรทัด 1: เลขที่ + ชื่อลูกค้า */}
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
-                      <div className="flex items-center gap-1 min-w-0">
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
                         <User size={13} className="text-gray-300 shrink-0" />
                         {order.customerName
                           ? <span className="text-sm text-gray-600 truncate">{order.customerName}</span>
