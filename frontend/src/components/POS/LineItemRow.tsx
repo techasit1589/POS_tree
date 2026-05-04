@@ -142,8 +142,9 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
           inputMode="numeric"
           pattern="[0-9]*"
           min="0"
+          step="1"
           value={item.qty}
-          onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
+          onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value.replace(/\..*/, '') })}
           className={`w-full px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[15px] text-right text-[var(--ink)] outline-none
   ${qtyErr
     ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
@@ -273,7 +274,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
         <label className="flex flex-col gap-1">
           <span className="text-[12px] text-[var(--ink-4)] uppercase tracking-[0.06em]">จำนวน</span>
           <div className="flex items-center gap-1.5">
-            <input type="number" inputMode="numeric" pattern="[0-9]*" min="0" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
+            <input type="number" inputMode="numeric" pattern="[0-9]*" min="0" step="1" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value.replace(/\..*/, '') })}
               className={`w-[72px] p-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-center
   ${qtyErrM
     ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
