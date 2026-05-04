@@ -366,6 +366,7 @@ export default function TreesPage() {
                   <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาปลีก (บาท) *</label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     value={editForm.price}
                     onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
                     min="0"
@@ -376,6 +377,7 @@ export default function TreesPage() {
                   <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาส่ง (บาท)</label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     value={editForm.priceWholesale}
                     onChange={(e) => setEditForm((f) => ({ ...f, priceWholesale: e.target.value }))}
                     placeholder="ไม่บังคับ"
@@ -464,6 +466,7 @@ export default function TreesPage() {
                   <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาปลีก (บาท) *</label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     value={addForm.price}
                     onChange={(e) => setAddForm((f) => ({ ...f, price: e.target.value }))}
                     placeholder="0"
@@ -475,6 +478,7 @@ export default function TreesPage() {
                   <label className="text-sm font-medium text-gray-600 mb-1 block">ราคาส่ง (บาท)</label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     value={addForm.priceWholesale}
                     onChange={(e) => setAddForm((f) => ({ ...f, priceWholesale: e.target.value }))}
                     placeholder="ไม่บังคับ"

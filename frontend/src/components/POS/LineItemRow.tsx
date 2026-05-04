@@ -140,6 +140,8 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
       <div className="flex items-center gap-1.5">
         <input
           type="number"
+          inputMode="numeric"
+          pattern="[0-9]*"
           min="0"
           value={item.qty}
           onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
@@ -157,6 +159,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
           <span className="font-[var(--font-mono)] text-[var(--ink-4)] text-[15px]">฿</span>
           <input
             type="number"
+            inputMode="decimal"
             min="0"
             value={item.price}
             onChange={(e) => onUpdate(idx, { ...item, price: e.target.value })}
@@ -271,7 +274,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
         <label className="flex flex-col gap-1">
           <span className="text-[12px] text-[var(--ink-4)] uppercase tracking-[0.06em]">จำนวน</span>
           <div className="flex items-center gap-1.5">
-            <input type="number" min="0" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
+            <input type="number" inputMode="numeric" pattern="[0-9]*" min="0" value={item.qty} onChange={(e) => onUpdate(idx, { ...item, qty: e.target.value })}
               className={`w-[72px] p-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-center
   ${qtyErrM
     ? 'border border-[#EF4444] shadow-[0_0_0_3px_rgba(239,68,68,0.18)] bg-red-50'
@@ -284,7 +287,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
           <div className="flex items-center gap-1">
             <span className="font-[var(--font-mono)] text-[var(--ink-4)] text-[15px]">฿</span>
             <div className="flex flex-col gap-0.5">
-              <input type="number" min="0" value={item.price} onChange={(e) => onUpdate(idx, { ...item, price: e.target.value })}
+              <input type="number" inputMode="decimal" min="0" value={item.price} onChange={(e) => onUpdate(idx, { ...item, price: e.target.value })}
                 placeholder={isCustomM ? 'ใส่ราคา' : ''}
                 className={`w-[96px] px-2 py-2 rounded-[7px] font-[var(--font-mono)] text-[16px] outline-none text-right
   ${priceErrM
