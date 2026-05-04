@@ -531,38 +531,36 @@ export default function HistoryPage() {
           <div className="space-y-2">
             {filtered.map((order) => (
               <div key={order.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-                {/* Row header */}
-                <div className="flex items-end group">
+                {/* แถว 1: เลขที่ + ชื่อลูกค้า */}
+                <button
+                  onClick={() => setExpanded(expanded === order.id ? null : order.id)}
+                  className="w-full px-4 pt-3 pb-1 flex items-center gap-2 hover:bg-gray-50 transition text-left min-w-0"
+                >
+                  <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                    <User size={13} className="text-gray-300 shrink-0" />
+                    {order.customerName
+                      ? <span className="text-sm text-gray-600 truncate">{order.customerName}</span>
+                      : <span className="text-sm text-gray-300">—</span>
+                    }
+                  </div>
+                </button>
+
+                {/* แถว 2: ราคา + ปุ่ม */}
+                <div className="px-4 pb-3 flex items-center gap-2">
                   <button
                     onClick={() => setExpanded(expanded === order.id ? null : order.id)}
-                    className="flex-1 px-4 py-3 hover:bg-gray-50 transition text-left min-w-0"
+                    className="flex items-center gap-1.5 hover:opacity-70 transition"
                   >
-                    {/* บรรทัด 1: เลขที่ + ชื่อลูกค้า */}
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
-                      <div className="flex items-center gap-1 flex-1 min-w-0">
-                        <User size={13} className="text-gray-300 shrink-0" />
-                        {order.customerName
-                          ? <span className="text-sm text-gray-600 truncate">{order.customerName}</span>
-                          : <span className="text-sm text-gray-300">—</span>
-                        }
-                      </div>
-                    </div>
-                    {/* บรรทัด 2: ยอด + chevron + วันที่ */}
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-lg text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
-                        {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
-                      </div>
-                      <span className="text-xs text-gray-300 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
-                    </div>
+                    <span className="font-bold text-lg text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
+                    {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                   </button>
-
-                  {/* Action buttons — ชิดล่างให้ตรงกับแถวราคา */}
-                  <div className="flex items-center gap-0.5 pr-2 pb-3 shrink-0">
+                  <span className="text-xs text-gray-300 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
+                  <div className="flex-1" />
+                  <div className="flex items-center gap-0.5">
                     <button
                       onClick={() => openPrint(order)}
-                      className="flex items-center gap-1 px-2 sm:px-3 py-2 text-forest-600 hover:bg-forest-50 rounded-lg text-sm font-medium"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-forest-600 hover:bg-forest-50 rounded-lg text-sm font-medium"
                       title="พิมพ์ / บันทึกใบเสร็จ"
                     >
                       <ReceiptIcon size={15} />
@@ -570,7 +568,7 @@ export default function HistoryPage() {
                     </button>
                     <button
                       onClick={() => openEdit(order)}
-                      className="flex items-center gap-1 px-2 sm:px-3 py-2 text-blue-500 hover:bg-blue-50 rounded-lg text-sm font-medium"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-blue-500 hover:bg-blue-50 rounded-lg text-sm font-medium"
                       title="แก้ไข"
                     >
                       <Pencil size={15} />
@@ -578,7 +576,7 @@ export default function HistoryPage() {
                     </button>
                     <button
                       onClick={() => setDeleteTarget(order)}
-                      className="flex items-center gap-1 px-2 sm:px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium"
                       title="ลบ"
                     >
                       <Trash2 size={15} />
