@@ -157,12 +157,12 @@ export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
   return toTree(data as DbTree);
 }
 
-export async function updateTree(id: number, input: Partial<Tree>): Promise<Tree> {
+export async function updateTree(id: number, input: Omit<Partial<Tree>, 'priceWholesale'> & { priceWholesale?: number | null }): Promise<Tree> {
   const patch: Partial<DbTree> = {};
   if (input.name !== undefined)              patch.name = input.name;
   if (input.category !== undefined)          patch.category = input.category || null;
   if (input.price !== undefined)             patch.price = input.price;
-  if (input.priceWholesale !== undefined)    patch.price_wholesale = input.priceWholesale ?? null;
+  if ('priceWholesale' in input)             patch.price_wholesale = input.priceWholesale ?? null;
   if (input.unit !== undefined)              patch.unit = input.unit || null;
 
   const { data, error } = await supabase
