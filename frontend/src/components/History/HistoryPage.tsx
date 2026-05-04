@@ -539,11 +539,13 @@ export default function HistoryPage() {
                   >
                     <div className="flex items-center gap-3 flex-wrap min-w-0">
                       <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
-                      {order.customerName && (
-                        <span className="flex items-center gap-1 text-base text-gray-700 truncate">
-                          <User size={15} className="text-gray-400 shrink-0" /> {order.customerName}
-                        </span>
-                      )}
+                      <span className="flex items-center gap-1 text-base truncate">
+                        <User size={15} className="text-gray-400 shrink-0" />
+                        {order.customerName
+                          ? <span className="text-gray-700">{order.customerName}</span>
+                          : <span className="text-gray-300">—</span>
+                        }
+                      </span>
                       <span className="text-sm text-gray-400 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
