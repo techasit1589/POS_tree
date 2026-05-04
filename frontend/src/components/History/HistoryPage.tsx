@@ -271,7 +271,9 @@ export default function HistoryPage() {
     for (const it of editItems) {
       if (!it.treeName.trim())               return setEditError('กรุณากรอกชื่อต้นไม้ทุกรายการ');
       if (isNaN(Number(it.unitPrice)) || Number(it.unitPrice) <= 0) return setEditError('ราคาต้องเป็นตัวเลขมากกว่า 0');
-      if (isNaN(Number(it.quantity))  || Number(it.quantity)  <= 0) return setEditError('จำนวนต้องเป็นตัวเลขมากกว่า 0');
+      // ตรวจหลัง round เพราะค่าทศนิยม < 0.5 จะถูกปัดเป็น 0 ทำให้บันทึกจำนวน 0 ได้
+      const qty = Math.round(Number(it.quantity));
+      if (isNaN(qty) || qty < 1) return setEditError('จำนวนต้องเป็นจำนวนเต็มอย่างน้อย 1');
     }
     setEditSaving(true); setEditError(null);
     try {
