@@ -160,6 +160,19 @@ export default function HistoryPage() {
     finally { setLoading(false); }
   };
 
+  // กด Esc เพื่อปิด modal ที่เปิดอยู่ (priority: print > edit > delete confirm)
+  useEffect(() => {
+    if (!printTarget && !editOrder && !deleteTarget) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (printTarget) { setPrintTarget(null); setBtError(null); setExportError(null); }
+      else if (editOrder) { setEditOrder(null); setEditError(null); }
+      else if (deleteTarget) { setDeleteTarget(null); setDeleteError(null); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [printTarget, editOrder, deleteTarget]);
+
   // ค้นหาเมื่อกด Enter ในช่อง search
   const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') load();
