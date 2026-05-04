@@ -82,7 +82,7 @@ function wrapError(message: string): Error {
 
 function unwrapSupabaseError(e: { message?: string; details?: string; code?: string } | null): never {
   const msg = e?.message || e?.details || 'เกิดข้อผิดพลาด';
-  if (e?.code === '23505') throw wrapError('เลขที่ใบเสร็จซ้ำ กรุณาลองใหม่');
+  if (e?.code === '23505') throw wrapError('ข้อมูลซ้ำในระบบ กรุณาลองใหม่');
   throw wrapError(msg);
 }
 
