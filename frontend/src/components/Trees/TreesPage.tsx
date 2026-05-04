@@ -105,7 +105,11 @@ export default function TreesPage() {
         priceWholesale,
         unit: addForm.unit,
       } as Omit<Tree, 'id'>);
-      setTrees((prev) => [...prev, created]);
+      // แทรกตามชื่อ ascending ให้ตรงกับ ordering ของ getAllTrees
+      setTrees((prev) => {
+        const idx = prev.findIndex((t) => t.name.localeCompare(created.name, 'th') > 0);
+        return idx === -1 ? [...prev, created] : [...prev.slice(0, idx), created, ...prev.slice(idx)];
+      });
       setHasLoaded(true);
       setShowAddModal(false);
       setAddForm(emptyForm());
