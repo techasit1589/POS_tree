@@ -92,7 +92,7 @@ export default function TreesPage() {
     if (!addForm.name.trim()) return setAddError('กรุณาใส่ชื่อต้นไม้');
     if (isNaN(price) || price <= 0) return setAddError('กรุณาใส่ราคาปลีกที่ถูกต้อง');
     const priceWholesale = addForm.priceWholesale ? parseFloat(addForm.priceWholesale) : undefined;
-    if (priceWholesale !== undefined && (isNaN(priceWholesale) || priceWholesale < 0)) {
+    if (priceWholesale !== undefined && (isNaN(priceWholesale) || priceWholesale <= 0)) {
       return setAddError('กรุณาใส่ราคาส่งที่ถูกต้อง');
     }
     setAddSaving(true);
@@ -142,7 +142,7 @@ export default function TreesPage() {
     if (!editForm.name.trim()) return setEditError('กรุณาใส่ชื่อต้นไม้');
     if (isNaN(price) || price <= 0) return setEditError('กรุณาใส่ราคาปลีกที่ถูกต้อง');
     const priceWholesale: number | null = editForm.priceWholesale ? parseFloat(editForm.priceWholesale) : null;
-    if (priceWholesale !== null && (isNaN(priceWholesale) || priceWholesale < 0)) {
+    if (priceWholesale !== null && (isNaN(priceWholesale) || priceWholesale <= 0)) {
       return setEditError('กรุณาใส่ราคาส่งที่ถูกต้อง');
     }
     setEditSaving(true);
