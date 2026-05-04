@@ -566,7 +566,7 @@ export default function HistoryPage() {
                       title="พิมพ์ / บันทึกใบเสร็จ"
                     >
                       <ReceiptIcon size={15} />
-                      <span className="hidden sm:inline">ใบเสร็จ</span>
+                      <span>ใบเสร็จ</span>
                     </button>
                     <button
                       onClick={() => openEdit(order)}
@@ -574,7 +574,7 @@ export default function HistoryPage() {
                       title="แก้ไข"
                     >
                       <Pencil size={15} />
-                      <span className="hidden sm:inline">แก้ไข</span>
+                      <span>แก้ไข</span>
                     </button>
                     <button
                       onClick={() => setDeleteTarget(order)}
@@ -582,7 +582,7 @@ export default function HistoryPage() {
                       title="ลบ"
                     >
                       <Trash2 size={15} />
-                      <span className="hidden sm:inline">ลบ</span>
+                      <span>ลบ</span>
                     </button>
                   </div>
                 </div>
