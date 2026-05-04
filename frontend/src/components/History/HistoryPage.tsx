@@ -15,7 +15,11 @@ import { usePrinter } from '../../context/PrinterContext';
 type SummaryTab = 'day' | 'month' | 'year';
 
 function fmt(n: number) {
-  return Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2 });
+  const v = Number(n);
+  // ถ้าเป็นจำนวนเต็มไม่ต้องแสดงทศนิยม, ถ้ามีเศษค่อยแสดง 2 ตำแหน่ง
+  return Number.isInteger(v)
+    ? v.toLocaleString('th-TH')
+    : v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function toLocalDateStr(iso: string) {
   return new Date(iso).toLocaleDateString('th-TH', {
