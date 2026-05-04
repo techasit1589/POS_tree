@@ -535,50 +535,52 @@ export default function HistoryPage() {
                 <div className="flex items-center group">
                   <button
                     onClick={() => setExpanded(expanded === order.id ? null : order.id)}
-                    className="flex-1 px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition text-left min-w-0"
+                    className="flex-1 px-4 py-3 hover:bg-gray-50 transition text-left min-w-0"
                   >
-                    <div className="flex items-center gap-3 flex-wrap min-w-0">
-                      <span className="font-mono text-base font-semibold text-gray-500 shrink-0">{order.receiptNumber}</span>
-                      <span className="flex items-center gap-1 text-base truncate">
-                        <User size={15} className="text-gray-400 shrink-0" />
-                        {order.customerName
-                          ? <span className="text-gray-700">{order.customerName}</span>
-                          : <span className="text-gray-300">—</span>
-                        }
-                      </span>
-                      <span className="text-sm text-gray-400 hidden sm:inline">{toLocalDateStr(order.createdAt)}</span>
+                    {/* บรรทัด 1: เลขที่ + ยอด + chevron */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-base font-semibold text-gray-500 truncate">{order.receiptNumber}</span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="font-bold text-lg text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
+                        {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <span className="font-bold text-lg text-forest-700">฿{fmt(Number(order.totalAmount))}</span>
-                      {expanded === order.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                    {/* บรรทัด 2: ชื่อลูกค้า + วันที่ */}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <User size={13} className="text-gray-300 shrink-0" />
+                      {order.customerName
+                        ? <span className="text-sm text-gray-600 truncate">{order.customerName}</span>
+                        : <span className="text-sm text-gray-300">—</span>
+                      }
+                      <span className="text-xs text-gray-300 shrink-0 hidden sm:inline ml-1">{toLocalDateStr(order.createdAt)}</span>
                     </div>
                   </button>
 
-                  {/* Action buttons */}
-                  <div className="flex items-center gap-1 pr-2">
+                  {/* Action buttons — icon-only on mobile, icon+text on desktop */}
+                  <div className="flex items-center gap-0.5 pr-2 shrink-0">
                     <button
                       onClick={() => openPrint(order)}
-                      className="flex items-center gap-1 px-3 py-2 text-forest-600 hover:bg-forest-50 rounded-lg text-sm font-medium"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-2 text-forest-600 hover:bg-forest-50 rounded-lg text-sm font-medium"
                       title="พิมพ์ / บันทึกใบเสร็จ"
                     >
                       <ReceiptIcon size={15} />
-                      <span>ใบเสร็จ</span>
+                      <span className="hidden sm:inline">ใบเสร็จ</span>
                     </button>
                     <button
                       onClick={() => openEdit(order)}
-                      className="flex items-center gap-1 px-3 py-2 text-blue-500 hover:bg-blue-50 rounded-lg text-sm font-medium"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-2 text-blue-500 hover:bg-blue-50 rounded-lg text-sm font-medium"
                       title="แก้ไข"
                     >
                       <Pencil size={15} />
-                      <span>แก้ไข</span>
+                      <span className="hidden sm:inline">แก้ไข</span>
                     </button>
                     <button
                       onClick={() => setDeleteTarget(order)}
-                      className="flex items-center gap-1 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium"
+                      className="flex items-center gap-1 px-2 sm:px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium"
                       title="ลบ"
                     >
                       <Trash2 size={15} />
-                      <span>ลบ</span>
+                      <span className="hidden sm:inline">ลบ</span>
                     </button>
                   </div>
                 </div>
