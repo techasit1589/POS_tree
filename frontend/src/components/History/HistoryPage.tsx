@@ -191,8 +191,10 @@ export default function HistoryPage() {
   const clearFilters = () => { setSearch(''); setDateFrom(''); setDateTo(''); };
 
   const exportCSV = () => {
+    // RFC 4180: ห่อทุกฟิลด์ด้วย " และ escape " ภายในเป็น "" เพื่อกัน comma/quote ในชื่อลูกค้าหรือสินค้า
+    const csvField = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const rows: string[] = [
-      ['วันที่', 'เลขที่ใบเสร็จ', 'ชื่อลูกค้า', 'เบอร์โทร', 'วิธีชำระ', 'รายการ', 'ยอดรวม'].join(','),
+      ['วันที่', 'เลขที่ใบเสร็จ', 'ชื่อลูกค้า', 'เบอร์โทร', 'วิธีชำระ', 'รายการ', 'ยอดรวม'].map(csvField).join(','),
     ];
     filtered.forEach((o) => {
       const items = o.items.map((i) => `${i.treeName} x${i.quantity}`).join(' / ');
@@ -203,9 +205,9 @@ export default function HistoryPage() {
         o.customerName || '',
         o.customerPhone || '',
         method,
-        `"${items}"`,
+        items,
         Number(o.totalAmount).toFixed(2),
-      ].join(','));
+      ].map(csvField).join(','));
     });
     const bom = '﻿'; // UTF-8 BOM for Excel Thai support
     const blob = new Blob([bom + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
