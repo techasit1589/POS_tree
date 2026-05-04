@@ -57,9 +57,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   const [saving, setSaving] = useState(false);
   const [savedOrder, setSavedOrder] = useState<Order | null>(null);
 
-  const [manualPrice, setManualPrice] = useState(
-    () => localStorage.getItem('pos_manual_price') === 'true'
-  );
   const [priceMode, setPriceMode] = useState<'retail' | 'wholesale'>(
     () => (localStorage.getItem('pos_price_mode') as 'retail' | 'wholesale') || 'retail'
   );
@@ -77,6 +74,9 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   // Load trees once
   useEffect(() => {
     getAllTrees().then(setAllTrees).catch(() => setAllTrees([]));
+    // ล้าง legacy key ของ feature "ราคาอิสระ" ที่ถูกเอาออกแล้ว
+    // เพื่อกัน user ที่เคยเปิดไว้แล้วเจอพฤติกรรมแปลก ๆ จาก state ค้าง
+    localStorage.removeItem('pos_manual_price');
   }, []);
 
   // ESC to close settings modal
@@ -411,7 +411,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {/* ปลีก/ส่ง toggle */}
-                <div className={`flex border border-[rgba(62,122,58,0.35)] rounded-[7px] overflow-hidden transition-opacity ${manualPrice ? 'opacity-40 pointer-events-none' : ''}`}>
+                <div className="flex border border-[rgba(62,122,58,0.35)] rounded-[7px] overflow-hidden">
                   {(['retail', 'wholesale'] as const).map((mode) => (
                     <button
                       key={mode}
@@ -425,21 +425,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     </button>
                   ))}
                 </div>
-                {/* ราคาอิสระ toggle */}
-                <button
-                  onClick={() => setManualPrice((p) => { localStorage.setItem('pos_manual_price', String(!p)); return !p; })}
-                  title={manualPrice ? 'ราคาอิสระ: เปิดอยู่ — ราคาจะไม่ถูกดึงจากสต็อก' : 'ราคาอิสระ: ปิดอยู่ — เลือกต้นไม้จะดึงราคามาให้'}
-                  className="hidden"
-                >
-                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                    <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
-                    {manualPrice
-                      ? <path d="M5 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                      : <path d="M4.5 7l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    }
-                  </svg>
-                  {manualPrice ? 'กรอกราคาเอง' : 'ราคาจากระบบ'}
-                </button>
               </div>
             </div>
 
@@ -459,7 +444,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                     onUpdate={updateItem}
                     onRemove={removeItem}
                     showErrors={showErrors}
-                    autoFillPrice={!manualPrice}
                     priceMode={priceMode}
                   />
                 ))}
@@ -476,7 +460,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   onUpdate={updateItem}
                   onRemove={removeItem}
                   showErrors={showErrors}
-                  autoFillPrice={!manualPrice}
                   priceMode={priceMode}
                 />
               ))}
