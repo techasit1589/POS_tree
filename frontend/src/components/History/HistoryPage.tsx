@@ -147,7 +147,8 @@ export default function HistoryPage() {
   const [imageGenerating, setImageGenerating] = useState(false);
   const [exportError, setExportError]     = useState<string | null>(null);
   const receiptRef                        = useRef<HTMLDivElement>(null);
-  const posSettings                        = useMemo(() => loadPOSSettings(), []);
+  // อ่านใหม่ทุกครั้งที่เปิด print modal — เผื่อผู้ใช้ไปแก้ settings ในแท็บอื่นแล้วกลับมา
+  const posSettings                        = useMemo(() => loadPOSSettings(), [printTarget]);
   const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
 
   const [hasSearched, setHasSearched] = useState(false);
