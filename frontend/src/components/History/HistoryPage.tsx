@@ -147,7 +147,7 @@ export default function HistoryPage() {
   const [imageGenerating, setImageGenerating] = useState(false);
   const [exportError, setExportError]     = useState<string | null>(null);
   const receiptRef                        = useRef<HTMLDivElement>(null);
-  const posSettings                        = loadPOSSettings();
+  const posSettings                        = useMemo(() => loadPOSSettings(), []);
   const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
 
   const [hasSearched, setHasSearched] = useState(false);
