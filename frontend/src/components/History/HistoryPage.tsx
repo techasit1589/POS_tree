@@ -310,7 +310,9 @@ export default function HistoryPage() {
     } finally { setEditSaving(false); }
   };
 
-  const editTotal = editItems.reduce((s, i) => s + (Number(i.unitPrice) || 0) * (Number(i.quantity) || 0), 0);
+  // ใช้ qty หลัง round เพื่อให้ยอดที่โชว์ตรงกับที่บันทึกจริง (save ใช้ Math.round)
+  const editItemQty = (i: EditItem) => Math.max(0, Math.round(Number(i.quantity) || 0));
+  const editTotal = editItems.reduce((s, i) => s + (Number(i.unitPrice) || 0) * editItemQty(i), 0);
 
   // ── receipt print modal handlers ──
   const openPrint = (order: Order) => {
@@ -819,7 +821,7 @@ export default function HistoryPage() {
                           placeholder="จำนวน" min="1"
                           className="w-16 shrink-0 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-400" />
                         <span className="flex-1 text-sm font-medium text-forest-700 text-right">
-                          ฿{fmt((Number(item.unitPrice) || 0) * (Number(item.quantity) || 0))}
+                          ฿{fmt((Number(item.unitPrice) || 0) * editItemQty(item))}
                         </span>
                       </div>
                     </div>
