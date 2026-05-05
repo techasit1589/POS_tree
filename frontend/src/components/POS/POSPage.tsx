@@ -6,7 +6,6 @@ import type { LineItem } from './LineItemRow';
 import ReceiptPaper, { loadPOSSettings, savePOSSettings } from './ReceiptPaper';
 import type { POSSettings } from './ReceiptPaper';
 import { usePrinter } from '../../context/PrinterContext';
-import type { CartItem } from '../../types';
 
 // Generate receipt number preview: DDMMYY-NNNNN
 function genReceiptNo(): string {
@@ -19,18 +18,6 @@ function genReceiptNo(): string {
   return `${dd}${mm}${yy}-${rnd}`;
 }
 
-function lineItemsToCart(items: LineItem[]): CartItem[] {
-  return items
-    .filter((i) => i.name && Number(i.qty) > 0)
-    .map((i, idx) => ({
-      id: String(idx),
-      treeId: i.treeId,
-      treeName: i.name,
-      unitPrice: Number(i.price) || 0,
-      quantity: Number(i.qty) || 1,
-      unit: i.unit || 'ต้น',
-    }));
-}
 
 export interface POSPageHandle {
   clear: () => void;
@@ -166,6 +153,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   }, [items, showErrors]);
 
   const handleConfirm = async () => {
+    if (saving) return;
     setShowConfirm(false);
     setSaving(true);
     setError(null);
@@ -200,7 +188,13 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     setBtPrinting(true);
     setBtError(null);
     try {
-      await btPrintOrder(savedOrder, lineItemsToCart(items), {
+      await btPrintOrder(savedOrder, savedOrder.items.map((i) => ({
+        id: String(i.id),
+        treeId: i.treeId,
+        treeName: i.treeName,
+        unitPrice: Number(i.unitPrice),
+        quantity: i.quantity,
+      })), {
         shopName: settings.shopName,
         shopSubtitle: settings.shopTagline,
         thankYouMessage: settings.thanksMsg,

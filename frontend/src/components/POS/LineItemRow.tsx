@@ -79,7 +79,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
   const isCustom = !!item.name && !item.treeId;
   const nameErr = !!showErrors && !item.name;
   const qtyErr = !!showErrors && !!item.name && (!item.qty || Number(item.qty) <= 0);
-  const priceErr = !!showErrors && !!item.name && (!item.price || Number(item.price) === 0);
+  const priceErr = !!showErrors && !!item.name && (!item.price || Number(item.price) <= 0);
 
   return (
     <div className={`lineitem-row grid grid-cols-[28px_1fr_100px_110px_94px_28px] items-center gap-2 px-3.5 py-2.5 relative ${!isLast ? 'border-b border-[var(--rule-soft)]' : ''}`}>
@@ -232,7 +232,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
   const isCustomM = !!item.name && !item.treeId;
   const nameErrM = !!showErrors && !item.name;
   const qtyErrM = !!showErrors && !!item.name && (!item.qty || Number(item.qty) <= 0);
-  const priceErrM = !!showErrors && !!item.name && (!item.price || Number(item.price) === 0);
+  const priceErrM = !!showErrors && !!item.name && (!item.price || Number(item.price) <= 0);
 
   return (
     <div className="bg-[var(--cream-0)] border border-[var(--rule-soft)] rounded-[10px] p-3.5 mb-2.5">
