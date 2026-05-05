@@ -348,9 +348,12 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
       <div className="grid grid-cols-1 md:grid-cols-[minmax(520px,1fr)_minmax(480px,1fr)] min-h-[calc(100vh-56px)] w-full overflow-hidden">
 
         {/* ── Left: Form ── */}
-        <div className={`overflow-y-auto overflow-x-hidden border-r border-[var(--rule-soft)] bg-[var(--cream-1)] min-w-0 transition-[opacity] duration-200 p-5 pb-[110px] px-4 md:pt-7 md:px-8 md:pb-10
+        <div
+          className={`overflow-y-auto overflow-x-hidden border-r border-[var(--rule-soft)] bg-[var(--cream-1)] min-w-0 transition-[opacity] duration-200 p-5 pb-[110px] px-4 md:pt-7 md:px-8 md:pb-10
   ${savedOrder ? 'opacity-[0.55] pointer-events-none' : 'opacity-100'}
-  ${mobileTab !== 'form' ? 'hidden md:block' : ''}`}>
+  ${mobileTab !== 'form' ? 'hidden md:block' : ''}`}
+          {...(savedOrder ? { inert: '' } : {})}
+        >
 
           {/* Locked notice */}
           {savedOrder && (
