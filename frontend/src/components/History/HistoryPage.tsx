@@ -767,18 +767,10 @@ export default function HistoryPage() {
               )}
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <HistBtn
-                  onClick={handleBtPrint}
-                  icon={printerStatus === 'connected' ? <Bluetooth size={14} /> : <BluetoothOff size={14} />}
-                  disabled={btPrinting || printerStatus !== 'connected'}
-                  title={printerStatus !== 'connected' ? 'ยังไม่ได้เชื่อมต่อเครื่องพิมพ์' : undefined}
-                >
-                  {btPrinting ? 'กำลังพิมพ์...' : 'BT'}
-                </HistBtn>
-                <HistBtn
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<FileDown size={14} />}
-                >{pdfGenerating ? '...' : 'PDF'}</HistBtn>
+                >{pdfGenerating ? '...' : 'บันทึก PDF'}</HistBtn>
                 <HistBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}

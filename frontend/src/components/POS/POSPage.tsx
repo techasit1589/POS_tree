@@ -557,16 +557,10 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           {savedOrder && (
             <div className="hidden md:flex flex-wrap gap-2 justify-center bg-[rgba(251,245,232,0.12)] rounded-xl p-3.5 backdrop-blur-[8px]">
               <ActionBtn
-                onClick={handleBtPrint}
-                disabled={printerStatus !== 'connected' || btPrinting}
-                title={printerStatus !== 'connected' ? "ไปที่แท็บ 'เครื่องพิมพ์' เพื่อเชื่อมต่อ Bluetooth" : undefined}
-                icon={<BtIcon active={printerStatus === 'connected'} />}
-              >{btPrinting ? '...' : 'BT'}</ActionBtn>
-              <ActionBtn
                 onClick={handleExportPDF}
                 disabled={pdfGenerating || imageGenerating}
                 icon={<PdfIcon />}
-              >{pdfGenerating ? '...' : 'PDF'}</ActionBtn>
+              >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
               <ActionBtn
                 onClick={handleSaveImage}
                 disabled={pdfGenerating || imageGenerating}
@@ -616,15 +610,10 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
               {(btError || exportError) && <div className="text-[14px] text-[#B6452F]">{btError || exportError}</div>}
               <div className="flex gap-2">
                 <ActionBtn
-                  onClick={handleBtPrint}
-                  disabled={printerStatus !== 'connected' || btPrinting}
-                  icon={<BtIcon active={printerStatus === 'connected'} />}
-                >{btPrinting ? '...' : 'BT'}</ActionBtn>
-                <ActionBtn
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<PdfIcon />}
-                >{pdfGenerating ? '...' : 'PDF'}</ActionBtn>
+                >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
                 <ActionBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}
