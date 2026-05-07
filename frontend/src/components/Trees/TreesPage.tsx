@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Check, X, Search, RefreshCw, TreePine } from 'lucide-react';
 import { getAllTrees, createTree, updateTree, deleteTree } from '../../api';
 import type { Tree } from '../../types';
@@ -36,6 +36,39 @@ const emptyForm = (): FormState => ({
   name: '', category: 'ไม้ผล', price: '', priceWholesale: '', unit: 'ต้น',
 });
 
+const TREES_PAGE_SIZE = 50;
+
+function Pagination({ page, total, pageSize, onChange }: {
+  page: number; total: number; pageSize: number; onChange: (p: number) => void;
+}) {
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) return null;
+  const pages: (number | '...')[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push('...');
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+    if (page < totalPages - 2) pages.push('...');
+    pages.push(totalPages);
+  }
+  return (
+    <div className="flex items-center justify-center gap-1 px-4 py-3 border-t border-gray-50">
+      <button onClick={() => onChange(page - 1)} disabled={page === 1}
+        className="px-2.5 py-1.5 text-sm rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30">‹</button>
+      {pages.map((p, i) =>
+        p === '...'
+          ? <span key={`e${i}`} className="px-1 text-sm text-gray-400">…</span>
+          : <button key={p} onClick={() => onChange(p as number)}
+              className={`w-8 h-8 text-sm rounded-lg transition ${p === page ? 'bg-forest-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>{p}</button>
+      )}
+      <button onClick={() => onChange(page + 1)} disabled={page === totalPages}
+        className="px-2.5 py-1.5 text-sm rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30">›</button>
+    </div>
+  );
+}
+
 export default function TreesPage() {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,6 +76,7 @@ export default function TreesPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('ทั้งหมด');
+  const [treesPage, setTreesPage] = useState(1);
 
   // Add modal
   const [showAddModal, setShowAddModal] = useState(false);
@@ -76,6 +110,8 @@ export default function TreesPage() {
     }
   };
 
+  useEffect(() => { setTreesPage(1); }, [search, filterCat]);
+
   const filtered = trees.filter((t) => {
     const q = search.toLowerCase();
     const matchSearch =
@@ -85,6 +121,7 @@ export default function TreesPage() {
     const matchCat = filterCat === 'ทั้งหมด' || t.category === filterCat;
     return matchSearch && matchCat;
   });
+  const pagedFiltered = filtered.slice((treesPage - 1) * TREES_PAGE_SIZE, treesPage * TREES_PAGE_SIZE);
 
   // ── Add ──
   const handleAdd = async () => {
@@ -260,6 +297,7 @@ export default function TreesPage() {
             <p>ไม่พบรายการ</p>
           </div>
         ) : (
+          <>
           <table className="w-full text-base table-fixed">
             <thead className="bg-gray-50 text-sm text-gray-500 uppercase">
               <tr>
@@ -271,7 +309,7 @@ export default function TreesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map((tree) => (
+              {pagedFiltered.map((tree) => (
                 <tr key={tree.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 min-w-0 cursor-pointer" onClick={() => setExpandedName(expandedName === tree.id ? null : tree.id)}>
                     <p className={`font-medium text-gray-800 ${expandedName === tree.id ? 'whitespace-normal' : 'truncate'}`}>{tree.name}</p>
@@ -316,6 +354,8 @@ export default function TreesPage() {
               ))}
             </tbody>
           </table>
+          <Pagination page={treesPage} total={filtered.length} pageSize={TREES_PAGE_SIZE} onChange={setTreesPage} />
+          </>
         )}
       </div>
 
