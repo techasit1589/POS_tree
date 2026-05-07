@@ -461,7 +461,7 @@ export default function HistoryPage() {
         <div className="flex items-center gap-3">
           {filtered.length > 0 && (
             <button onClick={exportCSV} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-lg transition">
-              <FileDown size={16} /> Export CSV
+              <FileDown size={16} /> ดึงข้อมูลใส่ Excel
             </button>
           )}
         </div>
