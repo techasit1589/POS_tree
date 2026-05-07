@@ -555,18 +555,22 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
 
           {/* Post-save print actions (desktop only — mobile uses bottom bar) */}
           {savedOrder && (
-            <div className="hidden md:flex flex-wrap gap-2 justify-center bg-[rgba(251,245,232,0.12)] rounded-xl p-3.5 backdrop-blur-[8px]">
-              <ActionBtn
-                onClick={handleExportPDF}
-                disabled={pdfGenerating || imageGenerating}
-                icon={<PdfIcon />}
-              >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
-              <ActionBtn
-                onClick={handleSaveImage}
-                disabled={pdfGenerating || imageGenerating}
-                icon={<ImgIcon />}
-              >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
-              <ActionBtn onClick={clear} ghost icon={<span className="text-[14px] opacity-70">✦</span>}>ออเดอร์ใหม่</ActionBtn>
+            <div className="hidden md:flex flex-col gap-2 bg-[rgba(251,245,232,0.12)] rounded-xl p-3.5 backdrop-blur-[8px]" style={{ width: '100%' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <ActionBtn
+                  onClick={handleExportPDF}
+                  disabled={pdfGenerating || imageGenerating}
+                  icon={<PdfIcon />}
+                  extraStyle={{ flex: 1 }}
+                >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
+                <ActionBtn
+                  onClick={handleSaveImage}
+                  disabled={pdfGenerating || imageGenerating}
+                  icon={<ImgIcon />}
+                  extraStyle={{ flex: 1 }}
+                >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
+              </div>
+              <ActionBtn onClick={clear} ghost icon={<span className="text-[14px] opacity-70">✦</span>} extraStyle={{ width: '100%' }}>ออเดอร์ใหม่</ActionBtn>
             </div>
           )}
 
@@ -608,16 +612,18 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
             /* หลัง save: ปุ่ม print */
             <div className="flex flex-col gap-2">
               {(btError || exportError) && <div className="text-[14px] text-[#B6452F]">{btError || exportError}</div>}
-              <div className="flex gap-2">
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <ActionBtn
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<PdfIcon />}
+                  extraStyle={{ flex: 1 }}
                 >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
                 <ActionBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<ImgIcon />}
+                  extraStyle={{ flex: 1 }}
                 >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
               </div>
               <button
@@ -779,17 +785,18 @@ const ImgIcon = () => (
 );
 
 function ActionBtn({
-  onClick, children, disabled, title, icon, ghost,
+  onClick, children, disabled, title, icon, ghost, extraStyle,
 }: {
   onClick: () => void; children: React.ReactNode;
-  disabled?: boolean; title?: string; icon?: React.ReactNode; ghost?: boolean;
+  disabled?: boolean; title?: string; icon?: React.ReactNode; ghost?: boolean; extraStyle?: React.CSSProperties;
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`appearance-none rounded-lg font-[var(--font-ui)] text-[16px] font-medium inline-flex items-center gap-1.5 transition-all whitespace-nowrap backdrop-blur-[6px] px-3.5 py-2
+      style={extraStyle}
+      className={`appearance-none rounded-lg font-[var(--font-ui)] text-[16px] font-medium inline-flex items-center justify-center gap-1.5 transition-all whitespace-nowrap backdrop-blur-[6px] px-3.5 py-2
         ${ghost
           ? 'border border-[rgba(251,245,232,0.35)] bg-transparent text-[rgba(251,245,232,0.75)]'
           : 'border border-[rgba(251,245,232,0.55)] bg-[rgba(251,245,232,0.92)] text-[var(--ink-2)] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]'}
