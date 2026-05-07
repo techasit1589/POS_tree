@@ -87,9 +87,9 @@ function toEditItems(items: OrderItem[]): EditItem[] {
 function genLocalId() { return Math.random().toString(36).slice(2, 7); }
 
 /** Cream glass button — matches POS action button style */
-function HistBtn({ onClick, icon, children, disabled, title }: {
+function HistBtn({ onClick, icon, children, disabled, title, extraStyle }: {
   onClick: () => void; icon?: React.ReactNode; children: React.ReactNode;
-  disabled?: boolean; title?: string;
+  disabled?: boolean; title?: string; extraStyle?: React.CSSProperties;
 }) {
   return (
     <button
@@ -109,6 +109,7 @@ function HistBtn({ onClick, icon, children, disabled, title }: {
         transition: 'opacity 0.15s',
         opacity: disabled ? 0.6 : 1,
         whiteSpace: 'nowrap',
+        ...extraStyle,
       }}
     >
       {icon}{children}
@@ -765,16 +766,18 @@ export default function HistoryPage() {
                   {exportError}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
                 <HistBtn
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<FileDown size={14} />}
+                  extraStyle={{ flex: 1, justifyContent: 'center' }}
                 >{pdfGenerating ? '...' : 'บันทึก PDF'}</HistBtn>
                 <HistBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<ImageDown size={14} />}
+                  extraStyle={{ flex: 1, justifyContent: 'center' }}
                 >{imageGenerating ? '...' : 'บันทึกรูป'}</HistBtn>
               </div>
             </div>
