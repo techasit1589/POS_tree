@@ -116,6 +116,40 @@ function HistBtn({ onClick, icon, children, disabled, title }: {
   );
 }
 
+const SUMMARY_PAGE_SIZE = 5;
+const ORDERS_PAGE_SIZE  = 10;
+
+function Pagination({ page, total, pageSize, onChange }: {
+  page: number; total: number; pageSize: number; onChange: (p: number) => void;
+}) {
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) return null;
+  const pages: (number | '...')[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push('...');
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+    if (page < totalPages - 2) pages.push('...');
+    pages.push(totalPages);
+  }
+  return (
+    <div className="flex items-center justify-center gap-1 px-4 py-3 border-t border-gray-50">
+      <button onClick={() => onChange(page - 1)} disabled={page === 1}
+        className="px-2.5 py-1.5 text-sm rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30">‹</button>
+      {pages.map((p, i) =>
+        p === '...'
+          ? <span key={`e${i}`} className="px-1 text-sm text-gray-400">…</span>
+          : <button key={p} onClick={() => onChange(p as number)}
+              className={`w-8 h-8 text-sm rounded-lg transition ${p === page ? 'bg-forest-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>{p}</button>
+      )}
+      <button onClick={() => onChange(page + 1)} disabled={page === totalPages}
+        className="px-2.5 py-1.5 text-sm rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30">›</button>
+    </div>
+  );
+}
+
 // ── component ────────────────────────────────────────────────────────
 export default function HistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -156,6 +190,8 @@ export default function HistoryPage() {
   const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
 
   const [hasSearched, setHasSearched] = useState(false);
+  const [summaryPage, setSummaryPage] = useState(1);
+  const [ordersPage, setOrdersPage]   = useState(1);
 
   const load = async () => {
     setLoading(true); setError(null); setHasSearched(true);
@@ -176,6 +212,9 @@ export default function HistoryPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [printTarget, editOrder, deleteTarget]);
+
+  useEffect(() => { setSummaryPage(1); setOrdersPage(1); }, [orders, search, dateFrom, dateTo]);
+  useEffect(() => { setSummaryPage(1); }, [summaryTab]);
 
   // ค้นหาเมื่อกด Enter ในช่อง search
   const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -202,6 +241,9 @@ export default function HistoryPage() {
     });
     return Array.from(map.entries()).map(([label, v]) => ({ label, ...v }));
   }, [filtered, summaryTab]);
+
+  const pagedSummaryGroups = summaryGroups.slice((summaryPage - 1) * SUMMARY_PAGE_SIZE, summaryPage * SUMMARY_PAGE_SIZE);
+  const pagedOrders        = filtered.slice((ordersPage - 1) * ORDERS_PAGE_SIZE, ordersPage * ORDERS_PAGE_SIZE);
 
   const grandTotal = filtered.reduce((s, o) => s + Number(o.totalAmount), 0);
   const hasFilter  = search || dateFrom || dateTo;
@@ -498,7 +540,7 @@ export default function HistoryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {summaryGroups.map((g) => (
+              {pagedSummaryGroups.map((g) => (
                 <tr key={g.label} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-700">{g.label}</td>
                   <td className="px-4 py-3 text-center text-gray-500">{g.count} บิล</td>
@@ -507,6 +549,7 @@ export default function HistoryPage() {
               ))}
             </tbody>
           </table>
+          <Pagination page={summaryPage} total={summaryGroups.length} pageSize={SUMMARY_PAGE_SIZE} onChange={setSummaryPage} />
         </div>
       )}
 
@@ -532,8 +575,9 @@ export default function HistoryPage() {
             <p>ไม่พบรายการ</p>
           </div>
         ) : (
+          <>
           <div className="space-y-2">
-            {filtered.map((order) => (
+            {pagedOrders.map((order) => (
               <div key={order.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                 {/* แถว 1: เลขที่ + ชื่อลูกค้า */}
                 <button
@@ -631,6 +675,8 @@ export default function HistoryPage() {
               </div>
             ))}
           </div>
+          <Pagination page={ordersPage} total={filtered.length} pageSize={ORDERS_PAGE_SIZE} onChange={setOrdersPage} />
+          </>
         )}
       </div>
 
