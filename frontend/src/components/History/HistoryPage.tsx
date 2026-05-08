@@ -865,8 +865,9 @@ export default function HistoryPage() {
                             placeholder="ราคา"
                             className="w-24 pl-6 pr-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-400" />
                         </div>
-                        <input type="number" inputMode="numeric" pattern="[0-9]*" value={item.quantity} onChange={(e) => updateEditItem(item.localId, 'quantity', e.target.value)}
-                          placeholder="จำนวน" min="1"
+                        <input type="number" inputMode="numeric" pattern="[0-9]*" min="1" step="1" value={item.quantity}
+                          onChange={(e) => updateEditItem(item.localId, 'quantity', e.target.value.replace(/\..*/, ''))}
+                          placeholder="จำนวน"
                           className="w-16 shrink-0 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-400" />
                         <span className="flex-1 text-sm font-medium text-forest-700 text-right">
                           ฿{fmt((Number(item.unitPrice) || 0) * editItemQty(item))}
