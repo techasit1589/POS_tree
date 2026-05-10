@@ -925,41 +925,11 @@ export default function HistoryPage() {
             </div>
 
             <div className="px-6 py-5 space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">ชื่อลูกค้า</label>
-                  <input value={editCustomer} onChange={(e) => setEditCustomer(e.target.value)}
-                    placeholder="ชื่อลูกค้า"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">เบอร์โทร</label>
-                  <input value={editPhone} onChange={(e) => setEditPhone(e.target.value.replace(/\D/g, ''))}
-                    placeholder="08X-XXX-XXXX" type="tel"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">ชำระโดย</label>
-                  <div className="flex gap-2">
-                    {(['cash', 'transfer'] as const).map((m) => (
-                      <button key={m} type="button"
-                        onClick={() => setEditPayment(m)}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium border transition ${
-                          editPayment === m
-                            ? 'bg-forest-600 text-white border-forest-600'
-                            : 'bg-white text-gray-600 border-gray-300 hover:border-forest-400'
-                        }`}>
-                        {m === 'cash' ? 'เงินสด' : 'โอนเงิน'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">หมายเหตุ</label>
-                  <input value={editNote} onChange={(e) => setEditNote(e.target.value)}
-                    placeholder="หมายเหตุ"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">ชื่อลูกค้า</label>
+                <input value={editCustomer} onChange={(e) => setEditCustomer(e.target.value)}
+                  placeholder="ชื่อลูกค้า"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
               </div>
 
               <div>
@@ -1000,6 +970,37 @@ export default function HistoryPage() {
                   className="mt-2 w-full flex items-center justify-center gap-1 text-sm bg-green-500 hover:bg-green-600 text-white font-medium px-3 py-2 rounded-lg">
                   <Plus size={14} /> เพิ่มรายการ
                 </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">เบอร์โทร</label>
+                  <input value={editPhone} onChange={(e) => setEditPhone(e.target.value.replace(/\D/g, ''))}
+                    placeholder="08X-XXX-XXXX" type="tel"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">หมายเหตุ</label>
+                  <input value={editNote} onChange={(e) => setEditNote(e.target.value)}
+                    placeholder="หมายเหตุ"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">ชำระโดย</label>
+                  <div className="flex gap-2">
+                    {(['cash', 'transfer'] as const).map((m) => (
+                      <button key={m} type="button"
+                        onClick={() => setEditPayment(m)}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium border transition ${
+                          editPayment === m
+                            ? 'bg-forest-600 text-white border-forest-600'
+                            : 'bg-white text-gray-600 border-gray-300 hover:border-forest-400'
+                        }`}>
+                        {m === 'cash' ? 'เงินสด' : 'โอนเงิน'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-between items-center pt-2 border-t border-dashed border-gray-200">
