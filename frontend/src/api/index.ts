@@ -206,7 +206,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   return toOrder(data as DbOrder);
 }
 
-export const ORDERS_LIMIT = 100;
+export const ORDERS_LIMIT = 500;
 
 export async function getOrders(all = false): Promise<Order[]> {
   let query = supabase

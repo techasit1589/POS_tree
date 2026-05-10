@@ -654,14 +654,18 @@ export default function HistoryPage() {
             <button
               onClick={loadAll}
               disabled={loadingAll}
-              className="text-xs text-forest-600 hover:text-forest-700 font-medium disabled:opacity-50 mt-1"
+              className="text-xs bg-forest-600 hover:bg-forest-700 text-white font-medium px-2 py-0.5 rounded disabled:opacity-50 mt-1"
             >
-              {loadingAll ? 'กำลังโหลด...' : 'โหลดทั้งหมด'}
+              {loadingAll ? 'กำลังโหลด...' : 'โหลดใบเสร็จทั้งหมด'}
             </button>
           )}
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-sm text-gray-500">ยอดขายรวม{hasFilter ? ' (ที่กรอง)' : ''}</p>
+          <p className="text-sm text-gray-500">
+            {!loadedAll && orders.length >= ORDERS_LIMIT
+              ? `ยอดขาย ${ORDERS_LIMIT} ใบล่าสุด${hasFilter ? ' (ที่กรอง)' : ''}`
+              : `ยอดขายรวม${hasFilter ? ' (ที่กรอง)' : ''}`}
+          </p>
           <p className="text-3xl font-bold text-forest-700 mt-1">฿{fmt(grandTotal)}</p>
         </div>
       </div>
