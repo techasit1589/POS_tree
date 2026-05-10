@@ -859,12 +859,16 @@ export default function HistoryPage() {
                       </div>
                       {/* Row 2: จำนวน + ราคา + รวม */}
                       <div className="flex gap-2 items-center">
-                        <input type="number" inputMode="numeric" pattern="[0-9]*" min="1" step="1" value={item.quantity}
-                          onChange={(e) => updateEditItem(item.localId, 'quantity', e.target.value.replace(/\..*/, ''))}
-                          placeholder="จำนวน"
-                          className="w-16 shrink-0 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                        <div className="flex flex-col items-center shrink-0">
+                          <span className="text-xs text-gray-400 mb-0.5">จำนวน</span>
+                          <input type="number" inputMode="numeric" pattern="[0-9]*" min="1" step="1" value={item.quantity}
+                            onChange={(e) => updateEditItem(item.localId, 'quantity', e.target.value.replace(/\..*/, ''))}
+                            placeholder="จำนวน"
+                            className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                        </div>
                         <div className="relative shrink-0">
-                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">฿</span>
+                          <span className="text-xs text-gray-400 mb-0.5 block">ราคา</span>
+                          <span className="absolute left-2.5 bottom-[9px] text-gray-400 text-xs">฿</span>
                           <input type="number" inputMode="decimal" value={item.unitPrice} onChange={(e) => updateEditItem(item.localId, 'unitPrice', e.target.value)}
                             placeholder="ราคา"
                             className="w-24 pl-6 pr-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-400" />
