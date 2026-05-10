@@ -90,11 +90,12 @@ function genLocalId() { return Math.random().toString(36).slice(2, 7); }
 interface EditItemRowProps {
   item: EditItem;
   catalog: Tree[];
+  priceMode: 'retail' | 'wholesale';
   onUpdate: (localId: string, field: keyof Omit<EditItem, 'localId'>, val: string) => void;
   onPick: (localId: string, tree: Tree) => void;
   onRemove: (localId: string) => void;
 }
-function EditItemRow({ item, catalog, onUpdate, onPick, onRemove }: EditItemRowProps) {
+function EditItemRow({ item, catalog, priceMode, onUpdate, onPick, onRemove }: EditItemRowProps) {
   const [query, setQuery] = useState(item.treeName);
   const [showSuggest, setShowSuggest] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -161,7 +162,9 @@ function EditItemRow({ item, catalog, onUpdate, onPick, onRemove }: EditItemRowP
                   className={`px-3 py-2 cursor-pointer border-b border-gray-50 flex justify-between items-center ${i === activeIdx ? 'bg-green-50' : ''}`}
                 >
                   <span className="text-sm text-gray-800">{m.name}</span>
-                  <span className="text-xs font-medium text-forest-700">฿{Number(m.price).toLocaleString('th-TH')}</span>
+                  <span className="text-xs font-medium text-forest-700">
+                    ฿{Number(priceMode === 'wholesale' ? (m.priceWholesale ?? m.price) : m.price).toLocaleString('th-TH')}
+                  </span>
                 </div>
               ))}
             </div>
@@ -284,6 +287,9 @@ export default function HistoryPage() {
   const [editSaving, setEditSaving]       = useState(false);
   const [editError, setEditError]         = useState<string | null>(null);
   const [catalog, setCatalog]             = useState<Tree[]>([]);
+  const [editPriceMode, setEditPriceMode] = useState<'retail' | 'wholesale'>(
+    () => (localStorage.getItem('pos_price_mode') as 'retail' | 'wholesale') || 'retail'
+  );
 
   // ── delete confirm ──
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
@@ -433,11 +439,13 @@ export default function HistoryPage() {
 
   const updateEditItem = (localId: string, field: keyof Omit<EditItem,'localId'>, val: string) =>
     setEditItems((prev) => prev.map((i) => i.localId === localId ? { ...i, [field]: val } : i));
-  const pickEditTree = (localId: string, tree: Tree) =>
+  const pickEditTree = (localId: string, tree: Tree) => {
+    const price = editPriceMode === 'wholesale' ? (tree.priceWholesale ?? tree.price) : tree.price;
     setEditItems((prev) => prev.map((i) => i.localId === localId
-      ? { ...i, treeName: tree.name, treeId: tree.id, unitPrice: String(tree.price) }
+      ? { ...i, treeName: tree.name, treeId: tree.id, unitPrice: String(price) }
       : i
     ));
+  };
   const removeEditItem = (localId: string) =>
     setEditItems((prev) => prev.filter((i) => i.localId !== localId));
   const addEditItem = () =>
@@ -957,10 +965,20 @@ export default function HistoryPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-gray-600">รายการสินค้า</label>
-                  <button onClick={addEditItem}
-                    className="flex items-center gap-1 text-xs bg-green-500 hover:bg-green-600 text-white font-medium px-3 py-1.5 rounded-lg">
-                    <Plus size={13} /> เพิ่มรายการ
-                  </button>
+                  {/* ปลีก/ส่ง toggle */}
+                  <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                    {(['retail', 'wholesale'] as const).map((mode) => (
+                      <button key={mode} type="button"
+                        onClick={() => { setEditPriceMode(mode); localStorage.setItem('pos_price_mode', mode); }}
+                        className={`px-3 py-1 text-sm transition-all ${
+                          editPriceMode === mode
+                            ? 'bg-forest-600 text-white font-semibold'
+                            : 'bg-transparent text-gray-500 hover:bg-gray-50'
+                        }`}>
+                        {mode === 'retail' ? 'ปลีก' : 'ส่ง'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   {editItems.map((item) => (
@@ -968,15 +986,20 @@ export default function HistoryPage() {
                       key={item.localId}
                       item={item}
                       catalog={catalog}
+                      priceMode={editPriceMode}
                       onUpdate={updateEditItem}
                       onPick={pickEditTree}
                       onRemove={removeEditItem}
                     />
                   ))}
                   {editItems.length === 0 && (
-                    <p className="text-xs text-gray-400 text-center py-3">ไม่มีรายการ — กดเพิ่มรายการด้านบน</p>
+                    <p className="text-xs text-gray-400 text-center py-3">ไม่มีรายการ — กดเพิ่มรายการด้านล่าง</p>
                   )}
                 </div>
+                <button onClick={addEditItem}
+                  className="mt-2 w-full flex items-center justify-center gap-1 text-sm bg-green-500 hover:bg-green-600 text-white font-medium px-3 py-2 rounded-lg">
+                  <Plus size={14} /> เพิ่มรายการ
+                </button>
               </div>
 
               <div className="flex justify-between items-center pt-2 border-t border-dashed border-gray-200">
