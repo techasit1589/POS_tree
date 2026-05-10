@@ -644,23 +644,20 @@ export default function HistoryPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-sm text-gray-500">จำนวนใบเสร็จ{hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}</p>
+          <p className="text-sm text-gray-500">
+            {!loadedAll && orders.length >= 100
+              ? '100 ใบเสร็จล่าสุด'
+              : `จำนวนใบเสร็จ${hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}`}
+          </p>
           <p className="text-3xl font-bold text-forest-700 mt-1">{filtered.length}</p>
-          {hasSearched && !loading && (
-            loadedAll ? (
-              <p className="text-xs text-gray-400 mt-1">โหลดทั้งหมดแล้ว</p>
-            ) : (
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs text-gray-400">100 ใบเสร็จล่าสุด</p>
-                <button
-                  onClick={loadAll}
-                  disabled={loadingAll}
-                  className="text-xs text-forest-600 hover:text-forest-700 font-medium disabled:opacity-50"
-                >
-                  {loadingAll ? 'กำลังโหลด...' : 'โหลดทั้งหมด'}
-                </button>
-              </div>
-            )
+          {hasSearched && !loading && !loadedAll && orders.length >= 100 && (
+            <button
+              onClick={loadAll}
+              disabled={loadingAll}
+              className="text-xs text-forest-600 hover:text-forest-700 font-medium disabled:opacity-50 mt-1"
+            >
+              {loadingAll ? 'กำลังโหลด...' : 'โหลดทั้งหมด'}
+            </button>
           )}
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
