@@ -841,7 +841,7 @@ export default function HistoryPage() {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-gray-600">รายการสินค้า</label>
                   <button onClick={addEditItem}
-                    className="flex items-center gap-1 text-xs text-forest-600 hover:text-forest-800 font-medium">
+                    className="flex items-center gap-1 text-xs bg-green-500 hover:bg-green-600 text-white font-medium px-3 py-1.5 rounded-lg">
                     <Plus size={13} /> เพิ่มรายการ
                   </button>
                 </div>
