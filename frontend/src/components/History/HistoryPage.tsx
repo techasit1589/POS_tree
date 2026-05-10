@@ -699,7 +699,7 @@ export default function HistoryPage() {
               <span className="text-sm text-gray-400">โหลดทั้งหมดแล้ว</span>
             ) : (
               <>
-                <span className="text-sm text-gray-400">100 บิลล่าสุด</span>
+                <span className="text-sm text-gray-400">100 ใบเสร็จล่าสุด</span>
                 <button
                   onClick={loadAll}
                   disabled={loadingAll}
