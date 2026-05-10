@@ -4,9 +4,9 @@ import {
   Calendar, User, X, Pencil, Trash2, Plus, Check, AlertCircle,
   FileDown, ImageDown, Bluetooth, BluetoothOff, Receipt as ReceiptIcon,
 } from 'lucide-react';
-import { getOrders, updateOrder, deleteOrder } from '../../api';
+import { getOrders, updateOrder, deleteOrder, getAllTrees } from '../../api';
 import ConfirmModal from '../shared/ConfirmModal';
-import type { Order, OrderItem, CartItem } from '../../types';
+import type { Order, OrderItem, CartItem, Tree } from '../../types';
 import ReceiptPaper, { loadPOSSettings } from '../POS/ReceiptPaper';
 import type { LineItem } from '../POS/LineItemRow';
 import { usePrinter } from '../../context/PrinterContext';
@@ -85,6 +85,116 @@ function toEditItems(items: OrderItem[]): EditItem[] {
   }));
 }
 function genLocalId() { return Math.random().toString(36).slice(2, 7); }
+
+// ── autocomplete row for edit modal ──────────────────────────────────
+interface EditItemRowProps {
+  item: EditItem;
+  catalog: Tree[];
+  onUpdate: (localId: string, field: keyof Omit<EditItem, 'localId'>, val: string) => void;
+  onPick: (localId: string, tree: Tree) => void;
+  onRemove: (localId: string) => void;
+}
+function EditItemRow({ item, catalog, onUpdate, onPick, onRemove }: EditItemRowProps) {
+  const [query, setQuery] = useState(item.treeName);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setQuery(item.treeName); }, [item.treeName]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node))
+        setShowSuggest(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const matches = useMemo(() => {
+    if (!query.trim()) return [];
+    const q = query.toLowerCase();
+    return catalog.filter(p => p.name.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q)).slice(0, 6);
+  }, [query, catalog]);
+
+  const pick = (tree: Tree) => {
+    onPick(item.localId, tree);
+    setQuery(tree.name);
+    setShowSuggest(false);
+  };
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (!showSuggest || !matches.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => (i + 1) % matches.length); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => (i - 1 + matches.length) % matches.length); }
+    else if (e.key === 'Enter') { e.preventDefault(); pick(matches[activeIdx]); }
+    else if (e.key === 'Escape') setShowSuggest(false);
+  };
+
+  const qty = Math.max(0, Math.round(Number(item.quantity) || 0));
+
+  return (
+    <div className="flex flex-col gap-1.5 py-2 border-b border-gray-100 last:border-0">
+      {/* Row 1: ชื่อ + autocomplete + ลบ */}
+      <div className="flex gap-2 items-center" ref={wrapRef}>
+        <div className="flex-1 min-w-0 relative">
+          <input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowSuggest(true);
+              setActiveIdx(0);
+              onUpdate(item.localId, 'treeName', e.target.value);
+            }}
+            onFocus={() => { if (query.trim()) setShowSuggest(true); }}
+            onKeyDown={handleKey}
+            placeholder="ชื่อต้นไม้ *"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+          {showSuggest && matches.length > 0 && (
+            <div className="absolute top-[calc(100%+2px)] left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden max-h-[200px] overflow-y-auto">
+              {matches.map((m, i) => (
+                <div
+                  key={m.id}
+                  onMouseEnter={() => setActiveIdx(i)}
+                  onMouseDown={(e) => { e.preventDefault(); pick(m); }}
+                  className={`px-3 py-2 cursor-pointer border-b border-gray-50 flex justify-between items-center ${i === activeIdx ? 'bg-green-50' : ''}`}
+                >
+                  <span className="text-sm text-gray-800">{m.name}</span>
+                  <span className="text-xs font-medium text-forest-700">฿{Number(m.price).toLocaleString('th-TH')}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button onClick={() => onRemove(item.localId)} className="p-1 text-red-400 hover:text-red-600 shrink-0">
+          <X size={14} />
+        </button>
+      </div>
+      {/* Row 2: จำนวน + ราคา + รวม */}
+      <div className="flex gap-2 items-center">
+        <div className="flex flex-col items-center shrink-0">
+          <span className="text-xs text-gray-400 mb-0.5">จำนวน</span>
+          <input type="number" inputMode="numeric" pattern="[0-9]*" min="1" step="1" value={item.quantity}
+            onChange={(e) => onUpdate(item.localId, 'quantity', e.target.value.replace(/\..*/, ''))}
+            placeholder="จำนวน"
+            className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-400" />
+        </div>
+        <div className="relative shrink-0">
+          <span className="text-xs text-gray-400 mb-0.5 block">ราคา</span>
+          <span className="absolute left-2.5 bottom-[9px] text-gray-400 text-xs">฿</span>
+          <input type="number" inputMode="decimal" value={item.unitPrice}
+            onChange={(e) => onUpdate(item.localId, 'unitPrice', e.target.value)}
+            placeholder="ราคา"
+            className="w-24 pl-6 pr-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-400" />
+        </div>
+        <span className="flex-1 text-sm font-medium text-forest-700 text-right">
+          ฿{fmt((Number(item.unitPrice) || 0) * qty)}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 /** Cream glass button — matches POS action button style */
 function HistBtn({ onClick, icon, children, disabled, title, extraStyle }: {
@@ -173,6 +283,7 @@ export default function HistoryPage() {
   const [editItems, setEditItems]         = useState<EditItem[]>([]);
   const [editSaving, setEditSaving]       = useState(false);
   const [editError, setEditError]         = useState<string | null>(null);
+  const [catalog, setCatalog]             = useState<Tree[]>([]);
 
   // ── delete confirm ──
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
@@ -316,11 +427,17 @@ export default function HistoryPage() {
     setEditPayment((order.paymentMethod as 'cash' | 'transfer') || 'cash');
     setEditItems(toEditItems(order.items || []));
     setEditError(null);
+    if (catalog.length === 0) getAllTrees().then(setCatalog).catch(() => {});
   };
   const closeEdit = () => { setEditOrder(null); setEditError(null); };
 
   const updateEditItem = (localId: string, field: keyof Omit<EditItem,'localId'>, val: string) =>
     setEditItems((prev) => prev.map((i) => i.localId === localId ? { ...i, [field]: val } : i));
+  const pickEditTree = (localId: string, tree: Tree) =>
+    setEditItems((prev) => prev.map((i) => i.localId === localId
+      ? { ...i, treeName: tree.name, treeId: tree.id, unitPrice: String(tree.price) }
+      : i
+    ));
   const removeEditItem = (localId: string) =>
     setEditItems((prev) => prev.filter((i) => i.localId !== localId));
   const addEditItem = () =>
@@ -847,37 +964,14 @@ export default function HistoryPage() {
                 </div>
                 <div className="space-y-2">
                   {editItems.map((item) => (
-                    <div key={item.localId} className="flex flex-col gap-1.5 py-2 border-b border-gray-100 last:border-0">
-                      {/* Row 1: ชื่อ + ลบ */}
-                      <div className="flex gap-2 items-center">
-                        <input value={item.treeName} onChange={(e) => updateEditItem(item.localId, 'treeName', e.target.value)}
-                          placeholder="ชื่อต้นไม้ *"
-                          className="flex-1 min-w-0 px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                        <button onClick={() => removeEditItem(item.localId)} className="p-1 text-red-400 hover:text-red-600 shrink-0">
-                          <X size={14} />
-                        </button>
-                      </div>
-                      {/* Row 2: จำนวน + ราคา + รวม */}
-                      <div className="flex gap-2 items-center">
-                        <div className="flex flex-col items-center shrink-0">
-                          <span className="text-xs text-gray-400 mb-0.5">จำนวน</span>
-                          <input type="number" inputMode="numeric" pattern="[0-9]*" min="1" step="1" value={item.quantity}
-                            onChange={(e) => updateEditItem(item.localId, 'quantity', e.target.value.replace(/\..*/, ''))}
-                            placeholder="จำนวน"
-                            className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                        </div>
-                        <div className="relative shrink-0">
-                          <span className="text-xs text-gray-400 mb-0.5 block">ราคา</span>
-                          <span className="absolute left-2.5 bottom-[9px] text-gray-400 text-xs">฿</span>
-                          <input type="number" inputMode="decimal" value={item.unitPrice} onChange={(e) => updateEditItem(item.localId, 'unitPrice', e.target.value)}
-                            placeholder="ราคา"
-                            className="w-24 pl-6 pr-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-400" />
-                        </div>
-                        <span className="flex-1 text-sm font-medium text-forest-700 text-right">
-                          ฿{fmt((Number(item.unitPrice) || 0) * editItemQty(item))}
-                        </span>
-                      </div>
-                    </div>
+                    <EditItemRow
+                      key={item.localId}
+                      item={item}
+                      catalog={catalog}
+                      onUpdate={updateEditItem}
+                      onPick={pickEditTree}
+                      onRemove={removeEditItem}
+                    />
                   ))}
                   {editItems.length === 0 && (
                     <p className="text-xs text-gray-400 text-center py-3">ไม่มีรายการ — กดเพิ่มรายการด้านบน</p>
