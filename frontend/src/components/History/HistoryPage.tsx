@@ -646,6 +646,22 @@ export default function HistoryPage() {
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <p className="text-sm text-gray-500">จำนวนใบเสร็จ{hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}</p>
           <p className="text-3xl font-bold text-forest-700 mt-1">{filtered.length}</p>
+          {hasSearched && !loading && (
+            loadedAll ? (
+              <p className="text-xs text-gray-400 mt-1">โหลดทั้งหมดแล้ว</p>
+            ) : (
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-gray-400">100 ใบเสร็จล่าสุด</p>
+                <button
+                  onClick={loadAll}
+                  disabled={loadingAll}
+                  className="text-xs text-forest-600 hover:text-forest-700 font-medium disabled:opacity-50"
+                >
+                  {loadingAll ? 'กำลังโหลด...' : 'โหลดทั้งหมด'}
+                </button>
+              </div>
+            )
+          )}
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <p className="text-sm text-gray-500">ยอดขายรวม{hasFilter ? ' (ที่กรอง)' : ''}</p>
@@ -690,27 +706,7 @@ export default function HistoryPage() {
 
       {/* Orders list */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <p className="text-base font-semibold text-gray-600">
-            รายการทั้งหมด ({filtered.length})
-          </p>
-          {hasSearched && !loading && (
-            loadedAll ? (
-              <span className="text-sm text-gray-400">โหลดทั้งหมดแล้ว</span>
-            ) : (
-              <>
-                <span className="text-sm text-gray-400">100 ใบเสร็จล่าสุด</span>
-                <button
-                  onClick={loadAll}
-                  disabled={loadingAll}
-                  className="text-sm text-forest-600 hover:text-forest-700 font-medium disabled:opacity-50"
-                >
-                  {loadingAll ? 'กำลังโหลด...' : 'โหลดทั้งหมด'}
-                </button>
-              </>
-            )
-          )}
-        </div>
+        <p className="text-base font-semibold text-gray-600 mb-2">รายการทั้งหมด ({filtered.length})</p>
         {!hasSearched ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
             <Search size={40} className="mx-auto mb-3 opacity-30" />
