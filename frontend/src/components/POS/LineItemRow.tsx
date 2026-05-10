@@ -52,7 +52,7 @@ export default function LineItemRow({ item, idx, isLast, catalog, onUpdate, onRe
   }, [query, catalog]);
 
   const pick = (tree: Tree) => {
-    const filledPrice = priceMode === 'wholesale' ? (tree.priceWholesale ?? '') : tree.price;
+    const filledPrice = priceMode === 'wholesale' ? (tree.priceWholesale ?? tree.price) : tree.price;
     onUpdate(idx, {
       ...item,
       name: tree.name,
@@ -220,7 +220,7 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
   }, [query, catalog]);
 
   const pick = (tree: Tree) => {
-    const filledPrice = priceMode === 'wholesale' ? (tree.priceWholesale ?? '') : tree.price;
+    const filledPrice = priceMode === 'wholesale' ? (tree.priceWholesale ?? tree.price) : tree.price;
     onUpdate(idx, { ...item, name: tree.name, price: filledPrice, unit: tree.unit || 'ต้น', category: tree.category || '', treeId: tree.id });
     setQuery(tree.name);
     setShowSuggest(false);

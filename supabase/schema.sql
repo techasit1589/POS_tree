@@ -168,11 +168,11 @@ DECLARE
   v_total   NUMERIC(10, 2);
   v_result  JSONB;
 BEGIN
-  -- update fields ที่ส่งมา (NULL = ไม่แตะ)
+  -- update fields ที่ส่งมา (NULL = ล้างค่า ยกเว้น payment_method)
   UPDATE orders SET
-    customer_name  = COALESCE(p_customer_name,  customer_name),
-    customer_phone = COALESCE(p_customer_phone, customer_phone),
-    note           = COALESCE(p_note,           note),
+    customer_name  = p_customer_name,
+    customer_phone = p_customer_phone,
+    note           = p_note,
     payment_method = COALESCE(p_payment_method, payment_method)
   WHERE id = p_id;
 
