@@ -4,7 +4,7 @@ import {
   Calendar, User, X, Pencil, Trash2, Plus, Check, AlertCircle,
   FileDown, ImageDown, Bluetooth, BluetoothOff, Receipt as ReceiptIcon,
 } from 'lucide-react';
-import { getOrders, updateOrder, deleteOrder, getAllTrees } from '../../api';
+import { getOrders, updateOrder, deleteOrder, getAllTrees, ORDERS_LIMIT } from '../../api';
 import ConfirmModal from '../shared/ConfirmModal';
 import type { Order, OrderItem, CartItem, Tree } from '../../types';
 import ReceiptPaper, { loadPOSSettings } from '../POS/ReceiptPaper';
@@ -645,12 +645,12 @@ export default function HistoryPage() {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <p className="text-sm text-gray-500">
-            {!loadedAll && orders.length >= 100
-              ? '100 ใบเสร็จล่าสุด'
+            {!loadedAll && orders.length >= ORDERS_LIMIT
+              ? `${ORDERS_LIMIT} ใบเสร็จล่าสุด`
               : `จำนวนใบเสร็จ${hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}`}
           </p>
           <p className="text-3xl font-bold text-forest-700 mt-1">{filtered.length}</p>
-          {hasSearched && !loading && !loadedAll && orders.length >= 100 && (
+          {hasSearched && !loading && !loadedAll && orders.length >= ORDERS_LIMIT && (
             <button
               onClick={loadAll}
               disabled={loadingAll}

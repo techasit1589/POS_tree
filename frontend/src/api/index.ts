@@ -206,12 +206,14 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   return toOrder(data as DbOrder);
 }
 
+export const ORDERS_LIMIT = 100;
+
 export async function getOrders(all = false): Promise<Order[]> {
   let query = supabase
     .from('orders')
     .select('*, order_items(*)')
     .order('created_at', { ascending: false });
-  if (!all) query = query.limit(100);
+  if (!all) query = query.limit(ORDERS_LIMIT);
   const { data, error } = await query;
   if (error) unwrapSupabaseError(error);
   return (data as DbOrder[]).map(toOrder);
