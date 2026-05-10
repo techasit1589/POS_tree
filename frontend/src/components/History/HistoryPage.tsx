@@ -310,12 +310,21 @@ export default function HistoryPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [summaryPage, setSummaryPage] = useState(1);
   const [ordersPage, setOrdersPage]   = useState(1);
+  const [loadedAll, setLoadedAll]     = useState(false);
+  const [loadingAll, setLoadingAll]   = useState(false);
 
   const load = async () => {
-    setLoading(true); setError(null); setHasSearched(true);
+    setLoading(true); setError(null); setHasSearched(true); setLoadedAll(false);
     try { setOrders(await getOrders()); }
     catch { setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ backend'); }
     finally { setLoading(false); }
+  };
+
+  const loadAll = async () => {
+    setLoadingAll(true); setError(null);
+    try { setOrders(await getOrders(true)); setLoadedAll(true); }
+    catch { setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ backend'); }
+    finally { setLoadingAll(false); }
   };
 
   // กด Esc เพื่อปิด modal ที่เปิดอยู่ (priority: print > edit > delete confirm)
@@ -681,7 +690,27 @@ export default function HistoryPage() {
 
       {/* Orders list */}
       <div>
-        <p className="text-base font-semibold text-gray-600 mb-2">รายการทั้งหมด ({filtered.length})</p>
+        <div className="flex items-center gap-3 mb-2">
+          <p className="text-base font-semibold text-gray-600">
+            รายการทั้งหมด ({filtered.length})
+          </p>
+          {hasSearched && !loading && (
+            loadedAll ? (
+              <span className="text-sm text-gray-400">โหลดทั้งหมดแล้ว</span>
+            ) : (
+              <>
+                <span className="text-sm text-gray-400">100 บิลล่าสุด</span>
+                <button
+                  onClick={loadAll}
+                  disabled={loadingAll}
+                  className="text-sm text-forest-600 hover:text-forest-700 font-medium disabled:opacity-50"
+                >
+                  {loadingAll ? 'กำลังโหลด...' : 'โหลดทั้งหมด'}
+                </button>
+              </>
+            )
+          )}
+        </div>
         {!hasSearched ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
             <Search size={40} className="mx-auto mb-3 opacity-30" />
