@@ -99,12 +99,12 @@ function genReceiptNumber(): string {
 // ─── Trees ───────────────────────────────────────────────────────────────
 
 export async function searchTrees(q: string): Promise<Tree[]> {
-  const query = supabase.from('trees').select('*').eq('is_active', true).limit(20);
+  let query = supabase.from('trees').select('*').eq('is_active', true).limit(20);
   // strip PostgREST reserved chars ( , ( ) ) ที่จะทำให้ .or() filter parse ผิด
   const safe = q.trim().replace(/[,()]/g, ' ').trim();
   if (safe !== '') {
     const pattern = `%${safe}%`;
-    query.or(`name.ilike.${pattern},category.ilike.${pattern}`);
+    query = query.or(`name.ilike.${pattern},category.ilike.${pattern}`);
   }
   const { data, error } = await query;
   if (error) unwrapSupabaseError(error);
