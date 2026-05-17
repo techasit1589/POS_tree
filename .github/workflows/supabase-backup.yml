@@ -1,0 +1,31 @@
+name: Supabase Backup
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # 01:00 Asia/Bangkok
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Dump database
+        run: |
+          mkdir -p backups
+          supabase db dump \
+            --db-url "${{ secrets.SUPABASE_DB_URL }}" \
+            -f "backups/supabase-backup-$(date +%Y-%m-%d-%H%M%S).sql" \
+            --use-copy
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-backup
+          path: backups/*.sql
+          retention-days: 30
