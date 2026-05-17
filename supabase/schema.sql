@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS trees (
   name_latin    TEXT,
   category      TEXT,
   price         NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  price_wholesale NUMERIC(10, 2),
   unit          TEXT DEFAULT 'ต้น',
   description   TEXT,
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,

@@ -1,31 +1,21 @@
 import { useState, useRef } from 'react';
-import { TreePine, History, Settings } from 'lucide-react';
+import { TreePine, History } from 'lucide-react';
 import POSPage from './components/POS/POSPage';
 import type { POSPageHandle } from './components/POS/POSPage';
 import TreesPage from './components/Trees/TreesPage';
 import HistoryPage from './components/History/HistoryPage';
-import SettingsPage from './components/Settings/SettingsPage';
-import { PrinterProvider, usePrinter } from './context/PrinterContext';
 
 export const BOTTOM_NAV_H = 56;
 
-type Tab = 'pos' | 'trees' | 'history' | 'settings';
+type Tab = 'pos' | 'trees' | 'history';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('pos');
   const [posOrderSaved, setPosOrderSaved] = useState(false);
   const posRef = useRef<POSPageHandle>(null);
-  const { status } = usePrinter();
-
-  const dotColor =
-    status === 'connected'  ? '#4ADE80' :
-    status === 'connecting' ? '#60A5FA' :
-    status === 'error'      ? '#F87171' : '';
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--cream-1)', fontFamily: 'var(--font-ui)' }}>
-
-      {/* ── Top bar: desktop action buttons only (hidden on mobile) ── */}
       <header className="hidden sm:flex" style={{
         alignItems: 'center', justifyContent: 'flex-end',
         padding: '0 12px', height: '56px',
@@ -35,7 +25,6 @@ function AppContent() {
         position: 'sticky', top: 0, zIndex: 20,
         gap: '16px',
       }}>
-        {/* Desktop POS action buttons */}
         <div style={{ gap: '8px', alignItems: 'center', flexShrink: 0, display: 'flex', visibility: activeTab === 'pos' ? 'visible' : 'hidden' }}>
           <button
             onClick={() => { posRef.current?.clear(); setPosOrderSaved(false); }}
@@ -64,7 +53,6 @@ function AppContent() {
         </div>
       </header>
 
-      {/* ── Page content ── */}
       <main style={{ paddingBottom: `${BOTTOM_NAV_H}px` }}>
         <div style={{ display: activeTab === 'pos' ? undefined : 'none' }}>
           <POSPage ref={posRef} onSavedOrderChange={setPosOrderSaved} />
@@ -75,12 +63,8 @@ function AppContent() {
         <div style={{ display: activeTab === 'history' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <HistoryPage />
         </div>
-        <div style={{ display: activeTab === 'settings' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-          <SettingsPage />
-        </div>
       </main>
 
-      {/* ── Bottom nav ── */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         height: `${BOTTOM_NAV_H}px`, zIndex: 20,
@@ -105,26 +89,12 @@ function AppContent() {
           <History size={20} />
           ประวัติ
         </NavTab>
-        <NavTab active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hidden>
-          <span style={{ position: 'relative', display: 'inline-flex' }}>
-            <Settings size={20} />
-            {dotColor && (
-              <span style={{
-                position: 'absolute', top: '-3px', right: '-3px',
-                width: '7px', height: '7px', borderRadius: '50%',
-                background: dotColor, border: '1.5px solid white',
-              }} />
-            )}
-          </span>
-          พิมพ์
-        </NavTab>
       </nav>
     </div>
   );
 }
 
-function NavTab({ children, active, onClick, hidden }: { children: React.ReactNode; active: boolean; onClick: () => void; hidden?: boolean }) {
-  if (hidden) return null;
+function NavTab({ children, active, onClick }: { children: React.ReactNode; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -163,9 +133,5 @@ const tbBtnPrimaryStyle: React.CSSProperties = {
 };
 
 export default function App() {
-  return (
-    <PrinterProvider>
-      <AppContent />
-    </PrinterProvider>
-  );
+  return <AppContent />;
 }

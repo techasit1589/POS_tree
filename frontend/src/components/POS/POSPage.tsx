@@ -5,7 +5,6 @@ import LineItemRow, { LineItemRowMobile, emptyItem } from './LineItemRow';
 import type { LineItem } from './LineItemRow';
 import ReceiptPaper, { loadPOSSettings, savePOSSettings } from './ReceiptPaper';
 import type { POSSettings } from './ReceiptPaper';
-import { usePrinter } from '../../context/PrinterContext';
 
 // Generate receipt number preview: DDMMYY-NNNNN
 function genReceiptNo(): string {
@@ -49,14 +48,11 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
   );
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [btPrinting, setBtPrinting] = useState(false);
-  const [btError, setBtError] = useState<string | null>(null);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [imageGenerating, setImageGenerating] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
-  const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
 
   // Load trees once
   useEffect(() => {
@@ -96,7 +92,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     setNote('');
     setSavedOrder(null);
     setError(null);
-    setBtError(null);
     setExportError(null);
     setReceiptNo(genReceiptNo());
     setMobileTab('form');
@@ -182,29 +177,6 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     }
   };
 
-
-  const handleBtPrint = async () => {
-    if (!savedOrder) return;
-    setBtPrinting(true);
-    setBtError(null);
-    try {
-      await btPrintOrder(savedOrder, savedOrder.items.map((i) => ({
-        id: String(i.id),
-        treeId: i.treeId,
-        treeName: i.treeName,
-        unitPrice: Number(i.unitPrice),
-        quantity: i.quantity,
-      })), {
-        shopName: settings.shopName,
-        shopSubtitle: settings.shopTagline,
-        thankYouMessage: settings.thanksMsg,
-      });
-    } catch (e: unknown) {
-      setBtError((e as Error).message || 'พิมพ์ผ่าน Bluetooth ไม่สำเร็จ');
-    } finally {
-      setBtPrinting(false);
-    }
-  };
 
   const handleSaveImage = async () => {
     const element = receiptRef.current;
@@ -574,8 +546,8 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
             </div>
           )}
 
-          {(btError || exportError) && (
-            <div className="text-[var(--cream-0)] text-[15px] text-center mt-2 opacity-80">{btError || exportError}</div>
+          {exportError && (
+            <div className="text-[var(--cream-0)] text-[15px] text-center mt-2 opacity-80">{exportError}</div>
           )}
         </div>
       </div>
@@ -611,7 +583,7 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
           ) : (
             /* หลัง save: ปุ่ม print */
             <div className="flex flex-col gap-2">
-              {(btError || exportError) && <div className="text-[14px] text-[#B6452F]">{btError || exportError}</div>}
+              {exportError && <div className="text-[14px] text-[#B6452F]">{exportError}</div>}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <ActionBtn
                   onClick={handleExportPDF}
@@ -762,13 +734,6 @@ function ModalBtn({ onClick, children, primary, disabled }: { onClick?: () => vo
   );
 }
 
-const BtIcon = ({ active }: { active?: boolean }) => (
-  <svg width="13" height="14" viewBox="0 0 12 16" fill="none">
-    <path d="M3 4l6 4-6 4M9 4l-6 4 6 4"
-      stroke={active ? 'var(--clay)' : 'currentColor'}
-      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
 const PdfIcon = () => (
   <svg width="13" height="14" viewBox="0 0 14 14" fill="none">
     <path d="M8 1H3a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>

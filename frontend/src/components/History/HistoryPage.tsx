@@ -2,14 +2,13 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   History, ChevronDown, ChevronUp, RefreshCw, Search,
   Calendar, User, X, Pencil, Trash2, Plus, Check, AlertCircle,
-  FileDown, ImageDown, Bluetooth, BluetoothOff, Receipt as ReceiptIcon,
+  FileDown, ImageDown, Receipt as ReceiptIcon,
 } from 'lucide-react';
 import { getOrders, updateOrder, deleteOrder, getAllTrees, ORDERS_LIMIT } from '../../api';
 import ConfirmModal from '../shared/ConfirmModal';
-import type { Order, OrderItem, CartItem, Tree } from '../../types';
+import type { Order, OrderItem, Tree } from '../../types';
 import ReceiptPaper, { loadPOSSettings } from '../POS/ReceiptPaper';
 import type { LineItem } from '../POS/LineItemRow';
-import { usePrinter } from '../../context/PrinterContext';
 
 // ── helpers ──────────────────────────────────────────────────────────
 type SummaryTab = 'day' | 'month' | 'year';
@@ -43,17 +42,6 @@ function isoDate(d: Date) {
 }
 /** ดึง local date "YYYY-MM-DD" จาก ISO string ที่มาจาก backend */
 function localDateFromIso(iso: string) { return isoDate(new Date(iso)); }
-
-/** แปลง OrderItem → CartItem สำหรับ BT print */
-function toCartItems(items: OrderItem[]): CartItem[] {
-  return items.map((i) => ({
-    id: String(i.id),
-    treeId: i.treeId,
-    treeName: i.treeName,
-    unitPrice: Number(i.unitPrice),
-    quantity: i.quantity,
-  }));
-}
 
 /** แปลง OrderItem → LineItem สำหรับ ReceiptPaper */
 function toLineItems(items: OrderItem[]): LineItem[] {
@@ -297,15 +285,12 @@ export default function HistoryPage() {
 
   // ── receipt print modal ──
   const [printTarget, setPrintTarget]     = useState<Order | null>(null);
-  const [btPrinting, setBtPrinting]       = useState(false);
-  const [btError, setBtError]             = useState<string | null>(null);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [imageGenerating, setImageGenerating] = useState(false);
   const [exportError, setExportError]     = useState<string | null>(null);
   const receiptRef                        = useRef<HTMLDivElement>(null);
   // อ่านใหม่ทุกครั้งที่เปิด print modal — เผื่อผู้ใช้ไปแก้ settings ในแท็บอื่นแล้วกลับมา
   const posSettings                        = useMemo(() => loadPOSSettings(), [printTarget]);
-  const { status: printerStatus, printOrder: btPrintOrder } = usePrinter();
 
   const [hasSearched, setHasSearched] = useState(false);
   const [summaryPage, setSummaryPage] = useState(1);
@@ -332,7 +317,7 @@ export default function HistoryPage() {
     if (!printTarget && !editOrder && !deleteTarget) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (printTarget) { setPrintTarget(null); setBtError(null); setExportError(null); }
+      if (printTarget) { setPrintTarget(null); setExportError(null); }
       else if (editOrder) { setEditOrder(null); setEditError(null); }
       else if (deleteTarget) { setDeleteTarget(null); setDeleteError(null); }
     };
@@ -498,9 +483,8 @@ export default function HistoryPage() {
   // ── receipt print modal handlers ──
   const openPrint = (order: Order) => {
     setPrintTarget(order);
-    setBtError(null);
   };
-  const closePrint = () => { setPrintTarget(null); setBtError(null); setExportError(null); };
+  const closePrint = () => { setPrintTarget(null); setExportError(null); };
 
 
   // ── shared onclone: แก้ overflow:hidden ที่ทำให้ตัวอักษรไทยขาดครึ่งใน html2canvas ──
@@ -569,22 +553,6 @@ export default function HistoryPage() {
     }
   }, [printTarget]);
 
-  const handleBtPrint = useCallback(async () => {
-    if (!printTarget) return;
-    setBtPrinting(true);
-    setBtError(null);
-    try {
-      await btPrintOrder(
-        printTarget,
-        toCartItems(printTarget.items || []),
-        { shopName: posSettings.shopName, shopSubtitle: posSettings.shopTagline, thankYouMessage: posSettings.thanksMsg },
-      );
-    } catch (e: unknown) {
-      setBtError((e as Error).message || 'พิมพ์ผ่าน Bluetooth ไม่สำเร็จ');
-    } finally {
-      setBtPrinting(false);
-    }
-  }, [printTarget, btPrintOrder, posSettings]);
 
   return (
     <div className="space-y-5">
@@ -907,11 +875,6 @@ export default function HistoryPage() {
               borderTop: '1px solid var(--rule-soft)',
               padding: '14px 18px', flexShrink: 0,
             }}>
-              {btError && (
-                <div style={{ fontSize: '12px', color: '#B6452F', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Bluetooth size={12} /> {btError}
-                </div>
-              )}
               {exportError && (
                 <div style={{ fontSize: '12px', color: '#B6452F', marginBottom: '10px' }}>
                   {exportError}
