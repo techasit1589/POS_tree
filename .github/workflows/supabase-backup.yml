@@ -8,6 +8,8 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Install Supabase CLI
@@ -21,7 +23,7 @@ jobs:
           supabase db dump \
             --db-url "${{ secrets.SUPABASE_DB_URL }}" \
             -f "backups/supabase-backup-$(date +%Y-%m-%d-%H%M%S).sql" \
-            --use-copy
+            --data-only
 
       - name: Upload backup artifact
         uses: actions/upload-artifact@v4
