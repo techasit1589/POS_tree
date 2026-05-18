@@ -9,12 +9,10 @@
 CREATE TABLE IF NOT EXISTS trees (
   id            BIGSERIAL PRIMARY KEY,
   name          TEXT NOT NULL UNIQUE,
-  name_latin    TEXT,
   category      TEXT,
   price         NUMERIC(10, 2) NOT NULL DEFAULT 0,
   price_wholesale NUMERIC(10, 2),
   unit          TEXT DEFAULT 'ต้น',
-  description   TEXT,
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
