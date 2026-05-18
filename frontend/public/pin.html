@@ -142,6 +142,10 @@
         })
         const data = await res.json()
         if (data.ok) {
+          if (data.edgeToken && data.edgeExpiresAt) {
+            sessionStorage.setItem('pos_edge_token', data.edgeToken)
+            sessionStorage.setItem('pos_edge_token_expires_at', String(data.edgeExpiresAt))
+          }
           window.location.href = '/'
         } else if (res.status === 429) {
           lockedUntil = Date.now() + (data.retryAfter ?? 900) * 1000
