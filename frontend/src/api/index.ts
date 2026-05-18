@@ -86,19 +86,6 @@ function unwrapSupabaseError(e: { message?: string; details?: string; code?: str
   throw wrapError(msg);
 }
 
-function getEdgeToken(): string | null {
-  const token = sessionStorage.getItem('pos_edge_token');
-  const expiresAt = Number(sessionStorage.getItem('pos_edge_token_expires_at'));
-  if (!token || !Number.isFinite(expiresAt) || Date.now() > expiresAt) return null;
-  return token;
-}
-
-function createOrderFunctionUrl(): string {
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  if (!url) throw wrapError('Missing Supabase env vars. ตั้ง VITE_SUPABASE_URL ใน .env / Vercel');
-  return `${url.replace(/\/$/, '')}/functions/v1/create-order`;
-}
-
 function genReceiptNumber(): string {
   const d = new Date();
   const dd = String(d.getDate()).padStart(2, '0');
@@ -198,7 +185,7 @@ interface CreateOrderInput {
   paymentMethod?: 'cash' | 'transfer';
 }
 
-async function createOrderDirectForDev(input: CreateOrderInput): Promise<Order> {
+export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const items = input.items.map((i) => ({
     tree_id: i.treeId ?? null,
     tree_name: i.treeName,
@@ -216,32 +203,6 @@ async function createOrderDirectForDev(input: CreateOrderInput): Promise<Order> 
   });
   if (error) unwrapSupabaseError(error);
   return toOrder(data as DbOrder);
-}
-
-export async function createOrder(input: CreateOrderInput): Promise<Order> {
-  const token = getEdgeToken();
-  if (!token) {
-    if (import.meta.env.DEV) {
-      return createOrderDirectForDev(input);
-    }
-    throw wrapError('Session หมดอายุ กรุณาใส่ PIN ใหม่');
-  }
-
-  const res = await fetch(createOrderFunctionUrl(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-pos-edge-token': token,
-    },
-    body: JSON.stringify(input),
-  });
-
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    throw wrapError(body?.message || 'เกิดข้อผิดพลาด');
-  }
-
-  return toOrder(body as DbOrder);
 }
 
 export const ORDERS_LIMIT = 500;

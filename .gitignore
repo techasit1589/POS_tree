@@ -12,6 +12,7 @@ dist/
 
 # Migration data (มีข้อมูลลูกค้า)
 supabase/data.sql
+supabase/.temp/
 
 # Vercel
 .vercel/
