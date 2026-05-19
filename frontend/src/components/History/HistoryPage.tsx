@@ -425,6 +425,11 @@ export default function HistoryPage() {
     }
   }, [ordersPage, fetchPage, hasSearched]);
 
+  // โหลดข้อมูลอัตโนมัติตอนเปิดหน้าจอขึ้นมาครั้งแรก
+  useEffect(() => {
+    load();
+  }, []);
+
   // กด Esc เพื่อปิด modal ที่เปิดอยู่ (priority: print > edit > delete confirm)
   useEffect(() => {
     if (!printTarget && !editOrder && !deleteTarget) return;

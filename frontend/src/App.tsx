@@ -13,6 +13,8 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('pos');
   const [posOrderSaved, setPosOrderSaved] = useState(false);
   const [posOrderSaving, setPosOrderSaving] = useState(false);
+  const [treesVisited, setTreesVisited] = useState(false);
+  const [historyVisited, setHistoryVisited] = useState(false);
   const posRef = useRef<POSPageHandle>(null);
 
   return (
@@ -70,13 +72,13 @@ function AppContent() {
         <div style={{ display: activeTab === 'pos' ? undefined : 'none' }}>
           <POSPage ref={posRef} onSavedOrderChange={setPosOrderSaved} onSavingChange={setPosOrderSaving} />
         </div>
-        {activeTab === 'trees' && (
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        {treesVisited && (
+          <div style={{ display: activeTab === 'trees' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
             <TreesPage />
           </div>
         )}
-        {activeTab === 'history' && (
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        {historyVisited && (
+          <div style={{ display: activeTab === 'history' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
             <HistoryPage />
           </div>
         )}
@@ -98,11 +100,11 @@ function AppContent() {
           </svg>
           ใบเสร็จ
         </NavTab>
-        <NavTab active={activeTab === 'trees'} onClick={() => setActiveTab('trees')}>
+        <NavTab active={activeTab === 'trees'} onClick={() => { setActiveTab('trees'); setTreesVisited(true); }}>
           <TreePine size={20} />
           ต้นไม้
         </NavTab>
-        <NavTab active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
+        <NavTab active={activeTab === 'history'} onClick={() => { setActiveTab('history'); setHistoryVisited(true); }}>
           <History size={20} />
           ประวัติ
         </NavTab>
