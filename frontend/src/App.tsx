@@ -70,12 +70,16 @@ function AppContent() {
         <div style={{ display: activeTab === 'pos' ? undefined : 'none' }}>
           <POSPage ref={posRef} onSavedOrderChange={setPosOrderSaved} onSavingChange={setPosOrderSaving} />
         </div>
-        <div style={{ display: activeTab === 'trees' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-          <TreesPage />
-        </div>
-        <div style={{ display: activeTab === 'history' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-          <HistoryPage />
-        </div>
+        {activeTab === 'trees' && (
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            <TreesPage />
+          </div>
+        )}
+        {activeTab === 'history' && (
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            <HistoryPage />
+          </div>
+        )}
       </main>
 
       <nav style={{
