@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Check, X, Search, RefreshCw, TreePine } from 'lucide-react';
-import { getAllTrees, createTree, updateTree, deleteTree } from '../../api';
+import { getAllTrees, createTree, updateTree, deleteTree, getPaginatedTrees } from '../../api';
 import type { Tree } from '../../types';
 import ConfirmModal from '../shared/ConfirmModal';
 
@@ -71,10 +71,12 @@ function Pagination({ page, total, pageSize, onChange }: {
 
 export default function TreesPage() {
   const [trees, setTrees] = useState<Tree[]>([]);
+  const [totalTrees, setTotalTrees] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterCat, setFilterCat] = useState('ทั้งหมด');
   const [treesPage, setTreesPage] = useState(1);
 
@@ -97,12 +99,26 @@ export default function TreesPage() {
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
+  // Debounce search input changes (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getAllTrees();
-      setTrees(data);
+      const { trees: fetchedTrees, total } = await getPaginatedTrees({
+        page: treesPage,
+        pageSize: TREES_PAGE_SIZE,
+        search: debouncedSearch,
+        category: filterCat,
+      });
+      setTrees(fetchedTrees);
+      setTotalTrees(total);
       setHasLoaded(true);
     } catch {
       setError('โหลดข้อมูลไม่ได้ กรุณาตรวจสอบการเชื่อมต่อ backend');
@@ -111,18 +127,15 @@ export default function TreesPage() {
     }
   };
 
-  useEffect(() => { setTreesPage(1); }, [search, filterCat]);
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setTreesPage(1);
+  }, [debouncedSearch, filterCat]);
 
-  const filtered = trees.filter((t) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      !q ||
-      t.name.toLowerCase().includes(q) ||
-      (t.category || '').toLowerCase().includes(q);
-    const matchCat = filterCat === 'ทั้งหมด' || t.category === filterCat;
-    return matchSearch && matchCat;
-  });
-  const pagedFiltered = filtered.slice((treesPage - 1) * TREES_PAGE_SIZE, treesPage * TREES_PAGE_SIZE);
+  // Load paginated data when page or filter values change
+  useEffect(() => {
+    load();
+  }, [treesPage, debouncedSearch, filterCat]);
 
   // ── Add ──
   const handleAdd = async () => {
@@ -143,14 +156,14 @@ export default function TreesPage() {
         priceWholesale,
         unit: addForm.unit,
       } as Omit<Tree, 'id'>);
-      // แทรกตามชื่อ ascending ให้ตรงกับ ordering ของ getAllTrees
-      setTrees((prev) => {
-        const idx = prev.findIndex((t) => t.name.localeCompare(created.name, 'th') > 0);
-        return idx === -1 ? [...prev, created] : [...prev.slice(0, idx), created, ...prev.slice(idx)];
-      });
       setHasLoaded(true);
       setShowAddModal(false);
       setAddForm(emptyForm());
+      // รีเซ็ตตัวกรองและย้อนกลับหน้าแรกเพื่อให้เห็นต้นไม้ใหม่
+      setSearchInput('');
+      setFilterCat('ทั้งหมด');
+      setTreesPage(1);
+      load();
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setAddError(typeof msg === 'string' ? msg : 'เกิดข้อผิดพลาด');
@@ -195,6 +208,7 @@ export default function TreesPage() {
       });
       setTrees((prev) => prev.map((t) => (t.id === editTarget.id ? updated : t)));
       closeEdit();
+      load();
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setEditError(typeof msg === 'string' ? msg : 'เกิดข้อผิดพลาด');
@@ -212,6 +226,7 @@ export default function TreesPage() {
       await deleteTree(deleteTarget.id);
       setTrees((prev) => prev.filter((t) => t.id !== deleteTarget.id));
       setDeleteTarget(null);
+      load();
     } catch {
       setDeleteError('ลบไม่สำเร็จ กรุณาลองใหม่');
       // ไม่ปิด modal ให้ user เห็น error
@@ -228,7 +243,7 @@ export default function TreesPage() {
           <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
             <TreePine size={22} className="text-forest-600" /> รายการต้นไม้ในระบบ
           </h2>
-          <p className="text-base text-gray-400 mt-0.5">{trees.length} รายการ</p>
+          <p className="text-base text-gray-400 mt-0.5">{totalTrees} รายการ</p>
         </div>
         <button
           onClick={() => { setShowAddModal(true); setAddForm(emptyForm()); setAddError(null); }}
@@ -244,8 +259,8 @@ export default function TreesPage() {
         <div className="relative flex-1 min-w-48">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder="ค้นหาชื่อ, หมวดหมู่..."
             className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
@@ -295,7 +310,7 @@ export default function TreesPage() {
               <RefreshCw size={16} /> โหลดรายการต้นไม้
             </button>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : trees.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <TreePine size={48} className="mx-auto mb-3 opacity-30" />
             <p>ไม่พบรายการ</p>
@@ -313,7 +328,7 @@ export default function TreesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {pagedFiltered.map((tree) => (
+              {trees.map((tree) => (
                 <tr key={tree.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 min-w-0 cursor-pointer" onClick={() => setExpandedName(expandedName === tree.id ? null : tree.id)}>
                     <p className={`font-medium text-gray-800 ${expandedName === tree.id ? 'whitespace-normal' : 'truncate'}`}>{tree.name}</p>
@@ -358,7 +373,7 @@ export default function TreesPage() {
               ))}
             </tbody>
           </table>
-          <Pagination page={treesPage} total={filtered.length} pageSize={TREES_PAGE_SIZE} onChange={setTreesPage} />
+          <Pagination page={treesPage} total={totalTrees} pageSize={TREES_PAGE_SIZE} onChange={setTreesPage} />
           </>
         )}
       </div>

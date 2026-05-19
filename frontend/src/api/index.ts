@@ -122,6 +122,47 @@ export async function getAllTrees(): Promise<Tree[]> {
   return (data as DbTree[]).map(toTree);
 }
 
+export async function getPaginatedTrees(params: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  category?: string;
+}): Promise<{ trees: Tree[]; total: number }> {
+  const { page, pageSize, search, category } = params;
+
+  let query = supabase
+    .from('trees')
+    .select('*', { count: 'exact' })
+    .eq('is_active', true)
+    .order('name', { ascending: true });
+
+  if (category && category !== 'ทั้งหมด') {
+    query = query.eq('category', category);
+  }
+
+  if (search) {
+    const q = search.trim();
+    // strip reserved PostgREST chars just like in searchTrees
+    const safe = q.replace(/[,()]/g, ' ').trim();
+    if (safe !== '') {
+      const pattern = `%${safe}%`;
+      query = query.or(`name.ilike.${pattern},category.ilike.${pattern}`);
+    }
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  query = query.range(from, to);
+
+  const { data, error, count } = await query;
+  if (error) unwrapSupabaseError(error);
+
+  return {
+    trees: (data as DbTree[]).map(toTree),
+    total: count || 0,
+  };
+}
+
 export async function createTree(input: Omit<Tree, 'id'>): Promise<Tree> {
   const { data: existing } = await supabase
     .from('trees').select('id, is_active').eq('name', input.name).maybeSingle();
