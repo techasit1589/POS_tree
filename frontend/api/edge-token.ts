@@ -20,7 +20,7 @@ async function verifyCookieToken(token: string, secret: string): Promise<boolean
 }
 
 async function signEdgeToken(secret: string, expiresAt: number): Promise<string> {
-  const payload = `create-order:${expiresAt}`
+  const payload = `pos-session:${expiresAt}`
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),

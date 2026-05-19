@@ -301,27 +301,124 @@ interface UpdateOrderInput {
   items?: { treeName: string; treeId?: number; unitPrice: number; quantity: number }[];
 }
 
-export async function updateOrder(id: number, input: UpdateOrderInput): Promise<Order> {
-  const items = input.items?.map((i) => ({
-    tree_id: i.treeId ?? null,
-    tree_name: i.treeName,
-    unit_price: i.unitPrice,
-    quantity: i.quantity,
-  })) ?? null;
+function updateOrderFunctionUrl(): string {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!url) throw wrapError('Missing Supabase env vars. ตั้ง VITE_SUPABASE_URL ใน .env / Vercel');
+  return `${url.replace(/\/$/, '')}/functions/v1/update-order`;
+}
 
-  const { data, error } = await supabase.rpc('update_order', {
-    p_id: id,
-    p_customer_name: input.customerName ?? null,
-    p_customer_phone: input.customerPhone ?? null,
-    p_note: input.note ?? null,
-    p_payment_method: input.paymentMethod ?? null,
-    p_items: items,
+function deleteOrderFunctionUrl(): string {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!url) throw wrapError('Missing Supabase env vars. ตั้ง VITE_SUPABASE_URL ใน .env / Vercel');
+  return `${url.replace(/\/$/, '')}/functions/v1/delete-order`;
+}
+
+export async function updateOrder(id: number, input: UpdateOrderInput): Promise<Order> {
+  // หากเป็น Local Dev ให้ตกกลับไปใช้ Direct Database RPC อัตโนมัติ เพื่อให้ผู้พัฒนาสะดวก
+  if (import.meta.env.DEV) {
+    const items = input.items?.map((i) => ({
+      tree_id: i.treeId ?? null,
+      tree_name: i.treeName,
+      unit_price: i.unitPrice,
+      quantity: i.quantity,
+    })) ?? null;
+
+    const { data, error } = await supabase.rpc('update_order', {
+      p_id: id,
+      p_customer_name: input.customerName ?? null,
+      p_customer_phone: input.customerPhone ?? null,
+      p_note: input.note ?? null,
+      p_payment_method: input.paymentMethod ?? null,
+      p_items: items,
+    });
+    if (error) unwrapSupabaseError(error);
+    return toOrder(data as DbOrder);
+  }
+
+  // ใน Production: วิ่งผ่าน Edge Function
+  let token = getEdgeToken();
+  if (!token) {
+    token = await refreshEdgeToken();
+  }
+
+  if (!token) {
+    throw wrapError('Session หมดอายุ กรุณาใส่ PIN ใหม่');
+  }
+
+  let res = await fetch(updateOrderFunctionUrl(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-pos-edge-token': token,
+    },
+    body: JSON.stringify({ id, input }),
   });
-  if (error) unwrapSupabaseError(error);
-  return toOrder(data as DbOrder);
+
+  if (res.status === 401) {
+    const refreshedToken = await refreshEdgeToken();
+    if (refreshedToken) {
+      res = await fetch(updateOrderFunctionUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-pos-edge-token': refreshedToken,
+        },
+        body: JSON.stringify({ id, input }),
+      });
+    }
+  }
+
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw wrapError(body?.message || 'เกิดข้อผิดพลาดในการแก้ไขออเดอร์');
+  }
+
+  return toOrder(body as DbOrder);
 }
 
 export async function deleteOrder(id: number): Promise<void> {
-  const { error } = await supabase.from('orders').delete().eq('id', id);
-  if (error) unwrapSupabaseError(error);
+  // หากเป็น Local Dev ให้ตกกลับไปใช้ Direct Delete ตารางตรง ๆ
+  if (import.meta.env.DEV) {
+    const { error } = await supabase.from('orders').delete().eq('id', id);
+    if (error) unwrapSupabaseError(error);
+    return;
+  }
+
+  // ใน Production: วิ่งผ่าน Edge Function
+  let token = getEdgeToken();
+  if (!token) {
+    token = await refreshEdgeToken();
+  }
+
+  if (!token) {
+    throw wrapError('Session หมดอายุ กรุณาใส่ PIN ใหม่');
+  }
+
+  let res = await fetch(deleteOrderFunctionUrl(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-pos-edge-token': token,
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (res.status === 401) {
+    const refreshedToken = await refreshEdgeToken();
+    if (refreshedToken) {
+      res = await fetch(deleteOrderFunctionUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-pos-edge-token': refreshedToken,
+        },
+        body: JSON.stringify({ id }),
+      });
+    }
+  }
+
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw wrapError(body?.message || 'เกิดข้อผิดพลาดในการลบออเดอร์');
+  }
 }

@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.104.1'
 
-type CreateOrderInput = {
+type UpdateOrderInput = {
   customerName?: string
   customerPhone?: string
   note?: string
@@ -49,22 +49,17 @@ async function isValidToken(token: string | null, secret: string): Promise<boole
   return signature === expected
 }
 
-function genReceiptNumber(): string {
-  const d = new Date()
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const yy = String(d.getFullYear()).slice(-2)
-  const rnd = Math.floor(1000000 + Math.random() * 9000000)
-  return `${dd}${mm}${yy}-${rnd}`
-}
-
-function normalizeItems(input: CreateOrderInput): Array<{
+function normalizeItems(items: Array<{
+  treeName?: string
+  treeId?: number
+  unitPrice?: number
+  quantity?: number
+}>): Array<{
   tree_id: number | null
   tree_name: string
   unit_price: number
   quantity: number
 }> {
-  const items = input.items ?? []
   return items
     .filter((item) => item.treeName && Number(item.quantity) > 0)
     .map((item) => ({
@@ -96,19 +91,24 @@ Deno.serve(async (req) => {
     return json({ message: 'Unauthorized' }, 401)
   }
 
-  let input: CreateOrderInput
+  let body: { id?: number; input?: UpdateOrderInput }
   try {
-    input = await req.json()
+    body = await req.json()
   } catch {
     return json({ message: 'Invalid JSON body' }, 400)
   }
 
-  const items = normalizeItems(input)
-  if (items.length === 0) {
-    return json({ message: 'กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ' }, 400)
+  const id = body.id
+  const input = body.input
+  if (!id || !input) {
+    return json({ message: 'Missing id or input' }, 400)
   }
 
-  if (items.some((item) => item.unit_price <= 0 || item.quantity <= 0)) {
+  const items = input.items ? normalizeItems(input.items) : null
+  if (items !== null && items.length === 0) {
+    return json({ message: 'กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ' }, 400)
+  }
+  if (items !== null && items.some((item) => item.unit_price <= 0 || item.quantity <= 0)) {
     return json({ message: 'กรุณาใส่ราคาและจำนวนให้ถูกต้อง' }, 400)
   }
 
@@ -116,12 +116,12 @@ Deno.serve(async (req) => {
     auth: { persistSession: false },
   })
 
-  const { data, error } = await supabase.rpc('create_order', {
-    p_receipt_number: genReceiptNumber(),
+  const { data, error } = await supabase.rpc('update_order', {
+    p_id: id,
     p_customer_name: input.customerName ?? null,
     p_customer_phone: input.customerPhone ?? null,
     p_note: input.note ?? null,
-    p_payment_method: input.paymentMethod ?? 'cash',
+    p_payment_method: input.paymentMethod ?? null,
     p_items: items,
   })
 
