@@ -50,10 +50,12 @@ async function isValidToken(token: string | null, secret: string): Promise<boole
 }
 
 function genReceiptNumber(): string {
-  const d = new Date()
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const yy = String(d.getFullYear()).slice(-2)
+  // บวกเวลาประเทศไทย (UTC+7) เข้าไปในวัตถุ Date เพื่อให้ Deno Deploy (ที่เป็น UTC) แสดงผลวันที่ไทยได้แม่นยำ
+  const now = new Date()
+  const d = new Date(now.getTime() + 7 * 60 * 60 * 1000)
+  const dd = String(d.getUTCDate()).padStart(2, '0')
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const yy = String(d.getUTCFullYear()).slice(-2)
   const rnd = Math.floor(1000000 + Math.random() * 9000000)
   return `${dd}${mm}${yy}-${rnd}`
 }
