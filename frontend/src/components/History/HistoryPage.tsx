@@ -269,7 +269,7 @@ function Pagination({ page, total, pageSize, onChange }: {
 }
 
 // ── component ────────────────────────────────────────────────────────
-export default function HistoryPage() {
+export default function HistoryPage({ isActive = true }: { isActive?: boolean }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -427,6 +427,15 @@ export default function HistoryPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // โหลดใหม่เมื่อสลับกลับมาที่แท็บนี้
+  const prevIsActive = useRef(isActive);
+  useEffect(() => {
+    if (isActive && !prevIsActive.current) {
+      load();
+    }
+    prevIsActive.current = isActive;
+  }, [isActive, load]);
 
   // กด Esc เพื่อปิด modal ที่เปิดอยู่ (priority: print > edit > delete confirm)
   useEffect(() => {

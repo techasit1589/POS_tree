@@ -79,7 +79,7 @@ function AppContent() {
         )}
         {historyVisited && (
           <div style={{ display: activeTab === 'history' ? undefined : 'none' }} className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-            <HistoryPage />
+            <HistoryPage isActive={activeTab === 'history'} />
           </div>
         )}
       </main>
