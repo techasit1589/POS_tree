@@ -26,9 +26,10 @@ export interface POSPageHandle {
 
 interface POSPageProps {
   onSavedOrderChange?: (saved: boolean) => void;
+  onSavingChange?: (saving: boolean) => void;
 }
 
-const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSavedOrderChange }, ref) {
+const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSavedOrderChange, onSavingChange }, ref) {
   const [receiptNo, setReceiptNo] = useState(genReceiptNo);
   const [items, setItems] = useState<LineItem[]>([emptyItem()]);
   const [customerName, setCustomerName] = useState('');
@@ -69,6 +70,11 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [showSettingsModal]);
+
+  // Sync saving state with parent
+  useEffect(() => {
+    onSavingChange?.(saving);
+  }, [saving, onSavingChange]);
 
   const updateItem = useCallback((idx: number, next: LineItem) => {
     setItems((prev) => { const a = [...prev]; a[idx] = next; return a; });
@@ -574,10 +580,22 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                 disabled={saving}
                 className={`bg-gradient-to-b from-[var(--clay)] to-[var(--clay-d)] text-[var(--cream-0)] border border-[var(--clay-d)] px-5 py-3 rounded-[10px] font-[var(--font-ui)] text-[17px] font-semibold flex items-center gap-2 shadow-[0_2px_8px_rgba(62,122,58,0.35)] whitespace-nowrap shrink-0 ${saving ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
               >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M2 7l3 3 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                ออกใบเสร็จ
+                {saving ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-1 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    กำลังออก...
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M2 7l3 3 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    ออกใบเสร็จ
+                  </>
+                )}
               </button>
             </div>
           ) : (
