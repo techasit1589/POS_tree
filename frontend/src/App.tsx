@@ -87,7 +87,7 @@ function AppContent() {
         borderTop: '1px solid var(--rule-soft)',
         boxShadow: '0 -2px 12px rgba(28,46,26,0.07)',
       }}>
-        <NavTab active={activeTab === 'pos'} onClick={() => setActiveTab('pos')}>
+        <NavTab active={activeTab === 'pos'} onClick={() => { setActiveTab('pos'); posRef.current?.refreshCatalog?.(); }}>
           <svg width="20" height="20" viewBox="0 0 14 14" fill="none">
             <rect x="3" y="2" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1.3"/>
             <path d="M5 5h4M5 7h4M5 9h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>

@@ -22,6 +22,7 @@ export interface POSPageHandle {
   clear: () => void;
   submit: () => void;
   hasSavedOrder: () => boolean;
+  refreshCatalog?: () => void;
 }
 
 interface POSPageProps {
@@ -131,7 +132,14 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
     setShowConfirm(true);
   };
 
-  useImperativeHandle(ref, () => ({ clear, submit, hasSavedOrder: () => !!savedOrder }));
+  useImperativeHandle(ref, () => ({
+    clear,
+    submit,
+    hasSavedOrder: () => !!savedOrder,
+    refreshCatalog: () => {
+      getAllTrees().then(setAllTrees).catch(() => setAllTrees([]));
+    },
+  }));
 
   useEffect(() => {
     onSavedOrderChange?.(!!savedOrder);

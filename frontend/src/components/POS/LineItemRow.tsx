@@ -241,7 +241,12 @@ export function LineItemRowMobile({ item, idx, catalog, onUpdate, onRemove, show
         <div className="flex-1 relative" ref={wrapRef}>
           <input
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setShowSuggest(true); setActiveIdx(0); onUpdate(idx, { ...item, name: e.target.value }); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowSuggest(true);
+              setActiveIdx(0);
+              onUpdate(idx, { ...item, name: e.target.value, treeId: undefined, category: item.category });
+            }}
             onFocus={() => { if (query.trim()) setShowSuggest(true); }}
             placeholder="ชื่อสินค้า..."
             className={`w-full px-3 py-2.5 rounded-[7px] font-[var(--font-ui)] text-[19px] text-[var(--ink)] outline-none
