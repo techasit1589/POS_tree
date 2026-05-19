@@ -539,16 +539,18 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<PdfIcon />}
+                  variant="pdf"
                   extraStyle={{ flex: 1 }}
                 >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
                 <ActionBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<ImgIcon />}
+                  variant="image"
                   extraStyle={{ flex: 1 }}
                 >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
               </div>
-              <ActionBtn onClick={clear} ghost icon={<span className="text-[14px] opacity-70">✦</span>} extraStyle={{ width: '100%' }}>ออเดอร์ใหม่</ActionBtn>
+              <ActionBtn onClick={clear} variant="new-order" icon={<span className="text-[14px] opacity-75">✦</span>} extraStyle={{ width: '100%' }}>ออเดอร์ใหม่</ActionBtn>
             </div>
           )}
 
@@ -607,21 +609,23 @@ const POSPage = forwardRef<POSPageHandle, POSPageProps>(function POSPage({ onSav
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<PdfIcon />}
+                  variant="pdf"
                   extraStyle={{ flex: 1 }}
                 >{pdfGenerating ? '...' : 'บันทึก PDF'}</ActionBtn>
                 <ActionBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}
                   icon={<ImgIcon />}
+                  variant="image"
                   extraStyle={{ flex: 1 }}
                 >{imageGenerating ? '...' : 'บันทึกรูป'}</ActionBtn>
               </div>
-              <button
+              <ActionBtn
                 onClick={clear}
-                className="w-full py-2.5 rounded-lg border border-[var(--rule)] bg-transparent text-[var(--ink-3)] font-[var(--font-ui)] text-[16px] cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <span className="text-[14px]">✦</span> ออเดอร์ใหม่
-              </button>
+                variant="new-order"
+                icon={<span className="text-[14px] opacity-75">✦</span>}
+                extraStyle={{ width: '100%' }}
+              >ออเดอร์ใหม่</ActionBtn>
             </div>
           )}
         </div>
@@ -768,22 +772,33 @@ const ImgIcon = () => (
 );
 
 function ActionBtn({
-  onClick, children, disabled, title, icon, ghost, extraStyle,
+  onClick, children, disabled, title, icon, variant = 'default', extraStyle,
 }: {
   onClick: () => void; children: React.ReactNode;
-  disabled?: boolean; title?: string; icon?: React.ReactNode; ghost?: boolean; extraStyle?: React.CSSProperties;
+  disabled?: boolean; title?: string; icon?: React.ReactNode;
+  variant?: 'pdf' | 'image' | 'new-order' | 'ghost' | 'default';
+  extraStyle?: React.CSSProperties;
 }) {
+  let variantClasses = '';
+  if (variant === 'pdf') {
+    variantClasses = 'bg-gradient-to-b from-[#CD5D57] to-[#B34741] text-white border border-[#9A3833] shadow-[0_2px_8px_rgba(205,93,87,0.3)] hover:brightness-105';
+  } else if (variant === 'image') {
+    variantClasses = 'bg-gradient-to-b from-[#4682B4] to-[#36648B] text-white border border-[#2B4F6E] shadow-[0_2px_8px_rgba(70,130,180,0.3)] hover:brightness-105';
+  } else if (variant === 'new-order') {
+    variantClasses = 'bg-gradient-to-b from-[var(--clay)] to-[var(--clay-d)] text-white border border-[var(--clay-d)] shadow-[0_2px_8px_rgba(92,143,84,0.3)] hover:brightness-105';
+  } else if (variant === 'ghost') {
+    variantClasses = 'border border-[rgba(251,245,232,0.35)] bg-transparent text-[rgba(251,245,232,0.75)] hover:bg-[rgba(251,245,232,0.08)]';
+  } else {
+    variantClasses = 'border border-[rgba(251,245,232,0.55)] bg-[rgba(251,245,232,0.92)] text-[var(--ink-2)] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset] hover:bg-[rgba(251,245,232,1)]';
+  }
+
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       title={title}
       style={extraStyle}
-      className={`appearance-none rounded-lg font-[var(--font-ui)] text-[16px] font-medium inline-flex items-center justify-center gap-1.5 transition-all whitespace-nowrap backdrop-blur-[6px] px-3.5 py-2
-        ${ghost
-          ? 'border border-[rgba(251,245,232,0.35)] bg-transparent text-[rgba(251,245,232,0.75)]'
-          : 'border border-[rgba(251,245,232,0.55)] bg-[rgba(251,245,232,0.92)] text-[var(--ink-2)] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]'}
-        ${disabled ? 'opacity-[0.38] cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`appearance-none rounded-lg font-[var(--font-ui)] text-[16px] font-medium inline-flex items-center justify-center gap-1.5 transition-all whitespace-nowrap backdrop-blur-[6px] px-3.5 py-2 ${variantClasses} ${disabled ? 'opacity-[0.38] cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {icon}
       {children}
