@@ -79,6 +79,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Avoid bulk Tailwind rewrites. If Tailwind utilities fail after 2 attempts, fall back to inline styles.
 - This app supports Thai text. Test layout with Thai characters — English-only testing misses wrapping issues.
 - `localStorage` may cache old values across sessions; account for this when debugging defaults.
+- **Loading States**: Prefer Skeleton Loading (`animate-pulse` with mocked layout blocks) over basic spinners or text like "..." to maintain a premium feel and prevent layout shifts.
 
 ## 7. Import Safety
 
