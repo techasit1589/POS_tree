@@ -188,26 +188,44 @@ function EditItemRow({ item, catalog, priceMode, onUpdate, onPick, onRemove }: E
 }
 
 /** Cream glass button — matches POS action button style */
-function HistBtn({ onClick, icon, children, disabled, title, extraStyle }: {
+function HistBtn({ onClick, icon, children, disabled, title, variant = 'default', extraStyle }: {
   onClick: () => void; icon?: React.ReactNode; children: React.ReactNode;
-  disabled?: boolean; title?: string; extraStyle?: React.CSSProperties;
+  disabled?: boolean; title?: string; variant?: 'pdf' | 'image' | 'default'; extraStyle?: React.CSSProperties;
 }) {
+  let background = disabled ? 'rgba(200,210,190,0.4)' : 'rgba(251,245,232,0.92)';
+  let border = '1px solid rgba(191,207,166,0.7)';
+  let color = disabled ? 'var(--ink-4)' : 'var(--ink-2)';
+  let boxShadow = disabled ? 'none' : '0 1px 0 rgba(255,255,255,0.6) inset';
+
+  if (variant === 'pdf') {
+    background = disabled ? 'rgba(205,93,87,0.4)' : 'linear-gradient(180deg, #CD5D57 0%, #B34741 100%)';
+    border = '1px solid #9A3833';
+    color = '#ffffff';
+    boxShadow = disabled ? 'none' : '0 2px 8px rgba(205,93,87,0.3)';
+  } else if (variant === 'image') {
+    background = disabled ? 'rgba(70,130,180,0.4)' : 'linear-gradient(180deg, #4682B4 0%, #36648B 100%)';
+    border = '1px solid #2B4F6E';
+    color = '#ffffff';
+    boxShadow = disabled ? 'none' : '0 2px 8px rgba(70,130,180,0.3)';
+  }
+
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       title={title}
+      className={disabled ? '' : 'hover:brightness-105 active:scale-[0.98] transition-all'}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: '6px',
         padding: '9px 15px', borderRadius: '8px',
-        background: disabled ? 'rgba(200,210,190,0.4)' : 'rgba(251,245,232,0.92)',
-        border: '1px solid rgba(191,207,166,0.7)',
-        color: disabled ? 'var(--ink-4)' : 'var(--ink-2)',
+        background,
+        border,
+        color,
         fontFamily: 'var(--font-ui)', fontSize: '16px', fontWeight: 500,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        boxShadow: disabled ? 'none' : '0 1px 0 rgba(255,255,255,0.6) inset',
+        boxShadow,
         backdropFilter: 'blur(6px)',
-        transition: 'opacity 0.15s',
+        transition: 'opacity 0.15s, transform 0.1s, filter 0.1s',
         opacity: disabled ? 0.6 : 1,
         whiteSpace: 'nowrap',
         ...extraStyle,
@@ -998,12 +1016,14 @@ export default function HistoryPage() {
                 <HistBtn
                   onClick={handleExportPDF}
                   disabled={pdfGenerating || imageGenerating}
+                  variant="pdf"
                   icon={<FileDown size={14} />}
                   extraStyle={{ flex: 1, justifyContent: 'center' }}
                 >{pdfGenerating ? '...' : 'บันทึก PDF'}</HistBtn>
                 <HistBtn
                   onClick={handleSaveImage}
                   disabled={pdfGenerating || imageGenerating}
+                  variant="image"
                   icon={<ImageDown size={14} />}
                   extraStyle={{ flex: 1, justifyContent: 'center' }}
                 >{imageGenerating ? '...' : 'บันทึกรูป'}</HistBtn>
