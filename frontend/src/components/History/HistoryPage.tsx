@@ -4,7 +4,7 @@ import {
   Calendar, User, X, Pencil, Trash2, Plus, Check, AlertCircle,
   FileDown, ImageDown, Receipt as ReceiptIcon,
 } from 'lucide-react';
-import { getOrders, updateOrder, deleteOrder, getAllTrees, ORDERS_LIMIT } from '../../api';
+import { getOrders, updateOrder, deleteOrder, getAllTrees, getOrdersOverallSummary, getOrdersGroupedSummary } from '../../api';
 import ConfirmModal from '../shared/ConfirmModal';
 import type { Order, OrderItem, Tree } from '../../types';
 import ReceiptPaper, { loadPOSSettings } from '../POS/ReceiptPaper';
@@ -296,22 +296,116 @@ export default function HistoryPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [summaryPage, setSummaryPage] = useState(1);
   const [ordersPage, setOrdersPage]   = useState(1);
-  const [loadedAll, setLoadedAll]     = useState(false);
-  const [loadingAll, setLoadingAll]   = useState(false);
+  
+  // server-side summary states
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
+  const [summaryGroups, setSummaryGroups] = useState<{ label: string; total: number; count: number }[]>([]);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
-  const load = async () => {
-    setLoading(true); setError(null); setHasSearched(true); setLoadedAll(false);
-    try { setOrders(await getOrders()); }
-    catch { setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ backend'); }
-    finally { setLoading(false); }
+  const fetchPage = useCallback(async (page: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getOrders({
+        page,
+        pageSize: ORDERS_PAGE_SIZE,
+        search,
+        dateFrom,
+        dateTo
+      });
+      setOrders(data);
+    } catch {
+      setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ backend');
+    } finally {
+      setLoading(false);
+    }
+  }, [search, dateFrom, dateTo]);
+
+  const triggerSearchWithFilters = useCallback(async (
+    currentSearch: string,
+    currentDateFrom: string,
+    currentDateTo: string
+  ) => {
+    setHasSearched(true);
+    setSummaryPage(1);
+    
+    setLoadingSummary(true);
+    setError(null);
+    try {
+      const [overall, grouped] = await Promise.all([
+        getOrdersOverallSummary({ search: currentSearch, dateFrom: currentDateFrom, dateTo: currentDateTo }),
+        getOrdersGroupedSummary({ type: summaryTab, search: currentSearch, dateFrom: currentDateFrom, dateTo: currentDateTo })
+      ]);
+      setTotalSales(overall.totalSales);
+      setTotalCount(overall.totalCount);
+      setSummaryGroups(grouped);
+    } catch {
+      setError('ไม่สามารถโหลดข้อมูลสรุปได้');
+    } finally {
+      setLoadingSummary(false);
+    }
+
+    // โหลดรายการใบเสร็จหน้า 1
+    const fetchPageWithFilters = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getOrders({
+          page: 1,
+          pageSize: ORDERS_PAGE_SIZE,
+          search: currentSearch,
+          dateFrom: currentDateFrom,
+          dateTo: currentDateTo
+        });
+        setOrders(data);
+      } catch {
+        setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ backend');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    setOrdersPage((prev) => {
+      if (prev === 1) {
+        fetchPageWithFilters();
+      }
+      return 1;
+    });
+  }, [summaryTab]);
+
+  const load = () => {
+    triggerSearchWithFilters(search, dateFrom, dateTo);
   };
 
-  const loadAll = async () => {
-    setLoadingAll(true); setError(null);
-    try { setOrders(await getOrders(true)); setLoadedAll(true); }
-    catch { setError('ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่อ backend'); }
-    finally { setLoadingAll(false); }
+  const handleSummaryTabChange = async (tab: SummaryTab) => {
+    setSummaryTab(tab);
+    setSummaryPage(1);
+    if (hasSearched) {
+      setLoadingSummary(true);
+      try {
+        const data = await getOrdersGroupedSummary({
+          type: tab,
+          search,
+          dateFrom,
+          dateTo
+        });
+        setSummaryGroups(data);
+      } catch (e) {
+        console.error('Failed to fetch grouped summary:', e);
+      } finally {
+        setLoadingSummary(false);
+      }
+    }
   };
+
+  // โหลดหน้าใหม่เมื่อ ordersPage เปลี่ยนแปลง
+  useEffect(() => {
+    if (hasSearched) {
+      fetchPage(ordersPage);
+    }
+  }, [ordersPage, fetchPage, hasSearched]);
 
   // กด Esc เพื่อปิด modal ที่เปิดอยู่ (priority: print > edit > delete confirm)
   useEffect(() => {
@@ -326,82 +420,92 @@ export default function HistoryPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [printTarget, editOrder, deleteTarget]);
 
-  useEffect(() => { setSummaryPage(1); setOrdersPage(1); }, [orders, search, dateFrom, dateTo]);
-  useEffect(() => { setSummaryPage(1); }, [summaryTab]);
-
   // ค้นหาเมื่อกด Enter ในช่อง search
   const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') load();
+    if (e.key === 'Enter') {
+      triggerSearchWithFilters(search, dateFrom, dateTo);
+    }
   };
-
-  // ── filtered ──
-  const filtered = useMemo(() => orders.filter((o) => {
-    const q = search.toLowerCase();
-    const matchSearch = !q ||
-      (o.customerName || '').toLowerCase().includes(q) ||
-      o.receiptNumber.toLowerCase().includes(q);
-    const d = localDateFromIso(o.createdAt);
-    return matchSearch && (!dateFrom || d >= dateFrom) && (!dateTo || d <= dateTo);
-  }), [orders, search, dateFrom, dateTo]);
-
-  // ── summary ──
-  const summaryGroups = useMemo(() => {
-    const map = new Map<string, { total: number; count: number }>();
-    filtered.forEach((o) => {
-      const key = dateKey(o.createdAt, summaryTab);
-      const cur = map.get(key) || { total: 0, count: 0 };
-      map.set(key, { total: cur.total + Number(o.totalAmount), count: cur.count + 1 });
-    });
-    return Array.from(map.entries()).map(([label, v]) => ({ label, ...v }));
-  }, [filtered, summaryTab]);
 
   const pagedSummaryGroups = summaryGroups.slice((summaryPage - 1) * SUMMARY_PAGE_SIZE, summaryPage * SUMMARY_PAGE_SIZE);
-  const pagedOrders        = filtered.slice((ordersPage - 1) * ORDERS_PAGE_SIZE, ordersPage * ORDERS_PAGE_SIZE);
 
-  const grandTotal = filtered.reduce((s, o) => s + Number(o.totalAmount), 0);
   const hasFilter  = search || dateFrom || dateTo;
-  const clearFilters = () => { setSearch(''); setDateFrom(''); setDateTo(''); };
-
-  const exportCSV = () => {
-    // RFC 4180: ห่อทุกฟิลด์ด้วย " และ escape " ภายในเป็น "" เพื่อกัน comma/quote ในชื่อลูกค้าหรือสินค้า
-    const csvField = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
-    const rows: string[] = [
-      ['วันที่', 'เลขที่ใบเสร็จ', 'ชื่อลูกค้า', 'เบอร์โทร', 'วิธีชำระ', 'รายการ', 'ยอดรวม'].map(csvField).join(','),
-    ];
-    filtered.forEach((o) => {
-      const items = o.items.map((i) => `${i.treeName} x${i.quantity}`).join(' / ');
-      const method = o.paymentMethod === 'transfer' ? 'โอน' : 'เงินสด';
-      rows.push([
-        toLocalDateStr(o.createdAt),
-        o.receiptNumber,
-        o.customerName || '',
-        o.customerPhone || '',
-        method,
-        items,
-        Number(o.totalAmount).toFixed(2),
-      ].map(csvField).join(','));
-    });
-    const bom = '﻿'; // UTF-8 BOM for Excel Thai support
-    const blob = new Blob([bom + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `orders_${isoDate(new Date())}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const clearFilters = () => {
+    setSearch('');
+    setDateFrom('');
+    setDateTo('');
+    setHasSearched(false);
+    setOrders([]);
+    setTotalCount(0);
+    setTotalSales(0);
+    setSummaryGroups([]);
   };
+
+  const exportCSV = async () => {
+    setExporting(true);
+    try {
+      const allOrders = await getOrders({
+        page: 1,
+        pageSize: 1000000,
+        search,
+        dateFrom,
+        dateTo
+      });
+
+      // RFC 4180: ห่อทุกฟิลด์ด้วย " และ escape " ภายในเป็น "" เพื่อกัน comma/quote ในชื่อลูกค้าหรือสินค้า
+      const csvField = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+      const rows: string[] = [
+        ['วันที่', 'เลขที่ใบเสร็จ', 'ชื่อลูกค้า', 'เบอร์โทร', 'วิธีชำระ', 'รายการ', 'ยอดรวม'].map(csvField).join(','),
+      ];
+      allOrders.forEach((o) => {
+        const items = o.items.map((i) => `${i.treeName} x${i.quantity}`).join(' / ');
+        const method = o.paymentMethod === 'transfer' ? 'โอน' : 'เงินสด';
+        rows.push([
+          toLocalDateStr(o.createdAt),
+          o.receiptNumber,
+          o.customerName || '',
+          o.customerPhone || '',
+          method,
+          items,
+          Number(o.totalAmount).toFixed(2),
+        ].map(csvField).join(','));
+      });
+      const bom = '﻿'; // UTF-8 BOM for Excel Thai support
+      const blob = new Blob([bom + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders_${isoDate(new Date())}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('ไม่สามารถดึงข้อมูลสำหรับส่งออก Excel ได้');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const setToday = () => {
     const t = isoDate(new Date());
-    setDateFrom(t); setDateTo(t);
+    setDateFrom(t);
+    setDateTo(t);
+    triggerSearchWithFilters(search, t, t);
   };
   const setThisMonth = () => {
     const n = new Date();
-    setDateFrom(`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-01`);
-    setDateTo(isoDate(new Date(n.getFullYear(), n.getMonth()+1, 0)));
+    const from = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-01`;
+    const to = isoDate(new Date(n.getFullYear(), n.getMonth()+1, 0));
+    setDateFrom(from);
+    setDateTo(to);
+    triggerSearchWithFilters(search, from, to);
   };
   const setThisYear = () => {
     const y = new Date().getFullYear();
-    setDateFrom(`${y}-01-01`); setDateTo(`${y}-12-31`);
+    const from = `${y}-01-01`;
+    const to = `${y}-12-31`;
+    setDateFrom(from);
+    setDateTo(to);
+    triggerSearchWithFilters(search, from, to);
   };
 
   // ── delete ──
@@ -413,6 +517,10 @@ export default function HistoryPage() {
       await deleteOrder(deleteTarget.id);
       setOrders((prev) => prev.filter((o) => o.id !== deleteTarget.id));
       if (expanded === deleteTarget.id) setExpanded(null);
+      setTotalCount((c) => Math.max(0, c - 1));
+      setTotalSales((s) => Math.max(0, s - Number(deleteTarget.totalAmount)));
+      const grouped = await getOrdersGroupedSummary({ type: summaryTab, search, dateFrom, dateTo });
+      setSummaryGroups(grouped);
       setDeleteTarget(null);
     } catch {
       setDeleteError('ลบไม่สำเร็จ กรุณาลองใหม่');
@@ -473,6 +581,10 @@ export default function HistoryPage() {
         })),
       });
       setOrders((prev) => prev.map((o) => o.id === updated.id ? updated : o));
+      const diff = Number(updated.totalAmount) - Number(editOrder.totalAmount);
+      setTotalSales((s) => s + diff);
+      const grouped = await getOrdersGroupedSummary({ type: summaryTab, search, dateFrom, dateTo });
+      setSummaryGroups(grouped);
       closeEdit();
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -566,9 +678,13 @@ export default function HistoryPage() {
           <History size={22} className="text-forest-600" /> ประวัติการขาย
         </h2>
         <div className="flex items-center gap-3">
-          {filtered.length > 0 && (
-            <button onClick={exportCSV} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-lg transition">
-              <FileDown size={16} /> ดึงข้อมูลใส่ Excel
+          {hasSearched && totalCount > 0 && (
+            <button
+              onClick={exportCSV}
+              disabled={exporting}
+              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded-lg transition disabled:opacity-50"
+            >
+              <FileDown size={16} /> {exporting ? 'กำลังประมวลผล...' : 'ดึงข้อมูลใส่ Excel'}
             </button>
           )}
         </div>
@@ -617,38 +733,29 @@ export default function HistoryPage() {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <p className="text-sm text-gray-500">
-            {!loadedAll && orders.length >= ORDERS_LIMIT
-              ? `${ORDERS_LIMIT} ใบเสร็จล่าสุด`
-              : `จำนวนใบเสร็จ${hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}`}
+            จำนวนใบเสร็จ{hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}
           </p>
-          <p className="text-3xl font-bold text-forest-700 mt-1">{filtered.length}</p>
-          {hasSearched && !loading && !loadedAll && orders.length >= ORDERS_LIMIT && (
-            <button
-              onClick={loadAll}
-              disabled={loadingAll}
-              className="text-xs bg-forest-600 hover:bg-forest-700 text-white font-medium px-2 py-0.5 rounded disabled:opacity-50 mt-1"
-            >
-              {loadingAll ? 'กำลังโหลด...' : 'โหลดใบเสร็จทั้งหมด'}
-            </button>
-          )}
+          <p className="text-3xl font-bold text-forest-700 mt-1">
+            {loadingSummary ? '...' : totalCount.toLocaleString('th-TH')}
+          </p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <p className="text-sm text-gray-500">
-            {!loadedAll && orders.length >= ORDERS_LIMIT
-              ? `ยอดขาย ${ORDERS_LIMIT} ใบล่าสุด${hasFilter ? ' (ที่กรอง)' : ''}`
-              : `ยอดขายรวม${hasFilter ? ' (ที่กรอง)' : ''}`}
+            ยอดขายรวม{hasFilter ? ' (ที่กรอง)' : ''}
           </p>
-          <p className="text-3xl font-bold text-forest-700 mt-1">฿{fmt(grandTotal)}</p>
+          <p className="text-3xl font-bold text-forest-700 mt-1">
+            ฿{loadingSummary ? '...' : fmt(totalSales)}
+          </p>
         </div>
       </div>
 
       {/* Summary table */}
-      {filtered.length > 0 && (
+      {hasSearched && totalCount > 0 && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center gap-1 px-4 pt-3 border-b border-gray-100">
             <span className="text-sm text-gray-500 mr-2">สรุปตาม:</span>
             {(['day','month','year'] as SummaryTab[]).map((k) => (
-              <button key={k} onClick={() => setSummaryTab(k)}
+              <button key={k} onClick={() => handleSummaryTabChange(k)}
                 className={`px-4 py-2.5 text-base font-medium border-b-2 transition-colors ${
                   summaryTab === k ? 'border-forest-600 text-forest-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                 {k === 'day' ? 'รายวัน' : k === 'month' ? 'รายเดือน' : 'รายปี'}
@@ -679,7 +786,9 @@ export default function HistoryPage() {
 
       {/* Orders list */}
       <div>
-        <p className="text-base font-semibold text-gray-600 mb-2">รายการทั้งหมด ({filtered.length})</p>
+        <p className="text-base font-semibold text-gray-600 mb-2">
+          รายการใบเสร็จ {hasFilter ? '(ที่กรอง)' : ''} ({loadingSummary ? '...' : totalCount})
+        </p>
         {!hasSearched ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
             <Search size={40} className="mx-auto mb-3 opacity-30" />
@@ -693,7 +802,7 @@ export default function HistoryPage() {
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-500 text-sm bg-red-50 rounded-xl border border-red-200 p-6">{error}</div>
-        ) : filtered.length === 0 ? (
+        ) : orders.length === 0 ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
             <History size={48} className="mx-auto mb-3 opacity-30" />
             <p>ไม่พบรายการ</p>
@@ -701,7 +810,7 @@ export default function HistoryPage() {
         ) : (
           <>
           <div className="space-y-2">
-            {pagedOrders.map((order) => (
+            {orders.map((order) => (
               <div key={order.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                 {/* แถว 1: เลขที่ + ชื่อลูกค้า */}
                 <button
@@ -799,7 +908,7 @@ export default function HistoryPage() {
               </div>
             ))}
           </div>
-          <Pagination page={ordersPage} total={filtered.length} pageSize={ORDERS_PAGE_SIZE} onChange={setOrdersPage} />
+          <Pagination page={ordersPage} total={totalCount} pageSize={ORDERS_PAGE_SIZE} onChange={setOrdersPage} />
           </>
         )}
       </div>

@@ -284,15 +284,87 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
 
 export const ORDERS_LIMIT = 500;
 
-export async function getOrders(all = false): Promise<Order[]> {
+export async function getOrders(params: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<Order[]> {
+  const { page, pageSize, search, dateFrom, dateTo } = params;
   let query = supabase
     .from('orders')
     .select('*, order_items(*)')
     .order('created_at', { ascending: false });
-  if (!all) query = query.limit(ORDERS_LIMIT);
+
+  if (search) {
+    const q = search.trim();
+    const pattern = `%${q}%`;
+    query = query.or(`customer_name.ilike.${pattern},customer_phone.ilike.${pattern},receipt_number.ilike.${pattern}`);
+  }
+
+  if (dateFrom) {
+    query = query.gte('created_at', new Date(dateFrom + 'T00:00:00+07:00').toISOString());
+  }
+  if (dateTo) {
+    query = query.lte('created_at', new Date(dateTo + 'T23:59:59.999+07:00').toISOString());
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  query = query.range(from, to);
+
   const { data, error } = await query;
   if (error) unwrapSupabaseError(error);
   return (data as DbOrder[]).map(toOrder);
+}
+
+export async function getOrdersOverallSummary(params: {
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<{ totalSales: number; totalCount: number }> {
+  const { search, dateFrom, dateTo } = params;
+  const { data, error } = await supabase.rpc('get_orders_overall_summary', {
+    p_search: search || null,
+    p_date_from: dateFrom || null,
+    p_date_to: dateTo || null,
+  });
+  if (error) unwrapSupabaseError(error);
+
+  const summary = data as { total_sales: number; total_count: string | number };
+  return {
+    totalSales: Number(summary?.total_sales) || 0,
+    totalCount: Number(summary?.total_count) || 0,
+  };
+}
+
+interface GroupedSummaryItem {
+  label: string;
+  total: number;
+  count: number;
+}
+
+export async function getOrdersGroupedSummary(params: {
+  type: 'day' | 'month' | 'year';
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<GroupedSummaryItem[]> {
+  const { type, search, dateFrom, dateTo } = params;
+  const { data, error } = await supabase.rpc('get_orders_grouped_summary', {
+    p_type: type,
+    p_search: search || null,
+    p_date_from: dateFrom || null,
+    p_date_to: dateTo || null,
+  });
+  if (error) unwrapSupabaseError(error);
+
+  return (data as any[]).map((item) => ({
+    label: String(item.label),
+    total: Number(item.total) || 0,
+    count: Number(item.count) || 0,
+  }));
 }
 
 interface UpdateOrderInput {

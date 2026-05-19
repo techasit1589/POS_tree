@@ -220,3 +220,69 @@ BEGIN
   RETURN v_result;
 END;
 $$ LANGUAGE plpgsql SECURITY INVOKER;
+
+-- ─── Helper: ดึงจำนวนและยอดขายรวมทั้งหมดภายใต้เงื่อนไขตัวกรอง ──────────────
+
+CREATE OR REPLACE FUNCTION get_orders_overall_summary(
+  p_search TEXT DEFAULT NULL,
+  p_date_from DATE DEFAULT NULL,
+  p_date_to DATE DEFAULT NULL
+) RETURNS JSONB AS $$
+DECLARE
+  v_total_sales NUMERIC := 0;
+  v_total_count BIGINT := 0;
+BEGIN
+  SELECT 
+    COALESCE(SUM(total_amount), 0), 
+    COUNT(*)
+  INTO v_total_sales, v_total_count
+  FROM orders
+  WHERE 
+    (p_search IS NULL OR p_search = '' OR 
+     customer_name ILIKE '%' || p_search || '%' OR 
+     customer_phone ILIKE '%' || p_search || '%' OR 
+     receipt_number ILIKE '%' || p_search || '%')
+    AND (p_date_from IS NULL OR (created_at AT TIME ZONE 'Asia/Bangkok')::date >= p_date_from)
+    AND (p_date_to IS NULL OR (created_at AT TIME ZONE 'Asia/Bangkok')::date <= p_date_to);
+
+  RETURN jsonb_build_object(
+    'total_sales', v_total_sales,
+    'total_count', v_total_count
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ─── Helper: ดึงยอดขายสรุปจัดกลุ่มรายวัน/รายเดือน/รายปี ──────────────────────
+
+CREATE OR REPLACE FUNCTION get_orders_grouped_summary(
+  p_type TEXT, -- 'day', 'month', 'year'
+  p_search TEXT DEFAULT NULL,
+  p_date_from DATE DEFAULT NULL,
+  p_date_to DATE DEFAULT NULL
+) RETURNS TABLE (
+  label TEXT,
+  total NUMERIC,
+  count BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    CASE 
+      WHEN p_type = 'year' THEN TO_CHAR(created_at AT TIME ZONE 'Asia/Bangkok', 'YYYY')
+      WHEN p_type = 'month' THEN TO_CHAR(created_at AT TIME ZONE 'Asia/Bangkok', 'MM/YYYY')
+      ELSE TO_CHAR(created_at AT TIME ZONE 'Asia/Bangkok', 'DD/MM/YYYY')
+    END AS label,
+    COALESCE(SUM(total_amount), 0) AS total,
+    COUNT(*) AS count
+  FROM orders
+  WHERE 
+    (p_search IS NULL OR p_search = '' OR 
+     customer_name ILIKE '%' || p_search || '%' OR 
+     customer_phone ILIKE '%' || p_search || '%' OR 
+     receipt_number ILIKE '%' || p_search || '%')
+    AND (p_date_from IS NULL OR (created_at AT TIME ZONE 'Asia/Bangkok')::date >= p_date_from)
+    AND (p_date_to IS NULL OR (created_at AT TIME ZONE 'Asia/Bangkok')::date <= p_date_to)
+  GROUP BY label
+  ORDER BY MIN(created_at) DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
