@@ -6,9 +6,18 @@ interface Props {
   onCancel: () => void;
   /** ข้อความ error ที่จะแสดงใน modal (เช่น "ลบไม่สำเร็จ") — modal จะไม่ปิดอัตโนมัติเพื่อให้ user เห็น */
   error?: string | null;
+  loading?: boolean;
 }
 
-export default function ConfirmModal({ title, message, confirmLabel = 'ลบ', onConfirm, onCancel, error }: Props) {
+export default function ConfirmModal({
+  title,
+  message,
+  confirmLabel = 'ลบ',
+  onConfirm,
+  onCancel,
+  error,
+  loading = false,
+}: Props) {
   return (
     <div
       style={{
@@ -16,7 +25,7 @@ export default function ConfirmModal({ title, message, confirmLabel = 'ลบ', 
         backdropFilter: 'blur(4px)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
       }}
-      onClick={onCancel}
+      onClick={loading ? undefined : onCancel}
     >
       <div
         style={{
@@ -43,26 +52,30 @@ export default function ConfirmModal({ title, message, confirmLabel = 'ลบ', 
         <div style={{ display: 'flex', gap: '8px', padding: '0 24px 24px' }}>
           <button
             onClick={onCancel}
+            disabled={loading}
             style={{
               flex: 1, padding: '10px', borderRadius: '9px',
               border: '1px solid #e5e7eb', background: '#fff',
               color: '#374151', fontFamily: 'inherit', fontSize: '14px',
-              fontWeight: 500, cursor: 'pointer',
+              fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.5 : 1,
             }}
           >
             ยกเลิก
           </button>
           <button
             onClick={onConfirm}
+            disabled={loading}
             style={{
               flex: 1, padding: '10px', borderRadius: '9px',
               border: '1px solid #dc2626', background: '#dc2626',
               color: '#fff', fontFamily: 'inherit', fontSize: '14px',
-              fontWeight: 600, cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(220,38,38,0.32)',
+              fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: loading ? 'none' : '0 2px 6px rgba(220,38,38,0.32)',
+              opacity: loading ? 0.7 : 1,
             }}
           >
-            {confirmLabel}
+            {loading ? 'กำลังลบ...' : confirmLabel}
           </button>
         </div>
       </div>

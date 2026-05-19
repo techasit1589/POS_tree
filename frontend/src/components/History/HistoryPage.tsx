@@ -282,6 +282,7 @@ export default function HistoryPage() {
   // ── delete confirm ──
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSaving, setDeleteSaving] = useState(false);
 
   // ── receipt print modal ──
   const [printTarget, setPrintTarget]     = useState<Order | null>(null);
@@ -407,6 +408,7 @@ export default function HistoryPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleteError(null);
+    setDeleteSaving(true);
     try {
       await deleteOrder(deleteTarget.id);
       setOrders((prev) => prev.filter((o) => o.id !== deleteTarget.id));
@@ -415,6 +417,8 @@ export default function HistoryPage() {
     } catch {
       setDeleteError('ลบไม่สำเร็จ กรุณาลองใหม่');
       // ไม่ปิด modal ให้ user เห็น error และลองใหม่ได้
+    } finally {
+      setDeleteSaving(false);
     }
   };
 
@@ -809,6 +813,7 @@ export default function HistoryPage() {
           onConfirm={handleDelete}
           onCancel={() => { setDeleteTarget(null); setDeleteError(null); }}
           error={deleteError}
+          loading={deleteSaving}
         />
       )}
 

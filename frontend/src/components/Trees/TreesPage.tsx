@@ -89,6 +89,7 @@ export default function TreesPage() {
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<Tree | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSaving, setDeleteSaving] = useState(false);
 
   // Edit modal
   const [editTarget, setEditTarget] = useState<Tree | null>(null);
@@ -206,6 +207,7 @@ export default function TreesPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleteError(null);
+    setDeleteSaving(true);
     try {
       await deleteTree(deleteTarget.id);
       setTrees((prev) => prev.filter((t) => t.id !== deleteTarget.id));
@@ -213,6 +215,8 @@ export default function TreesPage() {
     } catch {
       setDeleteError('ลบไม่สำเร็จ กรุณาลองใหม่');
       // ไม่ปิด modal ให้ user เห็น error
+    } finally {
+      setDeleteSaving(false);
     }
   };
 
@@ -453,6 +457,7 @@ export default function TreesPage() {
           onConfirm={handleDelete}
           onCancel={() => { setDeleteTarget(null); setDeleteError(null); }}
           error={deleteError}
+          loading={deleteSaving}
         />
       )}
 
