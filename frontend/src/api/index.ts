@@ -185,24 +185,99 @@ interface CreateOrderInput {
   paymentMethod?: 'cash' | 'transfer';
 }
 
-export async function createOrder(input: CreateOrderInput): Promise<Order> {
-  const items = input.items.map((i) => ({
-    tree_id: i.treeId ?? null,
-    tree_name: i.treeName,
-    unit_price: i.unitPrice,
-    quantity: i.quantity,
-  }));
+function getEdgeToken(): string | null {
+  const token = localStorage.getItem('pos_edge_token');
+  const expiresAt = Number(localStorage.getItem('pos_edge_token_expires_at'));
+  if (!token || !Number.isFinite(expiresAt) || Date.now() >= expiresAt) return null;
+  return token;
+}
 
-  const { data, error } = await supabase.rpc('create_order', {
-    p_receipt_number: genReceiptNumber(),
-    p_customer_name: input.customerName ?? null,
-    p_customer_phone: input.customerPhone ?? null,
-    p_note: input.note ?? null,
-    p_payment_method: input.paymentMethod ?? 'cash',
-    p_items: items,
+async function refreshEdgeToken(): Promise<string | null> {
+  try {
+    const res = await fetch('/api/edge-token', { method: 'POST' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.ok && data.edgeToken && data.edgeExpiresAt) {
+      localStorage.setItem('pos_edge_token', data.edgeToken);
+      localStorage.setItem('pos_edge_token_expires_at', String(data.edgeExpiresAt));
+      return data.edgeToken;
+    }
+  } catch (e) {
+    console.error('Failed to refresh edge token:', e);
+  }
+  return null;
+}
+
+function createOrderFunctionUrl(): string {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  if (!url) throw wrapError('Missing Supabase env vars. ตั้ง VITE_SUPABASE_URL ใน .env / Vercel');
+  return `${url.replace(/\/$/, '')}/functions/v1/create-order`;
+}
+
+export async function createOrder(input: CreateOrderInput): Promise<Order> {
+  // หากเป็น Local Dev ให้ตกกลับไปใช้ Direct Database RPC อัตโนมัติ เพื่อให้ผู้พัฒนาสะดวก
+  if (import.meta.env.DEV) {
+    const items = input.items.map((i) => ({
+      tree_id: i.treeId ?? null,
+      tree_name: i.treeName,
+      unit_price: i.unitPrice,
+      quantity: i.quantity,
+    }));
+
+    const { data, error } = await supabase.rpc('create_order', {
+      p_receipt_number: genReceiptNumber(),
+      p_customer_name: input.customerName ?? null,
+      p_customer_phone: input.customerPhone ?? null,
+      p_note: input.note ?? null,
+      p_payment_method: input.paymentMethod ?? 'cash',
+      p_items: items,
+    });
+    if (error) unwrapSupabaseError(error);
+    return toOrder(data as DbOrder);
+  }
+
+  // ใน Production: วิ่งผ่าน Edge Function
+  let token = getEdgeToken();
+  if (!token) {
+    // ลองทำ Automatic Token Refresh
+    token = await refreshEdgeToken();
+  }
+
+  if (!token) {
+    throw wrapError('Session หมดอายุ กรุณาใส่ PIN ใหม่');
+  }
+
+  let res = await fetch(createOrderFunctionUrl(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-pos-edge-token': token,
+    },
+    body: JSON.stringify(input),
   });
-  if (error) unwrapSupabaseError(error);
-  return toOrder(data as DbOrder);
+
+  // ถ้ารหัสผลลัพธ์เป็น 401 (อาจเกิดจาก Token หมดอายุกลางคันหรือเซิร์ฟเวอร์เปลี่ยน Secret)
+  // ให้ลองทำการ Refresh Token อีกครั้งนึง
+  if (res.status === 401) {
+    const refreshedToken = await refreshEdgeToken();
+    if (refreshedToken) {
+      res = await fetch(createOrderFunctionUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-pos-edge-token': refreshedToken,
+        },
+        body: JSON.stringify(input),
+      });
+    }
+  }
+
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw wrapError(body?.message || 'เกิดข้อผิดพลาดในการบันทึกออเดอร์');
+  }
+
+  return toOrder(body as DbOrder);
 }
 
 export const ORDERS_LIMIT = 500;

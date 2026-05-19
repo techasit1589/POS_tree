@@ -50,6 +50,20 @@ async function signToken(secret: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(sig)))
 }
 
+async function signEdgeToken(secret: string, expiresAt: number): Promise<string> {
+  const payload = `create-order:${expiresAt}`
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
+  const signature = btoa(String.fromCharCode(...new Uint8Array(sig)))
+  return `${expiresAt}.${signature}`
+}
+
 // ── Handler ──────────────────────────────────────────────────────────────────
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
@@ -87,10 +101,11 @@ export default async function handler(req: Request) {
   // 3. Verify PIN
   const correct = process.env.APP_PIN
   const secret  = process.env.COOKIE_SECRET
-  if (!correct || !secret) {
+  const edgeSecret = process.env.POS_EDGE_TOKEN_SECRET
+  if (!correct || !secret || !edgeSecret) {
     // env ไม่ถูกตั้งบน Vercel — log ออกมาให้แอดมินเห็น แล้วคืน 500
     // ห้ามรวมเข้ากับ "PIN ผิด" เพราะแอดมินจะหาไม่เจอว่าทำไมล็อกอินไม่ได้
-    console.error('[verify-pin] missing env vars: APP_PIN or COOKIE_SECRET')
+    console.error('[verify-pin] missing env vars: APP_PIN, COOKIE_SECRET, or POS_EDGE_TOKEN_SECRET')
     return new Response(JSON.stringify({ ok: false, error: 'config' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -102,11 +117,13 @@ export default async function handler(req: Request) {
     })
   }
 
-  // 4. PIN ถูก — reset rate limit + ออก signed cookie
+  // 4. PIN ถูก — reset rate limit + ออก signed cookie + ออก edgeToken
   clearRateLimit(ip)
   const token = await signToken(secret)
+  const edgeExpiresAt = Date.now() + 12 * 60 * 60 * 1000 // 12 hours
+  const edgeToken = await signEdgeToken(edgeSecret, edgeExpiresAt)
 
-  return new Response(JSON.stringify({ ok: true }), {
+  return new Response(JSON.stringify({ ok: true, edgeToken, edgeExpiresAt }), {
     headers: {
       'Content-Type': 'application/json',
       'Set-Cookie': `pin_ok=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000`,
