@@ -789,15 +789,15 @@ function ActionBtn({
 }) {
   let variantClasses = '';
   if (variant === 'pdf') {
-    variantClasses = 'bg-gradient-to-b from-[#CD5D57] to-[#B34741] text-white border border-[#9A3833] shadow-[0_2px_8px_rgba(205,93,87,0.3)] hover:brightness-105';
+    variantClasses = 'bg-[#CD5D57] text-white hover:bg-[#B34741]';
   } else if (variant === 'image') {
-    variantClasses = 'bg-gradient-to-b from-[#4682B4] to-[#36648B] text-white border border-[#2B4F6E] shadow-[0_2px_8px_rgba(70,130,180,0.3)] hover:brightness-105';
+    variantClasses = 'bg-[#4682B4] text-white hover:bg-[#36648B]';
   } else if (variant === 'new-order') {
-    variantClasses = 'bg-gradient-to-b from-[var(--clay)] to-[var(--clay-d)] text-white border border-[var(--clay-d)] shadow-[0_2px_8px_rgba(92,143,84,0.3)] hover:brightness-105';
+    variantClasses = 'bg-[var(--clay-d)] text-white hover:brightness-90';
   } else if (variant === 'ghost') {
     variantClasses = 'border border-[rgba(251,245,232,0.35)] bg-transparent text-[rgba(251,245,232,0.75)] hover:bg-[rgba(251,245,232,0.08)]';
   } else {
-    variantClasses = 'border border-[rgba(251,245,232,0.55)] bg-[rgba(251,245,232,0.92)] text-[var(--ink-2)] shadow-[0_1px_0_rgba(255,255,255,0.6)_inset] hover:bg-[rgba(251,245,232,1)]';
+    variantClasses = 'border border-[rgba(251,245,232,0.55)] bg-[rgba(251,245,232,0.92)] text-[var(--ink-2)] hover:bg-[rgba(251,245,232,1)]';
   }
 
   return (

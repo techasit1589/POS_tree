@@ -195,18 +195,16 @@ function HistBtn({ onClick, icon, children, disabled, title, variant = 'default'
   let background = disabled ? 'rgba(200,210,190,0.4)' : 'rgba(251,245,232,0.92)';
   let border = '1px solid rgba(191,207,166,0.7)';
   let color = disabled ? 'var(--ink-4)' : 'var(--ink-2)';
-  let boxShadow = disabled ? 'none' : '0 1px 0 rgba(255,255,255,0.6) inset';
+  let boxShadow = 'none';
 
   if (variant === 'pdf') {
-    background = disabled ? 'rgba(205,93,87,0.4)' : 'linear-gradient(180deg, #CD5D57 0%, #B34741 100%)';
-    border = '1px solid #9A3833';
+    background = disabled ? 'rgba(205,93,87,0.4)' : '#CD5D57';
+    border = '1px solid transparent';
     color = '#ffffff';
-    boxShadow = disabled ? 'none' : '0 2px 8px rgba(205,93,87,0.3)';
   } else if (variant === 'image') {
-    background = disabled ? 'rgba(70,130,180,0.4)' : 'linear-gradient(180deg, #4682B4 0%, #36648B 100%)';
-    border = '1px solid #2B4F6E';
+    background = disabled ? 'rgba(70,130,180,0.4)' : '#4682B4';
+    border = '1px solid transparent';
     color = '#ffffff';
-    boxShadow = disabled ? 'none' : '0 2px 8px rgba(70,130,180,0.3)';
   }
 
   return (
