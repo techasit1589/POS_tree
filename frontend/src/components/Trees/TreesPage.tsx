@@ -295,10 +295,28 @@ export default function TreesPage() {
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="text-center py-16 text-gray-400">
-            <RefreshCw size={32} className="mx-auto mb-2 animate-spin opacity-40" />
-            <p className="text-base">กำลังโหลด...</p>
-          </div>
+          <table className="w-full text-base table-fixed">
+            <thead className="bg-gray-50 text-sm text-gray-500 uppercase">
+              <tr>
+                <th className="text-left px-4 py-3 w-2/5">ชื่อต้นไม้</th>
+                <th className="text-left px-4 py-3 hidden md:table-cell w-1/5">หมวดหมู่</th>
+                <th className="text-right px-4 py-3 w-1/5 whitespace-nowrap">ปลีก/ส่ง</th>
+                <th className="text-center px-4 py-3 hidden md:table-cell w-16">หน่วย</th>
+                <th className="px-4 py-3 text-center">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {[...Array(8)].map((_, i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="px-4 py-4"><div className="h-5 bg-gray-100 rounded w-3/4"></div></td>
+                  <td className="px-4 py-4 hidden md:table-cell"><div className="h-5 bg-gray-100 rounded-full w-20"></div></td>
+                  <td className="px-4 py-4 text-right"><div className="h-5 bg-gray-100 rounded w-16 ml-auto"></div></td>
+                  <td className="px-4 py-4 hidden md:table-cell"><div className="h-5 bg-gray-100 rounded w-8 mx-auto"></div></td>
+                  <td className="px-4 py-4"><div className="h-8 bg-gray-100 rounded-lg w-32 mx-auto"></div></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : !hasLoaded ? (
           <div className="text-center py-16 text-gray-400">
             <TreePine size={48} className="mx-auto mb-3 opacity-30" />

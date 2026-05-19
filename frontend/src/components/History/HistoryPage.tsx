@@ -758,17 +758,25 @@ export default function HistoryPage() {
           <p className="text-sm text-gray-500">
             จำนวนใบเสร็จ{hasFilter ? ' (ที่กรอง)' : 'ทั้งหมด'}
           </p>
-          <p className="text-3xl font-bold text-forest-700 mt-1">
-            {loadingSummary ? '...' : totalCount.toLocaleString('th-TH')}
-          </p>
+          {loadingSummary ? (
+            <div className="h-9 bg-gray-100 rounded-lg animate-pulse w-24 mt-1"></div>
+          ) : (
+            <p className="text-3xl font-bold text-forest-700 mt-1">
+              {totalCount.toLocaleString('th-TH')}
+            </p>
+          )}
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <p className="text-sm text-gray-500">
             ยอดขายรวม{hasFilter ? ' (ที่กรอง)' : ''}
           </p>
-          <p className="text-3xl font-bold text-forest-700 mt-1">
-            ฿{loadingSummary ? '...' : fmt(totalSales)}
-          </p>
+          {loadingSummary ? (
+            <div className="h-9 bg-gray-100 rounded-lg animate-pulse w-32 mt-1"></div>
+          ) : (
+            <p className="text-3xl font-bold text-forest-700 mt-1">
+              ฿{fmt(totalSales)}
+            </p>
+          )}
         </div>
       </div>
 
@@ -809,8 +817,13 @@ export default function HistoryPage() {
 
       {/* Orders list */}
       <div>
-        <p className="text-base font-semibold text-gray-600 mb-2">
-          รายการใบเสร็จ {hasFilter ? '(ที่กรอง)' : ''} ({loadingSummary ? '...' : totalCount})
+        <p className="text-base font-semibold text-gray-600 mb-2 flex items-center gap-2">
+          รายการใบเสร็จ {hasFilter ? '(ที่กรอง)' : ''} 
+          {loadingSummary ? (
+            <span className="inline-block h-5 bg-gray-200 rounded animate-pulse w-8"></span>
+          ) : (
+            <span>({totalCount})</span>
+          )}
         </p>
         {!hasSearched ? (
           <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
@@ -819,9 +832,25 @@ export default function HistoryPage() {
             <p className="text-sm mt-1">หรือเลือกช่วงเวลาจากปุ่มดูด่วนด้านบน</p>
           </div>
         ) : loading ? (
-          <div className="text-center py-16 text-gray-400">
-            <RefreshCw size={32} className="mx-auto mb-2 animate-spin opacity-40" />
-            <p className="text-base">กำลังโหลด...</p>
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm animate-pulse flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-5 bg-gray-100 rounded w-24 shrink-0"></div>
+                  <div className="h-4 bg-gray-100 rounded w-32"></div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-7 bg-gray-100 rounded w-28"></div>
+                  <div className="flex-1"></div>
+                  <div className="flex items-center gap-1 hidden sm:flex">
+                    <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                    <div className="h-8 bg-gray-100 rounded-lg w-20"></div>
+                    <div className="h-8 bg-gray-100 rounded-lg w-20"></div>
+                  </div>
+                  <div className="h-8 bg-gray-100 rounded-lg w-16 sm:hidden"></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-500 text-sm bg-red-50 rounded-xl border border-red-200 p-6">{error}</div>
