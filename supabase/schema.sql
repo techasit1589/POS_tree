@@ -65,25 +65,27 @@ CREATE TRIGGER trees_set_updated_at
 
 -- ─── Row Level Security ──────────────────────────────────────────────────
 -- POS เล็ก ๆ 1-2 คน: PIN gate ผ่าน Vercel middleware
--- Supabase ระดับ RLS อนุญาต anon key ทำ CRUD ได้ (เพราะ anon key อยู่ใน frontend อยู่แล้ว)
--- ถ้าอยากเข้มขึ้นในอนาคต ค่อยเปลี่ยนเป็น signed JWT
+-- trees ยังอนุญาตให้ anon/authenticated ทำ CRUD ได้เพื่อให้จัดการ catalog จาก frontend ได้
+-- orders/order_items ให้ anon/authenticated อ่านได้เท่านั้น; การเขียนให้ผ่าน Edge Functions ที่ใช้ service role
 
 ALTER TABLE trees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
--- Allow anon (และ authenticated) ทำทุกอย่าง
+-- Allow anon (และ authenticated) ทำทุกอย่างเฉพาะ catalog
 DROP POLICY IF EXISTS trees_all_anon ON trees;
 CREATE POLICY trees_all_anon ON trees
   FOR ALL TO anon, authenticated USING (TRUE) WITH CHECK (TRUE);
 
 DROP POLICY IF EXISTS orders_all_anon ON orders;
-CREATE POLICY orders_all_anon ON orders
-  FOR ALL TO anon, authenticated USING (TRUE) WITH CHECK (TRUE);
+DROP POLICY IF EXISTS orders_select_only ON orders;
+CREATE POLICY orders_select_only ON orders
+  FOR SELECT TO anon, authenticated USING (TRUE);
 
 DROP POLICY IF EXISTS order_items_all_anon ON order_items;
-CREATE POLICY order_items_all_anon ON order_items
-  FOR ALL TO anon, authenticated USING (TRUE) WITH CHECK (TRUE);
+DROP POLICY IF EXISTS order_items_select_only ON order_items;
+CREATE POLICY order_items_select_only ON order_items
+  FOR SELECT TO anon, authenticated USING (TRUE);
 
 -- ─── Helper: สร้าง order + items เป็น transaction เดียว ──────────────────
 -- เรียกผ่าน supabase.rpc('create_order', { ... })

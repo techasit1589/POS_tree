@@ -340,8 +340,11 @@ export async function getOrders(params: {
 
   if (search) {
     const q = search.trim();
-    const pattern = `%${q}%`;
-    query = query.or(`customer_name.ilike.${pattern},customer_phone.ilike.${pattern},receipt_number.ilike.${pattern}`);
+    const safe = q.replace(/[,()]/g, ' ').trim();
+    if (safe !== '') {
+      const pattern = `%${safe}%`;
+      query = query.or(`customer_name.ilike.${pattern},customer_phone.ilike.${pattern},receipt_number.ilike.${pattern}`);
+    }
   }
 
   if (dateFrom) {
